@@ -1,0 +1,84 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}📚 Gestion des Produits{% endblock %}
+
+{% block admin_actions %}
+<a href="{% url 'ajouter_produit' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold">
+    <i class="fa-solid fa-plus"></i> Ajouter un produit
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Image</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Titre</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Auteur</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Prix</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Stock</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Statut</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">CEDI</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for produit in produits %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                        {% with produit.image_principale as img %}
+                           {% if img %}
+                           <img src="{{ img.url_image.url }}" class="w-12 h-12 object-cover rounded" alt="{{ produit.titre }}">
+                            {% else %}
+        <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">📷</div>
+    {% endif %}
+{% endwith %}
+                    </td>
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ produit.titre|truncatechars:30 }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ produit.auteur|default:"-" }}</td>
+                    <td class="px-4 py-3 font-bold text-cediRed">{{ produit.prix|floatformat:0 }} F</td>
+                    <td class="px-4 py-3 {% if produit.quantite_stock < 3 %}text-red-600 font-bold{% else %}text-gray-600{% endif %}">
+                        {{ produit.quantite_stock }}
+                    </td>
+                    
+                    <!-- Colonne Statut -->
+                    <td class="px-4 py-3">
+                        {% if produit.statut == True or produit.statut == 'actif' or produit.statut == 'ACTIF' %}
+                            <span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-semibold">Actif</span>
+                        {% else %}
+                            <span class="bg-gray-100 text-gray-600 text-xs px-2.5 py-1 rounded-full font-semibold">Inactif</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="px-4 py-3">{% if produit.est_edition_cedi %}<span class="bg-cediGold text-white text-xs px-2 py-1 rounded">✅</span>{% else %}<span class="text-gray-400">—</span>{% endif %}</td>
+                    
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <!-- Bouton Basculer Statut -->
+                            <a href="{% url 'basculer_statut_produit' produit.id %}" 
+                               title="{% if produit.statut == True or produit.statut == 'actif' or produit.statut == 'ACTIF' %}Désactiver{% else %}Activer{% endif %}"
+                               class="{% if produit.statut == True or produit.statut == 'actif' or produit.statut == 'ACTIF' %}text-green-600 hover:text-green-800{% else %}text-gray-400 hover:text-gray-600{% endif %} transition text-base">
+                                {% if produit.statut == True or produit.statut == 'actif' or produit.statut == 'ACTIF' %}
+                                    <i class="fa-solid fa-toggle-on text-xl"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-toggle-off text-xl"></i>
+                                {% endif %}
+                            </a>
+
+                            <a href="{% url 'modifier_produit' produit.id %}" class="text-cediRed hover:text-cediRedDark transition" title="Modifier"><i class="fa-solid fa-pen"></i></a>
+                            <a href="{% url 'supprimer_produit' produit.id %}" class="text-red-500 hover:text-red-700 transition" title="Supprimer"><i class="fa-solid fa-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="px-4 py-8 text-center text-gray-500">Aucun produit pour le moment. <a href="{% url 'ajouter_produit' %}" class="text-cediRed hover:underline">Ajoutez-en un !</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

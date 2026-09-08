@@ -1,0 +1,61 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}⭐ Gestion des avis clients{% endblock %}
+
+{% block admin_actions %}
+<a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold">
+    <i class="fa-solid fa-arrow-left"></i> Retour
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Produit</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Client</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Note</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Commentaire</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Statut</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for avis in avis %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ avis.produit.titre|truncatechars:30 }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ avis.utilisateur.username }}</td>
+                    <td class="px-4 py-3 text-cediGold font-bold">{{ avis.note }}/5</td>
+                    <td class="px-4 py-3 text-gray-600">{{ avis.commentaire|truncatechars:50|default:"-" }}</td>
+                    <td class="px-4 py-3">
+                        {% if avis.statut == 'approuve' %}
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">✅ Approuvé</span>
+                        {% elif avis.statut == 'rejete' %}
+                            <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs">❌ Rejeté</span>
+                        {% else %}
+                            <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs">⏳ En attente</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex gap-2">
+                            {% if avis.statut == 'en_attente' %}
+                                <a href="{% url 'approuver_avis' avis.id %}" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 text-xs">Approuver</a>
+                                <a href="{% url 'rejeter_avis' avis.id %}" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-xs">Rejeter</a>
+                            {% else %}
+                                <span class="text-gray-400 text-xs">Aucune action</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-4 py-8 text-center text-gray-500">Aucun avis pour le moment.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

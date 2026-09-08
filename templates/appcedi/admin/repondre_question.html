@@ -1,0 +1,32 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}💬 Répondre à la question{% endblock %}
+
+{% block admin_actions %}
+<a href="{% url 'liste_questions' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold">
+    <i class="fa-solid fa-arrow-left"></i> Retour
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-2xl mx-auto">
+    <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+        <h4 class="font-bold text-gray-800">{{ question.titre_question }}</h4>
+        <p class="text-sm text-gray-600 mt-2">{{ question.message }}</p>
+        <p class="text-xs text-gray-400 mt-2">Par {{ question.auteur.username|default:"Anonyme" }} - {{ question.date_question|date:"d/m/Y à H:i" }}</p>
+    </div>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Votre réponse</label>
+            <textarea name="reponse" rows="6" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed" placeholder="Écrivez votre réponse spirituelle ici..."></textarea>
+        </div>
+        <div class="flex justify-end gap-3 pt-4 border-t">
+            <a href="{% url 'liste_questions' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">Annuler</a>
+            <button type="submit" class="bg-cediRed text-white px-6 py-2 rounded-lg hover:bg-cediRedDark transition font-bold">
+                <i class="fa-solid fa-paper-plane"></i> Envoyer la réponse
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

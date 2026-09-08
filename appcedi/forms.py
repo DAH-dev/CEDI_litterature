@@ -1,0 +1,149 @@
+from django import forms
+from .models import *
+
+# ========== FORMULAIRE PRODUIT ==========
+class ProduitForm(forms.ModelForm):
+    class Meta:
+        model = Produit
+        fields = [
+            'titre', 'auteur', 'editeur', 'isbn', 'description', 'prix', 
+            'poids', 'type_produit', 'est_edition_cedi', 'quantite_stock', 
+            'seuil_alerte', 'statut', 'categories'
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
+            'categories': forms.SelectMultiple(attrs={'class': 'w-full border rounded px-3 py-2'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 👇 RENDRE LE CHAMP CATÉGORIES OPTIONNEL
+        self.fields['categories'].required = False
+
+        for field_name, field in self.fields.items():
+            if not isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.update({
+                    'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
+                })
+
+
+# ========== AUTRES FORMULAIRES ==========
+class CategorieForm(forms.ModelForm):
+    class Meta:
+        model = Categorie
+        fields = ['nom', 'description', 'categorie_parente']
+        widgets = {'description': forms.Textarea(attrs={'rows': 3})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            if not isinstance(self.fields[field].widget, forms.CheckboxInput):
+                self.fields[field].widget.attrs.update({
+                    'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
+                })
+
+class PointVenteForm(forms.ModelForm):
+    class Meta:
+        model = PointVente
+        fields = ['nom', 'adresse_complete', 'telephone', 'horaires_ouverture', 'url_image']
+        widgets = {'adresse_complete': forms.Textarea(attrs={'rows': 3})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            if not isinstance(self.fields[field].widget, forms.CheckboxInput):
+                self.fields[field].widget.attrs.update({
+                    'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
+                })
+
+from django import forms
+from django.utils import timezone
+from datetime import timedelta
+from .models import Promotion
+
+
+
+class PromotionForm(forms.ModelForm):
+    duree_heures = forms.FloatField(
+        required=False,
+        label="Durée rapide (en heures)",
+        help_text="Exemple : 2.5 pour 2h30 min. Le système calculera la fin à partir de maintenant.",
+        widget=forms.NumberInput(attrs={'placeholder': 'Ex: 2.5', 'step': '0.5'})
+    )
+
+    class Meta:
+        model = Promotion
+        fields = [
+            'titre', 'description', 'type_reduction', 'valeur_reduction', 
+            'duree_heures', 'date_debut', 'date_fin', 'code_promo', 
+            'est_vente_flash', 'actif', 'produits'
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'date_debut': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'date_fin': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'produits': forms.SelectMultiple(attrs={'class': 'w-full border rounded px-3 py-2'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Rendre les dates non obligatoires côté HTML pour autoriser le mode Durée
+        self.fields['date_debut'].required = False
+        self.fields['date_fin'].required = False
+
+        for field_name, field in self.fields.items():
+            if not isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.update({
+                    'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
+                })
+
+    def clean(self):
+        cleaned_data = super().clean()
+        duree = cleaned_data.get('duree_heures')
+        date_debut = cleaned_data.get('date_debut')
+        date_fin = cleaned_data.get('date_fin')
+
+        # Si une durée est indiquée (Vente Flash rapide)
+        if duree:
+            now = timezone.now()
+            cleaned_data['date_debut'] = now
+            cleaned_data['date_fin'] = now + timedelta(hours=duree)
+            cleaned_data['est_vente_flash'] = True
+
+        # Si des dates manuelles sont saisies
+        elif date_debut and date_fin:
+            if date_fin <= date_debut:
+                raise forms.ValidationError("La date de fin doit être postérieure à la date de début.")
+        else:
+            raise forms.ValidationError(
+                "Remplis soit la durée en heures (pour une vente rapide), soit la plage de dates."
+            )
+
+        return cleaned_data
+
+class ArticleBlogForm(forms.ModelForm):
+    class Meta:
+        model = ArticleBlog
+        fields = ['titre', 'contenu', 'categorie_article', 'statut']
+        widgets = {'contenu': forms.Textarea(attrs={'rows': 8})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            if not isinstance(self.fields[field].widget, forms.CheckboxInput):
+                self.fields[field].widget.attrs.update({
+                    'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
+                })
+
+class ImageForm(forms.ModelForm):
+    class Meta:
+        model = Image
+        fields = ['produit', 'url_image', 'est_principale']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            if not isinstance(self.fields[field].widget, forms.CheckboxInput):
+                self.fields[field].widget.attrs.update({
+                    'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
+                })

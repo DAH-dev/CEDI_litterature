@@ -1,0 +1,341 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEDI Littérature - Maison d'Édition & Librairie Chrétienne</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cediRed: '#8B1E22',
+                        cediRedDark: '#6A1518',
+                        cediGold: '#D4AF37',
+                        cediGoldLight: '#F39C12',
+                        cediCream: '#FBF3E2',
+                        cediCreamDark: '#F4E6C8',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ---- animations ---- */
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(26px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+        @keyframes floatY {
+            0%, 100% { transform: translateY(0) rotate(-1deg); }
+            50%      { transform: translateY(-8px) rotate(1deg); }
+        }
+        @keyframes pingSoft {
+            0%   { box-shadow: 0 0 0 0 rgba(212,175,55,0.5); }
+            100% { box-shadow: 0 0 0 9px rgba(212,175,55,0); }
+        }
+        @keyframes shimmer {
+            0%   { background-position: -300px 0; }
+            100% { background-position: 300px 0; }
+        }
+
+        .hero-enter { animation: fadeSlideUp .7s cubic-bezier(.22,.68,0,1.01) both; }
+        .hero-badge { animation: fadeSlideUp .6s cubic-bezier(.22,.68,0,1.01) both; }
+        .hero-card { animation: fadeIn .8s ease .15s both, floatY 6.5s ease-in-out 1s infinite; }
+        .pulse-dot::before {
+            content: ""; position: absolute; inset: 0; border-radius: 9999px;
+            animation: pingSoft 2.2s ease-out infinite;
+        }
+
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s cubic-bezier(.22,.68,0,1.01), transform .7s cubic-bezier(.22,.68,0,1.01); }
+        .reveal.in-view { opacity: 1; transform: translateY(0); }
+
+        .stagger-item { opacity: 0; transform: translateY(20px); transition: opacity .55s ease, transform .55s ease; }
+        .reveal.in-view .stagger-item { opacity: 1; transform: translateY(0); }
+        .stagger-item:nth-child(1){ transition-delay: .02s; }
+        .stagger-item:nth-child(2){ transition-delay: .10s; }
+        .stagger-item:nth-child(3){ transition-delay: .18s; }
+        .stagger-item:nth-child(4){ transition-delay: .26s; }
+
+        .img-zoom { overflow: hidden; }
+        .img-zoom img { transition: transform .5s ease; }
+        .img-zoom:hover img { transform: scale(1.07); }
+
+        .card-lift { transition: transform .25s ease, box-shadow .25s ease; }
+        .card-lift:hover { transform: translateY(-5px); box-shadow: 0 18px 30px -16px rgba(107,21,24,0.28); }
+
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, #f3f3f3 25%, #ececec 37%, #f3f3f3 63%);
+            background-size: 400px 100%;
+            animation: shimmer 1.4s ease infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *{ animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+<header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-12 h-12 rounded-full border-2 border-cediGold flex items-center justify-center bg-white shadow-sm">
+                <span class="text-cediRed font-bold text-xs text-center leading-none">CEDI<br><span class="text-[9px] text-cediGold font-semibold">LITTÉRATURE</span></span>
+            </div>
+        </a>
+
+        <div class="hidden md:block flex-1 max-w-md mx-2" id="searchBarDesktop">
+            <form class="relative" action="/recherche/" method="get">
+                <input type="text" name="q" placeholder="Rechercher un livre, un auteur, un thème..." class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-cediRed transition">
+                <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-cediRed transition">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </form>
+        </div>
+
+        <div class="hidden flex-1 mx-2 items-center gap-2" id="searchBarMobile">
+            <form class="relative flex-1" action="/recherche/" method="get">
+                <input type="text" name="q" id="searchInputMobile" placeholder="Rechercher un livre, un auteur..." class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-cediRed transition">
+                <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-cediRed transition">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </form>
+            <button type="button" id="searchCloseMobile" aria-label="Fermer la recherche" class="text-gray-500 hover:text-cediRed transition shrink-0">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <div class="flex items-center gap-4 text-gray-700" id="iconsRow">
+            <!-- Icône recherche mobile -->
+            <button type="button" id="searchToggleMobile" aria-label="Rechercher" class="md:hidden hover:text-cediRed transition">
+                <i class="fa-solid fa-magnifying-glass text-xl"></i>
+            </button>
+
+            <!-- Icône utilisateur (cadrage aligné sur la maquette : flex + gap + texte "Compte") -->
+            <a href="{% if user.is_authenticated %}{% url 'tableau_de_bord' %}{% else %}{% url 'connexion' %}{% endif %}" class="hover:text-cediRed flex items-center gap-1 text-sm font-medium transition relative">
+                <i class="fa-regular fa-user text-lg text-cediRed"></i>
+                {% if user.is_authenticated %}
+                    <span class="absolute -top-1 -right-3 bg-cediGold text-white text-[8px] font-bold px-1 rounded-full">{{ user.username|slice:":1"|upper }}</span>
+                {% endif %}
+                <span class="hidden md:inline">{% if user.is_authenticated %}{{ user.username|truncatechars:10 }}{% else %}Compte{% endif %}</span>
+            </a>
+
+            <!-- Panier -->
+            <a href="#" class="hover:text-cediRed relative transition">
+                <i class="fa-solid fa-cart-shopping text-xl text-cediRed"></i>
+                <span class="absolute -top-2 -right-2 bg-cediGold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+            </a>
+
+            <!-- Filtre -->
+            <div class="relative">
+                <button type="button" id="filterToggle" aria-label="Filtrer le catalogue" aria-expanded="false" class="hover:text-cediRed transition">
+                    <i class="fa-solid fa-filter text-lg text-cediRed"></i>
+                </button>
+                <div id="filterDropdown" class="hidden absolute right-0 top-full mt-3 w-72 bg-white rounded-xl shadow-xl border border-gray-100 p-4 z-50">
+                    <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Filtrer le catalogue</h5>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Prix</label>
+                    <select class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 mb-3 focus:outline-none focus:border-cediRed">
+                        <option>Toutes gammes</option>
+                        <option>Moins de 3 000 FCFA</option>
+                        <option>3 000 — 6 000 FCFA</option>
+                        <option>Plus de 6 000 FCFA</option>
+                    </select>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Disponibilité</label>
+                    <select class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 mb-3 focus:outline-none focus:border-cediRed">
+                        <option>Toutes librairies</option>
+                        <option>Adjamé</option>
+                        <option>Attiékoi</option>
+                        <option>Riviera</option>
+                        <option>Yopougon</option>
+                    </select>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Langue</label>
+                    <select class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 mb-4 focus:outline-none focus:border-cediRed">
+                        <option>Toutes</option>
+                        <option>Français</option>
+                        <option>Anglais</option>
+                    </select>
+                    <button type="button" class="w-full bg-cediRed text-white text-xs font-bold py-2 rounded hover:bg-cediRedDark transition">Appliquer les filtres</button>
+                </div>
+            </div>
+
+            <!-- Menu hamburger -->
+            <div class="relative">
+                <button type="button" id="menuToggle" aria-label="Ouvrir le menu" aria-expanded="false" class="hover:text-cediRed transition">
+                    <i class="fa-solid fa-bars text-xl text-cediRed"></i>
+                </button>
+                <div id="menuDropdown" class="hidden absolute right-0 top-full mt-3 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                    <!-- Liens de navigation -->
+                    <a href="{% url 'accueil' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Accueil</a>
+                    <a href="#boutique" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Boutique & Catalogue</a>
+                    <a href="#editions" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Éditions CEDI</a>
+                    <a href="#ressources" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Ressources Spirituelles</a>
+                    <a href="#points-de-vente" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Points de Vente</a>
+                    <a href="#conseils" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Conseils & Blog</a>
+                    <div class="my-1 border-t border-gray-100"></div>
+
+                    <!-- ====== ZONE AUTHENTIFICATION ====== -->
+                    {% if user.is_authenticated %}
+                        <div class="px-4 py-2 text-sm text-gray-500">👤 {{ user.username }}</div>
+                        <a href="{% url 'tableau_de_bord' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+                            <i class="fa-solid fa-gauge-high"></i> Tableau de bord
+                        </a>
+                        <a href="{% url 'deconnexion' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+                            <i class="fa-solid fa-sign-out-alt"></i> Déconnexion
+                        </a>
+                    {% else %}
+                        <a href="{% url 'connexion' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+                            <i class="fa-solid fa-key"></i> Se connecter
+                        </a>
+                    {% endif %}
+                    <!-- ============================================= -->
+
+                    <div class="my-1 border-t border-gray-100"></div>
+                    <a href="#apropos" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">À propos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre de navigation secondaire (facultative) -->
+    <nav class="bg-gray-100 border-t border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 flex space-x-6 overflow-x-auto text-sm font-medium py-2.5 text-gray-700">
+            <a href="/" class="text-cediRed font-bold hover:text-cediRed transition">Accueil</a>
+            <a href="#boutique" class="hover:text-cediRed whitespace-nowrap transition">Boutique & Catalogue</a>
+            <a href="#editions" class="hover:text-cediRed whitespace-nowrap transition">Éditions CEDI</a>
+            <a href="#ressources" class="hover:text-cediRed whitespace-nowrap transition">Ressources Spirituelles</a>
+            <a href="#points-de-vente" class="hover:text-cediRed whitespace-nowrap transition">Points de Vente</a>
+            <a href="#conseils" class="hover:text-cediRed whitespace-nowrap transition">Conseils & Blog</a>
+            <a href="{% url 'a_propos' %}" class="hover:text-cediRed whitespace-nowrap transition">À propos</a>
+            
+        </div>
+    </nav>
+</header>
+
+    <!-- CONTENU PRINCIPAL -->
+    {% block content %}{% endblock %}
+
+    <!-- WhatsApp flottant -->
+    <a href="https://wa.me/22500000000" target="_blank" class="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-lg hover:bg-emerald-600 transition z-50 flex items-center justify-center hover:scale-110">
+        <i class="fa-brands fa-whatsapp text-2xl"></i>
+    </a>
+
+    <!-- FOOTER (harmonisé avec la maquette : fond crème, comme le hero) -->
+    <footer class="bg-cediCream text-gray-600 mt-auto pt-12 pb-6 border-t-2 border-cediGold">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 text-sm">
+            <div>
+                <h5 class="text-cediRed font-bold text-base mb-3">CEDI Littérature</h5>
+                <p class="text-xs text-gray-500 mb-4">Maison d'édition chrétienne intégrée, librairie et conseil spirituel. "Distribuer la vie" à travers la Parole de Dieu.</p>
+                <div class="flex space-x-3 text-lg">
+                    <a href="#" class="w-9 h-9 rounded-full border border-cediGold text-cediRed flex items-center justify-center hover:bg-cediGold hover:text-white transition"><i class="fa-brands fa-facebook text-sm"></i></a>
+                    <a href="#" class="w-9 h-9 rounded-full border border-cediGold text-cediRed flex items-center justify-center hover:bg-cediGold hover:text-white transition"><i class="fa-brands fa-whatsapp text-sm"></i></a>
+                    <a href="#" class="w-9 h-9 rounded-full border border-cediGold text-cediRed flex items-center justify-center hover:bg-cediGold hover:text-white transition"><i class="fa-brands fa-instagram text-sm"></i></a>
+                </div>
+            </div>
+            <div>
+                <h5 class="text-cediRed font-bold text-base mb-3">Navigation</h5>
+                <ul class="space-y-2 text-xs">
+                    <li><a href="#boutique" class="hover:text-cediRed transition">Boutique en ligne</a></li>
+                    <li><a href="#editions" class="hover:text-cediRed transition">Éditions CEDI</a></li>
+                    <li><a href="#ressources" class="hover:text-cediRed transition">Vérités Fondamentales</a></li>
+                    <li><a href="#points-de-vente" class="hover:text-cediRed transition">Nos 4 Points de Vente</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-cediRed font-bold text-base mb-3">Modes de Paiement</h5>
+                <p class="text-xs text-gray-500 mb-2">Paiement hors-ligne sécurisé :</p>
+                <ul class="space-y-1 text-xs text-gray-600">
+                    <li>• Paiement au retrait / livraison</li>
+                    <li>• Orange Money / MTN MoMo</li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-cediRed font-bold text-base mb-3">Contact & Support</h5>
+                <p class="text-xs text-gray-500 mb-1">📍 Côte d'Ivoire (Abidjan & Attiékoi)</p>
+                <p class="text-xs text-gray-500 mb-1">📞 Contact / WhatsApp : +225 XX XX XX XX</p>
+                <p class="text-xs text-gray-500">✉️ Email : contact@cedi-litterature.com</p>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 border-t border-cediGold/30 pt-4 text-center text-xs text-gray-500">
+            <p>&copy; 2026 CEDI Littérature. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS (EXACTEMENT comme dans ton fichier original) -->
+    <script>
+        var filterToggle = document.getElementById('filterToggle');
+        var filterDropdown = document.getElementById('filterDropdown');
+        filterToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = !filterDropdown.classList.contains('hidden');
+            filterDropdown.classList.toggle('hidden');
+            filterToggle.setAttribute('aria-expanded', String(!isOpen));
+        });
+        document.addEventListener('click', function (e) {
+            if (!filterDropdown.classList.contains('hidden') && !filterDropdown.contains(e.target) && e.target !== filterToggle) {
+                filterDropdown.classList.add('hidden');
+                filterToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        var searchToggleMobile = document.getElementById('searchToggleMobile');
+        var searchCloseMobile = document.getElementById('searchCloseMobile');
+        var searchBarMobile = document.getElementById('searchBarMobile');
+        var iconsRow = document.getElementById('iconsRow');
+        var searchInputMobile = document.getElementById('searchInputMobile');
+
+        searchToggleMobile.addEventListener('click', function () {
+            iconsRow.classList.add('hidden');
+            searchBarMobile.classList.remove('hidden');
+            searchBarMobile.classList.add('flex');
+            searchInputMobile.focus();
+        });
+        searchCloseMobile.addEventListener('click', function () {
+            searchBarMobile.classList.add('hidden');
+            searchBarMobile.classList.remove('flex');
+            iconsRow.classList.remove('hidden');
+        });
+
+        var menuToggle = document.getElementById('menuToggle');
+        var menuDropdown = document.getElementById('menuDropdown');
+        menuToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = !menuDropdown.classList.contains('hidden');
+            menuDropdown.classList.toggle('hidden');
+            menuToggle.setAttribute('aria-expanded', String(!isOpen));
+        });
+        document.addEventListener('click', function (e) {
+            if (!menuDropdown.classList.contains('hidden') && !menuDropdown.contains(e.target) && e.target !== menuToggle) {
+                menuDropdown.classList.add('hidden');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+        menuDropdown.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                menuDropdown.classList.add('hidden');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        var targets = document.querySelectorAll('.reveal');
+        if ('IntersectionObserver' in window) {
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+            targets.forEach(function (el) { io.observe(el); });
+        } else {
+            targets.forEach(function (el) { el.classList.add('in-view'); });
+        }
+    </script>
+</body>
+</html>

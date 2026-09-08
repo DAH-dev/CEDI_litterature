@@ -1,0 +1,52 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}❓ Questions conseils spirituels{% endblock %}
+
+{% block admin_actions %}
+<a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold">
+    <i class="fa-solid fa-arrow-left"></i> Retour
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Question</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Auteur</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Date</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Statut</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for question in questions %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ question.titre_question|truncatechars:40 }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ question.auteur.username|default:"Anonyme" }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ question.date_question|date:"d/m/Y" }}</td>
+                    <td class="px-4 py-3">
+                        {% if question.statut == 'repondu' %}
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">✅ Répondu</span>
+                        {% else %}
+                            <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs">⏳ En attente</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex gap-2">
+                            <a href="{% url 'repondre_question' question.id %}" class="bg-cediRed text-white px-3 py-1 rounded hover:bg-cediRedDark text-xs">Répondre</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">Aucune question pour le moment.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends 'appcedi/base.html' %}
+
+{% block content %}
+<style>
+  :root{
+    --cedi-red:#8B1E22;
+    --cedi-red-dark:#6A1518;
+    --cedi-gold:#D4AF37;
+    --cedi-gold-light:#F39C12;
+    --ink:#1f2937;
+    --ink-soft:#6b7280;
+    --border:#e5e7eb;
+    --bg-soft:#f3f4f6;
+  }
+  .ap-container{ max-width:1100px; margin:0 auto; padding:0 20px; }
+
+  /* Hero avec image */
+  .ap-hero{ position:relative; margin-bottom:56px; overflow:hidden; }
+  .ap-hero img{ width:100%; height:320px; object-fit:cover; display:block; }
+  .ap-hero-overlay{
+    position:absolute; inset:0; background:linear-gradient(to top, rgba(107,21,24,0.85), rgba(107,21,24,0.35));
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;
+  }
+  .ap-eyebrow{
+    display:inline-flex; align-items:center; gap:8px; background:#fff; border:2px solid var(--cedi-gold);
+    color:var(--cedi-red); font-size:12px; font-weight:bold; text-transform:uppercase;
+    padding:6px 16px; border-radius:999px; margin-bottom:16px;
+  }
+  .ap-hero h1{ font-size:32px; color:#fff; margin:0 0 12px; }
+  .ap-hero p{ font-size:15px; color:rgba(255,255,255,0.9); max-width:520px; margin:0 auto; line-height:1.6; }
+
+  .ap-section{ margin-bottom:60px; }
+  .ap-section h2{ font-size:24px; color:#111827; margin:0 0 8px; }
+  .ap-section .ap-sub{ font-size:14px; color:var(--ink-soft); margin:0 0 28px; max-width:640px; }
+
+  /* Mission */
+  .ap-mission{ display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; }
+  @media (max-width:800px){ .ap-mission{ grid-template-columns:1fr; gap:24px; } }
+  .ap-mission img{ border-radius:12px; height:280px; width:100%; object-fit:cover; }
+  .ap-mission p{ font-size:15px; line-height:1.8; color:#4b5563; margin:0 0 16px; }
+  .ap-quote{
+    background:#fff; border-left:4px solid var(--cedi-gold); border-radius:0 10px 10px 0;
+    box-shadow:0 4px 16px rgba(0,0,0,0.06); padding:22px; font-size:16px; color:#374151;
+    font-style:italic; line-height:1.6; margin-top:18px;
+  }
+  .ap-quote span{ display:block; margin-top:12px; font-style:normal; font-size:13px; font-weight:bold; color:var(--cedi-red); }
+
+  /* 3 piliers */
+  .ap-pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  @media (max-width:760px){ .ap-pillars{ grid-template-columns:1fr; } }
+  .ap-pillar{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:26px; text-align:center; }
+  .ap-pillar i{ font-size:26px; color:var(--cedi-gold); margin-bottom:14px; display:block; }
+  .ap-pillar h3{ font-size:16px; color:#111827; margin:0 0 8px; }
+  .ap-pillar p{ font-size:13px; color:var(--ink-soft); line-height:1.6; margin:0; }
+
+  /* Valeurs */
+  .ap-values{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+  @media (max-width:860px){ .ap-values{ grid-template-columns:repeat(2,1fr); } }
+  .ap-value{ text-align:center; padding:12px; }
+  .ap-value .num{ width:44px; height:44px; border-radius:50%; background:var(--cedi-red); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; margin:0 auto 12px; }
+  .ap-value h4{ font-size:14px; color:#111827; margin:0 0 6px; }
+  .ap-value p{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin:0; }
+
+  /* Chiffres clés (DYNAMIQUE) */
+  .ap-stats{ background:var(--cedi-red); border-radius:14px; padding:36px 24px; display:grid; grid-template-columns:repeat(4,1fr); gap:20px; text-align:center; }
+  @media (max-width:760px){ .ap-stats{ grid-template-columns:repeat(2,1fr); } }
+  .ap-stats .stat b{ display:block; font-size:30px; color:#fff; }
+  .ap-stats .stat span{ font-size:12.5px; color:rgba(255,255,255,0.8); }
+
+  /* Notre équipe (statique) */
+  .ap-team{ display:grid; grid-template-columns:repeat(4,1fr); gap:22px; }
+  @media (max-width:860px){ .ap-team{ grid-template-columns:repeat(2,1fr); } }
+  .ap-member{ text-align:center; }
+  .ap-member .photo-wrap{ border-radius:12px; overflow:hidden; margin-bottom:14px; }
+  .ap-member img{ width:100%; height:220px; object-fit:cover; display:block; }
+  .ap-member h4{ font-size:15px; color:#111827; margin:0 0 3px; }
+  .ap-member .role{ font-size:12.5px; color:var(--cedi-red); font-weight:bold; margin:0 0 8px; }
+  .ap-member .bio{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin:0; }
+
+  /* Librairies avec photo (DYNAMIQUE) */
+  .ap-stores{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }
+  @media (max-width:860px){ .ap-stores{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:480px){ .ap-stores{ grid-template-columns:1fr; } }
+  .ap-store{ background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .ap-store img{ width:100%; height:110px; object-fit:cover; display:block; }
+  .ap-store-body{ padding:14px; }
+  .ap-store h4{ font-size:15px; color:#111827; margin:0 0 4px; }
+  .ap-store p{ font-size:12.5px; color:var(--ink-soft); margin:0; }
+
+  /* CTA */
+  .ap-cta{ background:var(--bg-soft); border-radius:14px; padding:40px 24px; text-align:center; }
+  .ap-cta h2{ font-size:22px; color:#111827; margin:0 0 10px; }
+  .ap-cta p{ font-size:14px; color:var(--ink-soft); margin:0 0 22px; }
+  .ap-cta-buttons{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; }
+  .ap-btn{ display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:bold; padding:11px 24px; border-radius:8px; text-decoration:none; transition:opacity .2s ease; }
+  .ap-btn:hover{ opacity:0.9; }
+  .ap-btn-primary{ background:var(--cedi-red); color:#fff; }
+  .ap-btn-secondary{ background:#fff; color:var(--cedi-red); border:2px solid var(--cedi-red); }
+</style>
+
+<!-- HERO -->
+<div class="ap-hero">
+    <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1400&auto=format&fit=crop&q=75" alt="Librairie CEDI Littérature">
+    <div class="ap-hero-overlay">
+        <span class="ap-eyebrow"><i class="fa-solid fa-book-bible"></i> Notre histoire</span>
+        <h1>Distribuer la vie, un livre à la fois</h1>
+        <p>CEDI Littérature est une maison d'édition chrétienne intégrée, associée à un réseau de librairies et à un service de conseil spirituel, présente à Abidjan et Attiékoi.</p>
+    </div>
+</div>
+
+<div class="ap-container">
+
+    <!-- NOTRE MISSION -->
+    <section class="ap-section">
+        <div class="ap-mission">
+            <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=700&auto=format&fit=crop&q=75" alt="Intérieur d'une librairie CEDI">
+            <div>
+                <h2>Notre mission</h2>
+                <p>Depuis sa création, CEDI Littérature s'est donné pour vocation de rendre la Parole de Dieu et une littérature chrétienne solide accessibles au plus grand nombre, à travers l'édition de nos propres ouvrages et la distribution de publications choisies.</p>
+                <p>Au-delà de la vente de livres, nous accompagnons chaque lecteur dans sa marche spirituelle : enseignements, études bibliques et conseils personnalisés font partie intégrante de notre engagement envers la communauté chrétienne de Côte d'Ivoire.</p>
+                <div class="ap-quote">
+                    « Distribuer la vie à travers la Parole et la littérature. »
+                    <span>— Devise de CEDI Littérature</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CE QUE NOUS FAISONS -->
+    <section class="ap-section">
+        <h2>Ce que nous faisons</h2>
+        <p class="ap-sub">Trois activités complémentaires, au service d'une même vocation.</p>
+        <div class="ap-pillars">
+            <div class="ap-pillar">
+                <i class="fa-solid fa-pen-nib"></i>
+                <h3>Édition</h3>
+                <p>Nous produisons nos propres ouvrages — enseignements, études doctrinales et littérature de croissance spirituelle — sous la collection CEDI.</p>
+            </div>
+            <div class="ap-pillar">
+                <i class="fa-solid fa-store"></i>
+                <h3>Librairie</h3>
+                <p>Bibles, livres d'étude, littérature jeunesse et articles religieux, disponibles dans nos quatre librairies et livrables partout à Abidjan.</p>
+            </div>
+            <div class="ap-pillar">
+                <i class="fa-solid fa-hands-praying"></i>
+                <h3>Conseil spirituel</h3>
+                <p>Un accompagnement personnalisé sur la foi, le couple, la famille et les épreuves de la vie, en ligne comme en librairie.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- NOS VALEURS -->
+    <section class="ap-section">
+        <h2>Nos valeurs</h2>
+        <p class="ap-sub">Ce qui guide notre travail au quotidien.</p>
+        <div class="ap-values">
+            <div class="ap-value"><div class="num"><i class="fa-solid fa-cross"></i></div><h4>Fidélité à la Parole</h4><p>Un contenu fidèle aux Écritures, sans compromis doctrinal.</p></div>
+            <div class="ap-value"><div class="num"><i class="fa-solid fa-heart"></i></div><h4>Service</h4><p>Chaque lecteur accueilli avec attention, en boutique comme en ligne.</p></div>
+            <div class="ap-value"><div class="num"><i class="fa-solid fa-medal"></i></div><h4>Excellence</h4><p>Des ouvrages soignés, dans le fond comme dans la forme.</p></div>
+            <div class="ap-value"><div class="num"><i class="fa-solid fa-people-group"></i></div><h4>Communauté</h4><p>Un lieu de rencontre et de partage pour l'Église locale.</p></div>
+        </div>
+    </section>
+
+    <!-- ===== CHIFFRES CLÉS (DYNAMIQUES) ===== -->
+    <section class="ap-section">
+        <div class="ap-stats">
+            <div class="stat"><b>{{ nb_librairies }}</b><span>Librairies à Abidjan</span></div>
+            <div class="stat"><b>{{ nb_produits }}+</b><span>Ouvrages au catalogue</span></div>
+            <div class="stat"><b>{{ nb_avis }}+</b><span>Avis clients</span></div>
+            <div class="stat"><b>100%</b><span>Retrait gratuit en boutique</span></div>
+        </div>
+    </section>
+
+    <!-- NOTRE ÉQUIPE (STATIQUE) -->
+    <section class="ap-section">
+        <h2>Notre équipe</h2>
+        <p class="ap-sub">Les personnes qui font vivre CEDI Littérature au quotidien.</p>
+        <div class="ap-team">
+            <div class="ap-member">
+                <div class="photo-wrap">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=75" alt="Directeur de CEDI Littérature">
+                </div>
+                <h4>Jean-Baptiste K.</h4>
+                <p class="role">Directeur général</p>
+                <p class="bio">Fondateur de CEDI Littérature, à l'origine de la vision d'une maison d'édition au service de l'Église.</p>
+            </div>
+            <div class="ap-member">
+                <div class="photo-wrap">
+                    <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&auto=format&fit=crop&q=75" alt="Responsable éditoriale">
+                </div>
+                <h4>Grace A.</h4>
+                <p class="role">Responsable éditoriale</p>
+                <p class="bio">Supervise la collection CEDI, de la relecture des manuscrits à l'impression finale.</p>
+            </div>
+            <div class="ap-member">
+                <div class="photo-wrap">
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=75" alt="Responsable conseil spirituel">
+                </div>
+                <h4>Pasteur Samuel D.</h4>
+                <p class="role">Responsable conseil spirituel</p>
+                <p class="bio">Accompagne les lecteurs à travers le service de conseils spirituels en ligne et en librairie.</p>
+            </div>
+            <div class="ap-member">
+                <div class="photo-wrap">
+                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&auto=format&fit=crop&q=75" alt="Responsable des librairies">
+                </div>
+                <h4>Marie-Claire T.</h4>
+                <p class="role">Responsable des librairies</p>
+                <p class="bio">Coordonne les quatre points de vente et la gestion des stocks au quotidien.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== NOS LIBRAIRIES (DYNAMIQUES) ===== -->
+    <section class="ap-section">
+        <h2>Nos librairies</h2>
+        <p class="ap-sub">Quatre points de vente pour vous accueillir.</p>
+        <div class="ap-stores">
+            {% for point in points_vente %}
+            <div class="ap-store">
+                {% if point.url_image %}
+                    <img src="{{ point.url_image.url }}" alt="Librairie CEDI {{ point.nom }}">
+                {% else %}
+                    <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=400&auto=format&fit=crop&q=70" alt="Librairie CEDI {{ point.nom }}">
+                {% endif %}
+                <div class="ap-store-body">
+                    <h4>{{ point.nom }}</h4>
+                    <p>{{ point.adresse_complete|truncatechars:50 }}</p>
+                </div>
+            </div>
+            {% empty %}
+                <p style="grid-column:1/-1;text-align:center;color:#6b7280;">Aucun point de vente configuré pour le moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="ap-section">
+        <div class="ap-cta">
+            <h2>Une question, un besoin d'accompagnement ?</h2>
+            <p>Notre équipe est disponible pour vous conseiller, en librairie ou en ligne.</p>
+            <div class="ap-cta-buttons">
+                <a href="{% url 'accueil' %}#boutique" class="ap-btn ap-btn-primary"><i class="fa-solid fa-store"></i> Découvrir la boutique</a>
+                <a href="{% url 'accueil' %}#ressources" class="ap-btn ap-btn-secondary"><i class="fa-solid fa-comments"></i> Poser une question</a>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

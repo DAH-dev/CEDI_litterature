@@ -1,0 +1,76 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}➕ Ajouter un produit{% endblock %}
+
+{% block admin_actions %}
+<a href="{% url 'liste_produits' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold">
+    <i class="fa-solid fa-arrow-left"></i> Retour
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-2xl mx-auto">
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+                <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <!-- Zone d'ajout dynamique des images -->
+        <div class="border-t pt-4 mt-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Images du produit</label>
+            
+            <div id="image-inputs-container" class="space-y-3 mb-3">
+                <div class="flex items-center gap-2 image-input-row">
+                    <input type="file" name="images_multiples" accept="image/*" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+                    <button type="button" class="text-red-500 hover:text-red-700 px-2 py-1 opacity-0 cursor-default" onclick="removeRow(this)">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="button" id="add-image-btn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-2 px-4 rounded-lg border transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> Ajouter une autre image
+            </button>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4 border-t">
+            <a href="{% url 'liste_produits' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">Annuler</a>
+            <button type="submit" class="bg-cediRed text-white px-6 py-2 rounded-lg hover:bg-cediRedDark transition font-bold">
+                <i class="fa-solid fa-save"></i> Enregistrer
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('add-image-btn').addEventListener('click', function() {
+        const container = document.getElementById('image-inputs-container');
+        const newRow = document.createElement('div');
+        newRow.className = 'flex items-center gap-2 image-input-row';
+        newRow.innerHTML = `
+            <input type="file" name="images_multiples" accept="image/*" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+            <button type="button" class="text-red-500 hover:text-red-700 px-2 py-1" onclick="removeRow(this)">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        `;
+        container.appendChild(newRow);
+    });
+
+    function removeRow(btn) {
+        const container = document.getElementById('image-inputs-container');
+        if (container.getElementsByClassName('image-input-row').length > 1) {
+            btn.parentElement.remove();
+        }
+    }
+</script>
+{% endblock %}

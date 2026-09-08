@@ -1,0 +1,51 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}🏷️ Gestion des Catégories{% endblock %}
+
+{% block admin_actions %}
+<a href="{% url 'ajouter_categorie' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold">
+    <i class="fa-solid fa-plus"></i> Ajouter une catégorie
+</a>
+<a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold">
+    <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Nom</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Description</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Catégorie parente</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for cat in categories %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ cat.nom }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ cat.description|truncatechars:40|default:"-" }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ cat.categorie_parente.nom|default:"-" }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex gap-2">
+                            <a href="{% url 'modifier_categorie' cat.id %}" class="text-cediRed hover:text-cediRedDark transition"><i class="fa-solid fa-pen"></i></a>
+                            <a href="{% url 'supprimer_categorie' cat.id %}" class="text-red-500 hover:text-red-700 transition"><i class="fa-solid fa-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                        Aucune catégorie pour le moment. 
+                        <a href="{% url 'ajouter_categorie' %}" class="text-cediRed hover:underline">Ajoutez-en une !</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

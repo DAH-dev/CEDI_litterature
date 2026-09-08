@@ -1,0 +1,62 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}🚚 Gestion des commandes{% endblock %}
+
+{% block admin_actions %}
+<a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold">
+    <i class="fa-solid fa-arrow-left"></i> Retour
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Référence</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Client</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Montant</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Mode</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Statut</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Date</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for commande in commandes %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ commande.reference_commande }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ commande.client.username|default:"Invité" }}</td>
+                    <td class="px-4 py-3 font-bold text-cediRed">{{ commande.montant_total|floatformat:0 }} F</td>
+                    <td class="px-4 py-3 text-gray-600">{{ commande.get_mode_livraison_display }}</td>
+                    <td class="px-4 py-3">
+                        {% if commande.statut == 'attente_paiement' %}
+                            <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs">⏳ En attente</span>
+                        {% elif commande.statut == 'payee' %}
+                            <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">💳 Payée</span>
+                        {% elif commande.statut == 'en_preparation' %}
+                            <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs">📦 En préparation</span>
+                        {% elif commande.statut == 'prete_retrait' %}
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">✅ Prête pour retrait</span>
+                        {% elif commande.statut == 'expediee' %}
+                            <span class="bg-teal-100 text-teal-700 px-2 py-1 rounded text-xs">🚚 Expédiée</span>
+                        {% elif commande.statut == 'livree' %}
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">🎯 Livrée</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-gray-600">{{ commande.date_commande|date:"d/m/Y" }}</td>
+                    <td class="px-4 py-3">
+                        <a href="{% url 'changer_statut_commande' commande.id %}" class="bg-cediRed text-white px-3 py-1 rounded hover:bg-cediRedDark text-xs">Changer statut</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">Aucune commande pour le moment.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

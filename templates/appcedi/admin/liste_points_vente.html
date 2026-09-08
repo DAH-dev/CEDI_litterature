@@ -1,0 +1,53 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}📍 Gestion des Points de Vente{% endblock %}
+
+{% block admin_actions %}
+<a href="{% url 'ajouter_point_vente' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold">
+    <i class="fa-solid fa-plus"></i> Ajouter un point de vente
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Photo</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Nom</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Adresse</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Téléphone</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for point in points %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                        {% if point.url_image %}
+                            <img src="{{ point.url_image.url }}" class="w-12 h-12 object-cover rounded" alt="{{ point.nom }}">
+                        {% else %}
+                            <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">📷</div>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ point.nom }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ point.adresse_complete|truncatechars:40 }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ point.telephone|default:"-" }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex gap-2">
+                            <a href="{% url 'modifier_point_vente' point.id %}" class="text-cediRed hover:text-cediRedDark transition"><i class="fa-solid fa-pen"></i></a>
+                            <a href="{% url 'supprimer_point_vente' point.id %}" class="text-red-500 hover:text-red-700 transition"><i class="fa-solid fa-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">Aucun point de vente. <a href="{% url 'ajouter_point_vente' %}" class="text-cediRed hover:underline">Ajoutez-en un !</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

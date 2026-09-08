@@ -1,0 +1,277 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}🎯 Gestion des Promotions{% endblock %}
+
+{% block admin_actions %}
+<div class="flex flex-wrap gap-2 w-full sm:w-auto">
+    <a href="{% url 'ajouter_promotion' %}" class="flex-1 sm:flex-none justify-center bg-cediRed text-white px-3 py-2 rounded-lg hover:bg-cediRedDark transition text-xs sm:text-sm font-bold flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Ajouter
+    </a>
+    <a href="{% url 'tableau_de_bord' %}" class="flex-1 sm:flex-none justify-center bg-gray-200 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-300 transition text-xs sm:text-sm font-bold flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+    </a>
+</div>
+{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-4">
+
+    <!-- Barre de Filtrage Responsive (Scrollable sur mobile) -->
+    <div class="flex items-center gap-2 bg-white p-2 sm:p-3 rounded-xl border border-gray-200 shadow-sm text-xs font-semibold overflow-x-auto whitespace-nowrap no-scrollbar">
+        <span class="text-gray-400 mr-1 flex items-center gap-1 shrink-0">
+            <i class="fa-solid fa-filter"></i> Filtrer :
+        </span>
+        <button onclick="filtrerPromos('toutes')" class="btn-filtre active shrink-0 bg-gray-900 text-white px-3 py-1.5 rounded-lg transition" data-filtre="toutes">
+            Toutes
+        </button>
+        <button onclick="filtrerPromos('en_cours')" class="btn-filtre shrink-0 bg-gray-100 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1" data-filtre="en_cours">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> En cours
+        </button>
+        <button onclick="filtrerPromos('a_venir')" class="btn-filtre shrink-0 bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1" data-filtre="a_venir">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> À venir
+        </button>
+        <button onclick="filtrerPromos('expiree')" class="btn-filtre shrink-0 bg-gray-100 text-gray-600 hover:bg-rose-50 hover:text-rose-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1" data-filtre="expiree">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span> Expirées
+        </button>
+        <button onclick="filtrerPromos('flash')" class="btn-filtre shrink-0 bg-gray-100 text-gray-600 hover:bg-amber-50 hover:text-amber-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1" data-filtre="flash">
+            <i class="fa-solid fa-bolt text-amber-500"></i> Flash
+        </button>
+        <button onclick="filtrerPromos('desactivee')" class="btn-filtre shrink-0 bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1" data-filtre="desactivee">
+            <i class="fa-solid fa-eye-slash text-gray-400"></i> Désactivées
+        </button>
+    </div>
+
+    <!-- VUE DES CARTES SUR MOBILE (< 768px) -->
+    <div class="grid grid-cols-1 gap-3 md:hidden" id="cartes-promotions-mobile">
+        {% for item in promos_enrichies %}
+        <div class="card-promo-mobile bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3"
+             data-statut="{{ item.statut }}"
+             data-flash="{% if item.promo.est_vente_flash %}flash{% else %}normal{% endif %}"
+             data-actif="{% if item.promo.actif %}actif{% else %}desactivee{% endif %}">
+            
+            <div class="flex items-start justify-between gap-2">
+                <div>
+                    <h4 class="font-bold text-gray-900 text-sm leading-tight">{{ item.promo.titre }}</h4>
+                    <div class="mt-1 flex items-center gap-2">
+                        {% if item.promo.est_vente_flash %}
+                            <span class="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                                <i class="fa-solid fa-bolt text-amber-600"></i> FLASH
+                            </span>
+                        {% endif %}
+                        <span class="font-extrabold text-cediRed text-sm">
+                            {% if item.promo.type_reduction == 'pourcentage' %}
+                                -{{ item.promo.valeur_reduction|floatformat:0 }}%
+                            {% else %}
+                                -{{ item.promo.valeur_reduction|floatformat:0 }} FCFA
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Switch Actif/Inactif Mobile -->
+                <a href="{% url 'basculer_statut_promotion' item.promo.id %}" class="shrink-0">
+                    {% if item.promo.actif %}
+                        <span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> Actif
+                        </span>
+                    {% else %}
+                        <span class="bg-gray-100 text-gray-600 border border-gray-300 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-circle-xmark text-gray-400"></i> Inactif
+                        </span>
+                    {% endif %}
+                </a>
+            </div>
+
+            <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
+                <!-- Statut Temporel -->
+                <div>
+                    {% if item.statut == 'en_cours' %}
+                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> {{ item.statut_libelle }}
+                        </span>
+                    {% elif item.statut == 'a_venir' %}
+                        <span class="bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-semibold px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                            <i class="fa-regular fa-clock"></i> {{ item.statut_libelle }}
+                        </span>
+                    {% else %}
+                        <span class="bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-semibold px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                            <i class="fa-solid fa-hourglass-end"></i> {{ item.statut_libelle }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Dates -->
+                <div class="text-right text-[11px] text-gray-500">
+                    <div>Du {{ item.promo.date_debut|date:"d/m/Y" }}</div>
+                    <div>Au {{ item.promo.date_fin|date:"d/m/Y" }}</div>
+                </div>
+            </div>
+
+            <!-- Boutons d'actions mobile -->
+            <div class="flex justify-end gap-3 pt-2 border-t border-gray-100 text-sm">
+                <a href="{% url 'modifier_promotion' item.promo.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-lg flex items-center gap-1 transition">
+                    <i class="fa-solid fa-pen-to-square"></i> Modifier
+                </a>
+                <a href="{% url 'supprimer_promotion' item.promo.id %}" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1 rounded-lg flex items-center gap-1 transition"
+                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement cette promotion ?');">
+                    <i class="fa-solid fa-trash-can"></i> Supprimer
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white p-6 rounded-xl text-center text-gray-500 border border-gray-200">
+            Aucune promotion enregistrée.
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- TABLEAU ORDINATEUR & TABLETTE (>= 768px) -->
+    <div class="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-semibold">Titre</th>
+                        <th class="px-4 py-3 text-center font-semibold">Actif</th>
+                        <th class="px-4 py-3 text-left font-semibold">Réduction</th>
+                        <th class="px-4 py-3 text-left font-semibold">Statut Temps</th>
+                        <th class="px-4 py-3 text-left font-semibold">Période</th>
+                        <th class="px-4 py-3 text-center font-semibold">Type</th>
+                        <th class="px-4 py-3 text-right font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100" id="table-promotions">
+                    {% for item in promos_enrichies %}
+                    <tr class="row-promo hover:bg-gray-50/80 transition"
+                        data-statut="{{ item.statut }}"
+                        data-flash="{% if item.promo.est_vente_flash %}flash{% else %}normal{% endif %}"
+                        data-actif="{% if item.promo.actif %}actif{% else %}desactivee{% endif %}">
+                        
+                        <td class="px-4 py-3 font-medium text-gray-900">
+                            <div class="font-semibold">{{ item.promo.titre|truncatechars:35 }}</div>
+                        </td>
+
+                        <td class="px-4 py-3 text-center">
+                            <a href="{% url 'basculer_statut_promotion' item.promo.id %}" 
+                               title="Cliquer pour {% if item.promo.actif %}désactiver{% else %}activer{% endif %}"
+                               class="inline-flex items-center cursor-pointer">
+                                {% if item.promo.actif %}
+                                    <span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 hover:bg-emerald-200 transition">
+                                        <i class="fa-solid fa-circle-check text-emerald-600"></i> Actif
+                                    </span>
+                                {% else %}
+                                    <span class="bg-gray-100 text-gray-600 border border-gray-300 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 hover:bg-gray-200 transition">
+                                        <i class="fa-solid fa-circle-xmark text-gray-400"></i> Inactif
+                                    </span>
+                                {% endif %}
+                            </a>
+                        </td>
+
+                        <td class="px-4 py-3 font-bold text-cediRed">
+                            {% if item.promo.type_reduction == 'pourcentage' %}
+                                -{{ item.promo.valeur_reduction|floatformat:0 }}%
+                            {% else %}
+                                -{{ item.promo.valeur_reduction|floatformat:0 }} FCFA
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {% if item.statut == 'en_cours' %}
+                                <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> {{ item.statut_libelle }}
+                                </span>
+                            {% elif item.statut == 'a_venir' %}
+                                <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                                    <i class="fa-regular fa-clock"></i> {{ item.statut_libelle }}
+                                </span>
+                            {% else %}
+                                <span class="bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-hourglass-end"></i> {{ item.statut_libelle }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-3 text-xs text-gray-600">
+                            <div>Du {{ item.promo.date_debut|date:"d/m/Y H:i" }}</div>
+                            <div>Au {{ item.promo.date_fin|date:"d/m/Y H:i" }}</div>
+                        </td>
+
+                        <td class="px-4 py-3 text-center">
+                            {% if item.promo.est_vente_flash %}
+                                <span class="bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold px-2 py-0.5 rounded flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-bolt text-amber-600"></i> FLASH
+                                </span>
+                            {% else %}
+                                <span class="text-xs text-gray-400">Standard</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex items-center justify-end gap-3 text-base">
+                                <a href="{% url 'modifier_promotion' item.promo.id %}" class="text-gray-500 hover:text-cediRed transition" title="Modifier">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <a href="{% url 'supprimer_promotion' item.promo.id %}" class="text-gray-400 hover:text-rose-600 transition" title="Supprimer"
+                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement cette promotion ?');">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-4 py-12 text-center text-gray-500">
+                            Aucune promotion enregistrée.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Script de Filtrage Dynamique (Mobile & Bureau) -->
+<script>
+    function filtrerPromos(filtre) {
+        const rows = document.querySelectorAll('.row-promo');
+        const cardsMobile = document.querySelectorAll('.card-promo-mobile');
+        const boutons = document.querySelectorAll('.btn-filtre');
+
+        // Mise à jour de l'état des boutons de filtres
+        boutons.forEach(btn => {
+            if (btn.getAttribute('data-filtre') === filtre) {
+                btn.classList.add('bg-gray-900', 'text-white');
+                btn.classList.remove('bg-gray-100', 'text-gray-600');
+            } else {
+                btn.classList.remove('bg-gray-900', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-600');
+            }
+        });
+
+        // Fonction pour filtrer un élément (ligne ou carte)
+        function verifierAffichage(element) {
+            const statut = element.getAttribute('data-statut');
+            const isFlash = element.getAttribute('data-flash') === 'flash';
+            const isDesactivee = element.getAttribute('data-actif') === 'desactivee';
+
+            if (filtre === 'toutes') {
+                element.style.display = '';
+            } else if (filtre === 'flash' && isFlash) {
+                element.style.display = '';
+            } else if (filtre === 'desactivee' && isDesactivee) {
+                element.style.display = '';
+            } else if (statut === filtre) {
+                element.style.display = '';
+            } else {
+                element.style.display = 'none';
+            }
+        }
+
+        // Appliquer aux lignes d'ordinateur
+        rows.forEach(verifierAffichage);
+        // Appliquer aux cartes mobiles
+        cardsMobile.forEach(verifierAffichage);
+    }
+</script>
+{% endblock %}
