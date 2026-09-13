@@ -1,24 +1,25 @@
+from datetime import datetime
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Count, Sum
+from django.contrib.auth.forms import AuthenticationForm
+from django.db.models import Count, Sum, Avg
+
 from .models import *
-from .forms import *
+from .forms import InscriptionForm, ProduitForm, CategorieForm, PointVenteForm, PromotionForm, ArticleBlogForm
+
 
 # ========== VÉRIFICATION DES DROITS ==========
 def est_admin_ou_gestionnaire(user):
     return user.is_superuser or (hasattr(user, 'role') and user.role in ['admin', 'gestionnaire_stock'])
 
-# ========== PAGE D'ACCUEIL ==========
-from django.utils import timezone
-from datetime import datetime
 
 # ========== PAGE D'ACCUEIL ==========
 def accueil(request):
     now = timezone.now()
     
-    # Récupère toutes les promotions valides dans la plage de dates
     promotions_actives = Promotion.objects.filter(
         date_debut__lte=now,
         date_fin__gte=now
@@ -28,7 +29,6 @@ def accueil(request):
     for promo in promotions_actives:
         produits_promo = []
         for produit in promo.produits.filter(statut=True):
-            # Utilisation de la méthode du modèle si elle existe, sinon calcul direct
             if hasattr(promo, 'calculer_prix_reduit'):
                 prix_reduit = promo.calculer_prix_reduit(produit.prix)
             else:
@@ -49,12 +49,6 @@ def accueil(request):
                 'produits': produits_promo,
             })
 
-    # Debug dans la console du terminal
-    print(f"--- DEBUG ACCUEIL ---")
-    print(f"Heure actuelle (now): {now}")
-    print(f"Promotions trouvées en BD: {promotions_actives.count()}")
-    print(f"Promotions envoyées au template: {len(promos_data)}")
-
     context = {
         'points_de_vente': PointVente.objects.all(),
         'produits_recents': Produit.objects.filter(statut=True).order_by('-id')[:8],
@@ -64,21 +58,20 @@ def accueil(request):
     
     return render(request, 'appcedi/accueil.html', context)
 
-# ========== AUTHENTIFICATION ==========
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
+# ========== AUTHENTIFICATION ==========
 def inscription(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = InscriptionForm(request.POST) # 👈 Utilisation d'InscriptionForm
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f'Bienvenue {user.username} !')
+            messages.success(request, f'Bienvenue {user.username} ! Votre compte a été créé avec succès.')
             return redirect('accueil')
     else:
-        form = UserCreationForm()
+        form = InscriptionForm() # 👈 Utilisation d'InscriptionForm
     return render(request, 'appcedi/inscription.html', {'form': form})
+
 
 def connexion(request):
     if request.method == 'POST':
@@ -95,13 +88,30 @@ def connexion(request):
         form = AuthenticationForm()
     return render(request, 'appcedi/connexion.html', {'form': form})
 
+
 def deconnexion(request):
     logout(request)
     messages.info(request, 'Vous êtes déconnecté.')
     return redirect('accueil')
 
+
+# ========== PAGES DIVERSES ==========
+def a_propos(request):
+    points_vente = PointVente.objects.all()
+    
+    context = {
+        'points_vente': points_vente,
+        'nb_librairies': points_vente.count(),
+        'nb_produits': Produit.objects.filter(statut=True).count(),
+        'nb_avis': AvisClient.objects.filter(statut='approuve').count(),
+    }
+    return render(request, 'appcedi/a_propos.html', context)
+
+
 # ========== TABLEAU DE BORD ==========
+# ========== TABLEAU DE BORD ADMIN (Sécurisé) ==========
 @login_required
+@user_passes_test(est_admin_ou_gestionnaire, login_url='accueil')
 def tableau_de_bord(request):
     context = {
         'total_produits': Produit.objects.count(),
@@ -125,9 +135,6 @@ def liste_produits(request):
     produits = Produit.objects.all().order_by('-id')
     return render(request, 'appcedi/admin/liste_produits.html', {'produits': produits})
 
-# views.py
-
-# views.py
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -137,14 +144,13 @@ def ajouter_produit(request):
         if form.is_valid():
             produit = form.save()
             
-            # Récupération de l'ensemble des fichiers transmis dynamiquement
             fichiers = request.FILES.getlist('images_multiples')
             for index, f in enumerate(fichiers):
                 if f:
                     Image.objects.create(
                         produit=produit,
                         url_image=f,
-                        est_principale=(index == 0) # La 1ère image devient l'image principale
+                        est_principale=(index == 0)
                     )
             
             messages.success(request, f'Produit "{produit.titre}" ajouté avec succès !')
@@ -153,8 +159,12 @@ def ajouter_produit(request):
         form = ProduitForm()
     return render(request, 'appcedi/admin/ajouter_produit.html', {'form': form})
 
+
 def detail_produit(request, pk):
     produit = get_object_or_404(Produit, pk=pk, statut=True)
+    mon_avis = None
+    if request.user.is_authenticated:
+        mon_avis = AvisProduit.objects.filter(produit=produit, utilisateur=request.user).first()
     images = produit.images.all()
     image_principale = images.filter(est_principale=True).first()
     if not image_principale and images.exists():
@@ -165,12 +175,8 @@ def detail_produit(request, pk):
     note_moyenne = produit.moyenne_avis()
     total_avis = avis_approuves.count()
 
-    # Pour la répartition des notes (barres)
-    repartition = {}
-    for i in range(1, 6):
-        repartition[i] = avis_approuves.filter(note=i).count()
+    repartition = {i: avis_approuves.filter(note=i).count() for i in range(1, 6)}
 
-    # Produits similaires (même catégorie, exclure le produit courant)
     categories = produit.categories.all()
     produits_similaires = Produit.objects.filter(
         categories__in=categories, statut=True
@@ -185,9 +191,11 @@ def detail_produit(request, pk):
         'total_avis': total_avis,
         'repartition': repartition,
         'produits_similaires': produits_similaires,
-        'points_vente': PointVente.objects.all(),  # pour la disponibilité
+        'points_vente': PointVente.objects.all(),
+        'mon_avis': mon_avis,
     }
     return render(request, 'appcedi/detail_produit.html', context)
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -198,7 +206,6 @@ def modifier_produit(request, pk):
         if form.is_valid():
             form.save()
             
-            # Récupération des nouvelles images ajoutées
             fichiers = request.FILES.getlist('images_multiples')
             for f in fichiers:
                 if f:
@@ -208,7 +215,6 @@ def modifier_produit(request, pk):
                         est_principale=False
                     )
             
-            # Si aucune image principale n'est définie, définir la toute première image disponible
             if not produit.images.filter(est_principale=True).exists():
                 premiere = produit.images.first()
                 if premiere:
@@ -220,6 +226,8 @@ def modifier_produit(request, pk):
     else:
         form = ProduitForm(instance=produit)
     return render(request, 'appcedi/admin/modifier_produit.html', {'form': form, 'produit': produit})
+
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def supprimer_produit(request, pk):
@@ -230,26 +238,25 @@ def supprimer_produit(request, pk):
         messages.success(request, f'Produit "{titre}" supprimé avec succès !')
         return redirect('liste_produits')
     return render(request, 'appcedi/admin/supprimer_produit.html', {'produit': produit})
-# appcedi/views.py
+
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def definir_principale(request, image_id):
     image = get_object_or_404(Image, pk=image_id)
     produit = image.produit
-    # Désactiver toutes les autres images du même produit
     produit.images.update(est_principale=False)
-    # Activer celle-ci
     image.est_principale = True
     image.save()
     messages.success(request, "Image définie comme principale.")
     return redirect('modifier_produit', pk=produit.pk)
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def supprimer_image(request, image_id):
     image = get_object_or_404(Image, pk=image_id)
     produit = image.produit
-    # Si c'était l'image principale, on en remet une autre (la première restante)
     if image.est_principale:
         image.delete()
         nouvelle = produit.images.first()
@@ -260,6 +267,8 @@ def supprimer_image(request, image_id):
         image.delete()
     messages.success(request, "Image supprimée.")
     return redirect('modifier_produit', pk=produit.pk)
+
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def basculer_statut_produit(request, pk):
@@ -276,12 +285,14 @@ def basculer_statut_produit(request, pk):
     messages.success(request, f'Statut du produit "{produit.titre}" mis à jour !')
     return redirect('liste_produits')
 
+
 # ========== CRUD CATÉGORIES ==========
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def liste_categories(request):
     categories = Categorie.objects.all()
     return render(request, 'appcedi/admin/liste_categories.html', {'categories': categories})
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -295,6 +306,7 @@ def ajouter_categorie(request):
     else:
         form = CategorieForm()
     return render(request, 'appcedi/admin/ajouter_categorie.html', {'form': form})
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -310,6 +322,7 @@ def modifier_categorie(request, pk):
         form = CategorieForm(instance=categorie)
     return render(request, 'appcedi/admin/modifier_categorie.html', {'form': form, 'categorie': categorie})
 
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def supprimer_categorie(request, pk):
@@ -321,12 +334,14 @@ def supprimer_categorie(request, pk):
         return redirect('liste_categories')
     return render(request, 'appcedi/admin/supprimer_categorie.html', {'categorie': categorie})
 
+
 # ========== CRUD POINTS DE VENTE ==========
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def liste_points_vente(request):
     points = PointVente.objects.all()
     return render(request, 'appcedi/admin/liste_points_vente.html', {'points': points})
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -340,6 +355,7 @@ def ajouter_point_vente(request):
     else:
         form = PointVenteForm()
     return render(request, 'appcedi/admin/ajouter_point_vente.html', {'form': form})
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -355,6 +371,7 @@ def modifier_point_vente(request, pk):
         form = PointVenteForm(instance=point)
     return render(request, 'appcedi/admin/modifier_point_vente.html', {'form': form, 'point': point})
 
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def supprimer_point_vente(request, pk):
@@ -366,17 +383,14 @@ def supprimer_point_vente(request, pk):
         return redirect('liste_points_vente')
     return render(request, 'appcedi/admin/supprimer_point_vente.html', {'point': point})
 
-# ========== CRUD PROMOTIONS ==========
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from .models import Promotion
 
+# ========== CRUD PROMOTIONS ==========
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
 def liste_promotions(request):
     maintenant = timezone.now()
-    # On récupère toutes les promotions sans restriction
     promotions = Promotion.objects.all().order_by('-date_debut')
     
-    # On ajoute des informations dynamiques sur le statut pour le template
     promos_enrichies = []
     for promo in promotions:
         if promo.date_fin < maintenant:
@@ -401,12 +415,15 @@ def liste_promotions(request):
     }
     return render(request, 'appcedi/admin/liste_promotions.html', context)
 
-# Vue pour activer/désactiver directement depuis la liste
+
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
 def basculer_statut_promotion(request, promo_id):
     promo = get_object_or_404(Promotion, id=promo_id)
-    promo.actif = not promo.actif  # Inverse le statut (True -> False / False -> True)
+    promo.actif = not promo.actif
     promo.save()
     return redirect('liste_promotions')
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -420,6 +437,7 @@ def ajouter_promotion(request):
     else:
         form = PromotionForm()
     return render(request, 'appcedi/admin/ajouter_promotion.html', {'form': form})
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -435,6 +453,7 @@ def modifier_promotion(request, pk):
         form = PromotionForm(instance=promo)
     return render(request, 'appcedi/admin/modifier_promotion.html', {'form': form, 'promo': promo})
 
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def supprimer_promotion(request, pk):
@@ -446,12 +465,245 @@ def supprimer_promotion(request, pk):
         return redirect('liste_promotions')
     return render(request, 'appcedi/admin/supprimer_promotion.html', {'promo': promo})
 
+
 # ========== CRUD ARTICLES DE BLOG ==========
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def liste_articles(request):
     articles = ArticleBlog.objects.all().order_by('-date_publication')
     return render(request, 'appcedi/admin/liste_articles.html', {'articles': articles})
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Produit, Panier, ArticlePanier, ListeSouhaits, AvisProduit, Commande, LigneCommande
+
+# ==========================================
+# 1. GESTION DU PANIER CLIENT
+# ==========================================
+
+def voir_panier(request):
+    """Affiche le contenu du panier de l'utilisateur."""
+    if request.user.is_authenticated:
+        panier, created = Panier.objects.get_or_create(utilisateur=request.user)
+    else:
+        # Pour les utilisateurs non connectés via la session
+        session_key = request.session.session_key
+        if not session_key:
+            request.session.create()
+            session_key = request.session.session_key
+        panier, created = Panier.objects.get_or_create(session_id=session_key)
+
+    articles = panier.articles.all()
+    total = sum(article.produit.prix * article.quantite for article in articles)
+    
+    context = {
+        'panier': panier,
+        'articles': articles,
+        'total': total,
+    }
+    return render(request, 'appcedi/panier/panier_detail.html', context)
+
+
+def ajouter_au_panier(request, produit_id):
+    """Ajoute un produit au panier (gestion connectés & anonymes)."""
+    # Correction de actif=True -> statut=True
+    produit = get_object_or_404(Produit, id=produit_id, statut=True)
+    
+    if request.user.is_authenticated:
+        panier, _ = Panier.objects.get_or_create(utilisateur=request.user)
+    else:
+        session_key = request.session.session_key
+        if not session_key:
+            request.session.create()
+            session_key = request.session.session_key
+        panier, _ = Panier.objects.get_or_create(session_id=session_key)
+
+    quantite = int(request.POST.get('quantite', 1))
+    
+    # Vérification ou création de l'article dans le panier
+    article, created = ArticlePanier.objects.get_or_create(panier=panier, produit=produit)
+    if not created:
+        article.quantite += quantite
+    else:
+        article.quantite = quantite
+    article.save()
+
+    messages.success(request, f"{produit.titre} a été ajouté à votre panier.")
+    return redirect('voir_panier')
+
+
+def modifier_quantite_panier(request, article_id):
+    """Met à jour la quantité d'un article dans le panier."""
+    article = get_object_or_404(ArticlePanier, id=article_id)
+    action = request.POST.get('action') # 'augmenter' ou 'reduire'
+
+    if action == 'augmenter':
+        article.quantite += 1
+        article.save()
+    elif action == 'reduire':
+        if article.quantite > 1:
+            article.quantite -= 1
+            article.save()
+        else:
+            article.delete()
+
+    return redirect('voir_panier')
+
+
+def supprimer_du_panier(request, article_id):
+    """Supprime un article du panier."""
+    article = get_object_or_404(ArticlePanier, id=article_id)
+    article.delete()
+    messages.info(request, "Article retiré du panier.")
+    return redirect('voir_panier')
+
+
+# ==========================================
+# 2. LISTE DE SOUHAITS (WISHLIST)
+# ==========================================
+
+@login_required
+def voir_liste_souhaits(request):
+    """Affiche tous les produits enregistrés par l'utilisateur."""
+    items = ListeSouhaits.objects.filter(utilisateur=request.user).select_related('produit')
+    return render(request, 'appcedi/panier/liste_souhaits.html', {'items': items})
+
+@login_required
+def basculer_liste_souhaits(request, produit_id):
+    """Ajoute ou retire un produit de la liste de souhaits."""
+    produit = get_object_or_404(Produit, id=produit_id)
+    soufait, created = ListeSouhaits.objects.get_or_create(
+        utilisateur=request.user, 
+        produit=produit
+    )
+    
+    if not created:
+        # Si le produit était déjà dans la liste, on le supprime
+        soufait.delete()
+        
+    return redirect('voir_liste_souhaits')
+@login_required
+def espace_client(request):
+    # Récupérer l'onglet actif passé en paramètre GET (ex: ?tab=commandes), par défaut 'profil'
+    tab = request.GET.get('tab', 'profil')
+    
+    # 1. Historique des commandes
+    commandes = Commande.objects.filter(utilisateur=request.user).order_by('-date_commande') if hasattr(Commande, 'utilisateur') else []
+    
+    # 2. Produits dans la liste de souhaits
+    souhaits = ListeSouhaits.objects.filter(utilisateur=request.user).select_related('produit')
+    
+    # 3. Contenu du panier
+    panier_items = []
+    panier_total = 0
+    try:
+        panier = Panier.objects.get(utilisateur=request.user)
+        panier_items = panier.items.all()
+        panier_total = sum(item.produit.prix * item.quantite for item in panier_items)
+    except Exception:
+        pass
+
+    context = {
+        'active_tab': tab,
+        'commandes': commandes,
+        'souhaits': souhaits,
+        'panier_items': panier_items,
+        'panier_total': panier_total,
+    }
+    return render(request, 'appcedi/espace_client.html', context)
+
+
+# ==========================================
+# Soumettre un avis produit (sur la fiche produit)
+# ==========================================
+
+
+@login_required
+def ajouter_avis_produit(request, produit_id):
+    if request.method == 'POST':
+        produit = get_object_or_404(Produit, pk=produit_id)
+        note = request.POST.get('note')
+        commentaire = request.POST.get('commentaire')
+
+        # - S'il n'en trouve pas : il en CRÉE un nouveau.
+        AvisProduit.objects.update_or_create(
+            produit=produit,
+            utilisateur=request.user,
+            defaults={
+                'note': note,
+                'commentaire': commentaire,
+            }
+        )
+        
+    return redirect('detail_produit', pk=produit_id)
+
+
+# ==========================================
+# 4. VALIDER LA COMMANDE (CHECKOUT)
+# ==========================================
+
+@login_required
+def valider_commande(request):
+    """Transforme le contenu du panier en une commande."""
+    try:
+        panier = Panier.objects.get(utilisateur=request.user)
+        articles = panier.articles.all()
+        if not articles.exists():
+            messages.warning(request, "Votre panier est vide.")
+            return redirect('voir_panier')
+    except Panier.DoesNotExist:
+        messages.warning(request, "Votre panier est vide.")
+        return redirect('voir_panier')
+
+    if request.method == 'POST':
+        adresse_livraison = request.POST.get('adresse_livraison')
+        telephone = request.POST.get('telephone')
+        
+        # Calcul du montant total
+        total = sum(item.produit.prix * item.quantite for item in articles)
+        
+        # Création de la commande
+        commande = Commande.objects.create(
+            utilisateur=request.user,
+            adresse_livraison=adresse_livraison,
+            telephone=telephone,
+            total=total,
+            statut='en_attente'
+        )
+        
+        # Transfert des articles du panier vers les lignes de commande
+        for item in articles:
+            LigneCommande.objects.create(
+                commande=commande,
+                produit=item.produit,
+                quantite=item.quantite,
+                prix_unitaire=item.produit.prix
+            )
+            
+        # Vider le panier
+        articles.delete()
+        
+        messages.success(request, f"Votre commande N°{commande.id} a été enregistrée avec succès !")
+        return redirect('profil')
+
+    total = sum(item.produit.prix * item.quantite for item in articles)
+    return render(request, 'appcedi/panier/checkout.html', {'articles': articles, 'total': total})
+
+
+# Soumettre un témoignage général sur le site (ex: page d'accueil ou à propos)
+@login_required
+def ajouter_temoignage_site(request):
+    if request.method == 'POST':
+        commentaire = request.POST.get('commentaire')
+        AvisClient.objects.create(
+            utilisateur=request.user,
+            commentaire=commentaire,
+            approuve=False
+        )
+        messages.success(request, "Merci ! Votre témoignage sur le site a été transmis à l'équipe.")
+    return redirect(request.META.get('HTTP_REFERER', 'accueil'))
+
+
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -468,6 +720,7 @@ def ajouter_article(request):
         form = ArticleBlogForm()
     return render(request, 'appcedi/admin/ajouter_article.html', {'form': form})
 
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def modifier_article(request, pk):
@@ -482,9 +735,9 @@ def modifier_article(request, pk):
         form = ArticleBlogForm(instance=article)
     return render(request, 'appcedi/admin/modifier_article.html', {'form': form, 'article': article})
 
+
 def article_detail(request, pk):
     article = get_object_or_404(ArticleBlog, pk=pk, statut='publie')
-    # Récupérer 3 articles similaires (même catégorie, sauf lui-même)
     articles_similaires = ArticleBlog.objects.filter(
         categorie_article=article.categorie_article,
         statut='publie'
@@ -494,6 +747,7 @@ def article_detail(request, pk):
         'article': article,
         'articles_similaires': articles_similaires,
     })
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -506,6 +760,7 @@ def supprimer_article(request, pk):
         return redirect('liste_articles')
     return render(request, 'appcedi/admin/supprimer_article.html', {'article': article})
 
+
 # ========== CRUD AVIS CLIENTS (MODÉRATION) ==========
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -513,14 +768,16 @@ def liste_avis(request):
     avis = AvisClient.objects.all().order_by('-date_creation')
     return render(request, 'appcedi/admin/liste_avis.html', {'avis': avis})
 
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def approuver_avis(request, pk):
     avis = get_object_or_404(AvisClient, pk=pk)
     avis.statut = 'approuve'
     avis.save()
-    messages.success(request, f'Avis approuvé avec succès !')
+    messages.success(request, 'Avis approuvé avec succès !')
     return redirect('liste_avis')
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -528,8 +785,9 @@ def rejeter_avis(request, pk):
     avis = get_object_or_404(AvisClient, pk=pk)
     avis.statut = 'rejete'
     avis.save()
-    messages.success(request, f'Avis rejeté.')
+    messages.success(request, 'Avis rejeté.')
     return redirect('liste_avis')
+
 
 # ========== CRUD QUESTIONS CONSEILS ==========
 @login_required
@@ -538,17 +796,18 @@ def liste_questions(request):
     questions = QuestionConseil.objects.all().order_by('-date_question')
     return render(request, 'appcedi/admin/liste_questions.html', {'questions': questions})
 
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def repondre_question(request, pk):
     question = get_object_or_404(QuestionConseil, pk=pk)
     if request.method == 'POST':
-        # Ici tu peux ajouter un système de réponse
         question.statut = 'repondu'
         question.save()
         messages.success(request, 'Question marquée comme répondue.')
         return redirect('liste_questions')
     return render(request, 'appcedi/admin/repondre_question.html', {'question': question})
+
 
 # ========== CRUD COMMANDES ==========
 @login_required
@@ -556,6 +815,7 @@ def repondre_question(request, pk):
 def liste_commandes(request):
     commandes = Commande.objects.all().order_by('-date_commande')
     return render(request, 'appcedi/admin/liste_commandes.html', {'commandes': commandes})
+
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -569,23 +829,3 @@ def changer_statut_commande(request, pk):
             messages.success(request, f'Statut de la commande mis à jour : {commande.get_statut_display()}')
         return redirect('liste_commandes')
     return render(request, 'appcedi/admin/changer_statut_commande.html', {'commande': commande})
-
-from django.db.models import Count, Avg
-from .models import PointVente, Produit, AvisClient
-
-def a_propos(request):
-    # Récupération des points de vente
-    points_vente = PointVente.objects.all()
-    
-    # Chiffres clés dynamiques
-    nb_librairies = points_vente.count()
-    nb_produits = Produit.objects.filter(statut=True).count()
-    nb_avis = AvisClient.objects.filter(statut='approuve').count()
-    
-    context = {
-        'points_vente': points_vente,
-        'nb_librairies': nb_librairies,
-        'nb_produits': nb_produits,
-        'nb_avis': nb_avis,
-    }
-    return render(request, 'appcedi/a_propos.html', context)

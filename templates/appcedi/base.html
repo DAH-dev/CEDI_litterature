@@ -118,13 +118,23 @@
             </button>
 
             <!-- Icône utilisateur (cadrage aligné sur la maquette : flex + gap + texte "Compte") -->
-            <a href="{% if user.is_authenticated %}{% url 'tableau_de_bord' %}{% else %}{% url 'connexion' %}{% endif %}" class="hover:text-cediRed flex items-center gap-1 text-sm font-medium transition relative">
-                <i class="fa-regular fa-user text-lg text-cediRed"></i>
-                {% if user.is_authenticated %}
-                    <span class="absolute -top-1 -right-3 bg-cediGold text-white text-[8px] font-bold px-1 rounded-full">{{ user.username|slice:":1"|upper }}</span>
-                {% endif %}
-                <span class="hidden md:inline">{% if user.is_authenticated %}{{ user.username|truncatechars:10 }}{% else %}Compte{% endif %}</span>
-            </a>
+           <!-- APRES -->
+{% if user.is_authenticated %}
+    {% if user.is_superuser or user.role == 'admin' or user.role == 'gestionnaire_stock' %}
+        <a href="{% url 'tableau_de_bord' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Tableau de bord">
+    {% else %}
+        <a href="{% url 'espace_client' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Mon Profil">
+    {% endif %}
+        <i class="fa-regular fa-user text-xl text-cediRed"></i>
+        <span class="absolute -top-1 -right-2 bg-cediGold text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
+            {{ user.username|slice:":1"|upper }}
+        </span>
+    </a>
+{% else %}
+    <a href="{% url 'connexion' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Se connecter">
+        <i class="fa-regular fa-user text-xl text-cediRed"></i>
+    </a>
+{% endif %}
 
             <!-- Panier -->
             <a href="#" class="hover:text-cediRed relative transition">
@@ -177,26 +187,40 @@
                     <a href="#ressources" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Ressources Spirituelles</a>
                     <a href="#points-de-vente" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Points de Vente</a>
                     <a href="#conseils" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Conseils & Blog</a>
+                    <a href="{% url 'a_propos' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">À propos</a>
                     <div class="my-1 border-t border-gray-100"></div>
 
                     <!-- ====== ZONE AUTHENTIFICATION ====== -->
-                    {% if user.is_authenticated %}
-                        <div class="px-4 py-2 text-sm text-gray-500">👤 {{ user.username }}</div>
-                        <a href="{% url 'tableau_de_bord' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
-                            <i class="fa-solid fa-gauge-high"></i> Tableau de bord
-                        </a>
-                        <a href="{% url 'deconnexion' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
-                            <i class="fa-solid fa-sign-out-alt"></i> Déconnexion
-                        </a>
-                    {% else %}
-                        <a href="{% url 'connexion' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
-                            <i class="fa-solid fa-key"></i> Se connecter
-                        </a>
-                    {% endif %}
+                    <!-- APRES -->
+<!-- ====== ZONE AUTHENTIFICATION ====== -->
+{% if user.is_authenticated %}
+    <div class="px-4 py-2 text-sm text-gray-500 flex items-center gap-2">
+        <i class="fa-solid fa-circle-user text-cediRed text-base"></i>
+        <span>{{ user.username }}</span>
+    </div>
+    
+    <a href="{% url 'espace_client' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+        <i class="fa-regular fa-user mr-1"></i> Mon Profil
+    </a>
+
+    {% if user.is_superuser or user.role == 'admin' or user.role == 'gestionnaire_stock' %}
+        <a href="{% url 'tableau_de_bord' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+            <i class="fa-solid fa-gauge-high mr-1"></i> Tableau de bord
+        </a>
+    {% endif %}
+
+    <a href="{% url 'deconnexion' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+        <i class="fa-solid fa-right-from-bracket mr-1"></i> Déconnexion
+    </a>
+{% else %}
+    <a href="{% url 'connexion' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+        <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i> Se connecter
+    </a>
+{% endif %}
+<!-- ============================================= -->
                     <!-- ============================================= -->
 
-                    <div class="my-1 border-t border-gray-100"></div>
-                    <a href="#apropos" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">À propos</a>
+               
                 </div>
             </div>
         </div>

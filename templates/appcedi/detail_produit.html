@@ -2,7 +2,7 @@
 
 {% block content %}
 <style>
-  /* ===== Style CSS classique de la fiche produit (pas de Tailwind ici) ===== */
+  /* ===== Style CSS classique de la fiche produit ===== */
   :root{
     --cedi-red:#8B1E22;
     --cedi-red-dark:#6A1518;
@@ -13,267 +13,199 @@
     --border:#e5e7eb;
     --bg-soft:#f9fafb;
   }
-  .pf-container{ max-width:1180px; margin:0 auto; padding:0 20px; }
+  *{ box-sizing:border-box; }
+  .pf-container{ max-width:1180px; margin:0 auto; padding:0 12px; overflow-x: hidden; width: 100%; }
 
   /* Fil d'Ariane */
   .pf-breadcrumb{
-    font-size:12px; color:#9ca3af; padding:18px 0 0;
-    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    font-size:12px; color:#9ca3af; padding:12px 0 0;
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap;
   }
   .pf-breadcrumb a{ color:var(--cedi-red); text-decoration:none; }
   .pf-breadcrumb a:hover{ color:var(--cedi-red-dark); }
   .pf-breadcrumb .current{ color:#374151; }
 
   /* Fiche produit */
-  .pf-product{ display:grid; grid-template-columns:1fr 1fr; gap:48px; padding:28px 0 8px; }
-  @media (max-width:860px){ .pf-product{ grid-template-columns:1fr; gap:28px; } }
+  .pf-product{ display:grid; grid-template-columns:1fr 1fr; gap:32px; padding:16px 0 8px; width: 100%; }
+  @media (max-width:860px){ .pf-product{ grid-template-columns:1fr; gap:20px; } }
 
+  /* Galerie d'images responsive & cadrée */
   .pf-gallery-main{
     position:relative; border:1px solid var(--border); border-radius:12px; overflow:hidden;
-    margin-bottom:14px; display:flex; align-items:center; justify-content:center; background:#fff;
+    margin-bottom:12px; background:#fff; height:380px; width:100%;
+    display: flex; align-items: center; justify-content: center;
   }
-  .pf-gallery-main img{ width:100%; height:420px; object-fit:contain; display:block; }
+  .pf-gallery-main img{
+    max-width:100% !important; max-height:100% !important;
+    width:auto !important; height:auto !important;
+    object-fit:contain !important; object-position:center; display:block;
+  }
+  /* Description */
+  #pf-tab-description p,
+  .pf-description {
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.7;
+    max-width: 100%;
+    white-space: pre-line;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
   .pf-badge-cedi{
-    position:absolute; top:12px; left:12px; background:var(--cedi-gold); color:#fff;
-    font-size:11px; font-weight:bold; padding:5px 12px; border-radius:999px;
-    display:flex; align-items:center; gap:5px;
+    position:absolute; top:10px; left:10px; background:var(--cedi-gold); color:#fff;
+    font-size:11px; font-weight:bold; padding:4px 10px; border-radius:999px;
+    display:flex; align-items:center; gap:5px; z-index: 2;
   }
-  .pf-thumbs{ display:flex; gap:12px; flex-wrap:wrap; }
+  .pf-thumbs{ display:flex; gap:8px; flex-wrap:wrap; }
   .pf-thumb{
-    width:76px; height:76px; border-radius:8px; overflow:hidden; border:2px solid var(--border);
-    cursor:pointer; padding:0; background:none;
+    width:64px; height:64px; border-radius:8px; overflow:hidden; border:2px solid var(--border);
+    cursor:pointer; padding:0; background:#f9fafb; display: flex; align-items: center; justify-content: center;
   }
-  .pf-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .pf-thumb img{ max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; }
   .pf-thumb:hover{ border-color:var(--cedi-red); }
 
-  .pf-title{ font-size:26px; font-weight:bold; color:#111827; margin:0 0 8px; }
-  .pf-meta{ display:flex; flex-wrap:wrap; gap:14px; font-size:13px; color:var(--ink-soft); margin-bottom:14px; }
+  .pf-title{ font-size:22px; font-weight:bold; color:#111827; margin:0 0 8px; overflow-wrap:break-word; word-break: break-word; }
+  .pf-meta{ display:flex; flex-wrap:wrap; gap:10px; font-size:12px; color:var(--ink-soft); margin-bottom:12px; }
   .pf-meta b{ color:#374151; font-weight:600; }
   .pf-author-name{ color:var(--cedi-red); font-weight:600; }
 
-  .pf-rating-row{ display:flex; align-items:center; gap:8px; margin-bottom:16px; }
-  .pf-stars{ color:var(--cedi-gold); font-size:15px; letter-spacing:2px; }
-  .pf-rating-count{ font-size:13px; color:var(--ink-soft); }
+  .pf-rating-row{ display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .pf-stars{ color:var(--cedi-gold); font-size:14px; letter-spacing:1px; }
+  .pf-rating-count{ font-size:12px; color:var(--ink-soft); }
 
-  .pf-price{ font-size:30px; font-weight:bold; color:var(--cedi-red); margin-bottom:14px; }
+  .pf-price{ font-size:26px; font-weight:bold; color:var(--cedi-red); margin-bottom:12px; }
 
-  .pf-stock{ font-size:14px; font-weight:600; margin-bottom:16px; }
+  .pf-stock{ font-size:13px; font-weight:600; margin-bottom:14px; }
   .pf-stock.ok{ color:#059669; }
   .pf-stock.out{ color:#dc2626; }
 
-  .pf-categories{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:20px; font-size:13px; }
-  .pf-categories b{ color:#374151; margin-right:4px; }
-  .pf-cat-tag{ background:#e5e7eb; color:#4b5563; font-size:12px; padding:3px 10px; border-radius:999px; }
+  .pf-categories{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:16px; font-size:12px; }
+  .pf-categories b{ color:#374151; margin-right:2px; }
+  .pf-cat-tag{ background:#e5e7eb; color:#4b5563; font-size:11px; padding:2px 8px; border-radius:999px; }
 
-  .pf-description{ font-size:14px; line-height:1.7; color:#4b5563; border-top:1px solid var(--border); padding-top:16px; margin-bottom:20px; white-space:pre-line; }
-  .pf-description h4{ font-size:14px; font-weight:bold; color:#111827; margin:0 0 8px; }
-
-  /* Retrait en librairie */
-  .pf-pickup-box{ background:#eef0f2; border:1px solid #d5d9de; border-radius:10px; padding:16px; margin-bottom:16px; }
-  .pf-pickup-box h4{ font-size:11px; font-weight:bold; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); margin:0 0 10px; }
-
-  .pf-perks{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; text-align:center; margin-bottom:22px; }
-  .pf-perks div{ border:1px solid var(--border); border-radius:8px; padding:12px 8px; font-size:12px; color:#4b5563; }
-  .pf-perks i{ color:var(--cedi-gold); display:block; margin-bottom:6px; font-size:16px; }
-  .pf-pickup-list{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
-  .pf-pickup-list li{
-    font-size:13px; color:#374151; background:#fff; border:1px solid var(--border);
-    padding:5px 12px; border-radius:999px;
-  }
-  .pf-pickup-list li i{ color:#10b981; margin-right:5px; }
-
-  /* Quantité + panier */
-  .pf-action-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
-  .pf-qty{ display:flex; align-items:center; border:1px solid #d1d5db; border-radius:8px; overflow:hidden; }
-  .pf-qty button{ width:36px; height:40px; border:none; background:#fff; color:var(--ink-soft); font-size:16px; cursor:pointer; }
-  .pf-qty button:hover{ color:var(--cedi-red); }
-  .pf-qty input{ width:44px; height:40px; text-align:center; border:none; border-left:1px solid #d1d5db; border-right:1px solid #d1d5db; font-size:14px; }
+  /* Quantité + Panier */
+  .pf-action-row{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; margin-bottom:16px; width:100%; max-width:100%; }
+  .pf-qty{ display:flex; align-items:center; border:1px solid #d1d5db; border-radius:8px; overflow:hidden; flex-shrink:0; background:#fff; }
+  .pf-qty button{ width:32px; height:40px; border:none; background:#fff; color:var(--ink-soft); font-size:15px; cursor:pointer; padding:0; }
+  .pf-qty button:hover{ color:var(--cedi-red); background:#f3f4f6; }
+  .pf-qty input{ width:34px; height:40px; text-align:center; border:none; border-left:1px solid #d1d5db; border-right:1px solid #d1d5db; font-size:13px; font-weight:bold; padding:0; -moz-appearance: textfield; }
+  .pf-qty input::-webkit-outer-spin-button, .pf-qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  
   .pf-btn-add{
     background:var(--cedi-red); color:#fff; border:none; border-radius:8px;
-    padding:12px 28px; font-size:15px; font-weight:bold; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:0 8px; height:40px; font-size:13px; font-weight:bold; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:6px; flex:1; white-space:nowrap; min-width:0; text-decoration:none;
   }
   .pf-btn-add:hover{ background:var(--cedi-red-dark); }
 
+  /* 3 Blocs Avantages */
+  .pf-perks-wrapper { width: 100%; margin-bottom: 16px; }
+  .pf-perks{ display:flex; flex-wrap:nowrap; gap:6px; width:100%; }
+  .pf-perks div{
+    flex:1; width:0; border:1px solid var(--border); border-radius:8px; padding:8px 2px;
+    font-size:10px; color:#4b5563; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    white-space:nowrap; background:#fff; overflow:hidden; text-overflow:ellipsis;
+  }
+  .pf-perks i{ color:var(--cedi-gold); font-size:14px; margin:0; }
+
+  /* Retrait en librairie */
+  .pf-pickup-box{ background:#eef0f2; border:1px solid #d5d9de; border-radius:10px; padding:12px; margin-bottom:16px; }
+  .pf-pickup-box h4{ font-size:10px; font-weight:bold; text-transform:uppercase; letter-spacing:0.03em; color:var(--ink-soft); margin:0 0 8px; }
+  .pf-pickup-list{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:6px; }
+  .pf-pickup-list li{
+    font-size:12px; color:#374151; background:#fff; border:1px solid var(--border);
+    padding:4px 10px; border-radius:999px;
+  }
+  .pf-pickup-list li i{ color:#10b981; margin-right:4px; }
+
   /* Onglets avis */
-  .pf-tabs{ margin-top:36px; }
-  .pf-tab-nav{ display:flex; gap:28px; border-bottom:1px solid var(--border); font-size:14px; font-weight:600; color:#9ca3af; }
-  .pf-tab-nav button{ background:none; border:none; padding:0 0 12px; cursor:pointer; font:inherit; color:inherit; border-bottom:2px solid transparent; }
+  .pf-tabs{ margin-top:28px; }
+  .pf-tab-nav{ display:flex; gap:20px; border-bottom:1px solid var(--border); font-size:13px; font-weight:600; color:#9ca3af; }
+  .pf-tab-nav button{ background:none; border:none; padding:0 0 10px; cursor:pointer; font:inherit; color:inherit; border-bottom:2px solid transparent; white-space:nowrap; }
   .pf-tab-nav button.active{ color:var(--cedi-red); border-color:var(--cedi-red); }
-  .pf-tab-panel{ display:none; padding-top:22px; }
+  .pf-tab-panel{ display:none; padding-top:16px; }
   .pf-tab-panel.active{ display:block; }
 
-  .pf-review-summary{ display:flex; gap:28px; margin-bottom:26px; align-items:center; flex-wrap:wrap; }
+  .pf-review-summary{ display:flex; gap:20px; margin-bottom:20px; align-items:center; flex-wrap:wrap; }
   .pf-review-score{ text-align:center; }
-  .pf-review-score .num{ font-size:36px; font-weight:bold; color:#111827; }
-  .pf-review-bars{ flex:1; min-width:220px; }
-  .pf-review-bars .bar-row{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-soft); margin-bottom:5px; }
+  .pf-review-score .num{ font-size:30px; font-weight:bold; color:#111827; }
+  .pf-review-bars{ flex:1; min-width:180px; }
+  .pf-review-bars .bar-row{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink-soft); margin-bottom:4px; }
   .pf-review-bars .bar-track{ flex:1; height:6px; background:#f3f4f6; border-radius:999px; overflow:hidden; }
   .pf-review-bars .bar-fill{ height:100%; background:var(--cedi-gold-light); }
 
-  .pf-review{ border-bottom:1px solid #f3f4f6; padding:18px 0; max-width:720px; }
-  .pf-review-head{ display:flex; justify-content:space-between; margin-bottom:4px; }
-  .pf-review-name{ font-weight:bold; font-size:14px; color:#111827; }
-  .pf-review-date{ font-size:12px; color:#9ca3af; }
-  .pf-review .pf-stars{ font-size:12px; display:block; margin-bottom:6px; }
-  .pf-empty-box{ background:var(--bg-soft); border:1px solid var(--border); border-radius:10px; padding:24px; text-align:center; }
-  .pf-empty-box p{ margin:0; color:var(--ink-soft); }
-  .pf-empty-box .small{ font-size:12px; color:#9ca3af; margin-top:4px; }
+  .pf-review{ border-bottom:1px solid #f3f4f6; padding:14px 0; max-width:720px; }
+  .pf-review-head{ display:flex; justify-content:space-between; margin-bottom:4px; flex-wrap:wrap; gap:4px; }
+  .pf-review-name{ font-weight:bold; font-size:13px; color:#111827; }
+  .pf-review-date{ font-size:11px; color:#9ca3af; }
+  .pf-review .pf-stars{ font-size:11px; display:block; margin-bottom:4px; }
+  .pf-empty-box{ background:var(--bg-soft); border:1px solid var(--border); border-radius:10px; padding:20px; text-align:center; }
+  .pf-empty-box p{ margin:0; color:var(--ink-soft); font-size:13px; }
+  .pf-empty-box .small{ font-size:11px; color:#9ca3af; margin-top:4px; }
 
-  /* Produits similaires (même style que les cartes de la page d'accueil) */
-  .pf-related{ margin-top:44px; background:#f3f4f6; border-radius:14px; padding:28px 24px; }
-  .pf-related h3{ font-size:19px; margin:0 0 20px; color:#111827; }
-  .pf-related-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
-  @media (min-width:640px){ .pf-related-grid{ grid-template-columns:repeat(3,1fr); gap:20px; } }
+  /* Formulaire d'avis */
+  .pf-add-review-form {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 24px;
+    max-width: 720px;
+  }
+  .pf-add-review-form h4 { margin: 0 0 12px 0; font-size: 15px; color: #111827; }
+  .pf-add-review-form select, 
+  .pf-add-review-form textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  /* Produits similaires */
+  .pf-related{ margin-top:32px; background:#f3f4f6; border-radius:12px; padding:20px 14px; }
+  .pf-related h3{ font-size:17px; margin:0 0 16px; color:#111827; }
+  .pf-related-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  @media (min-width:640px){ .pf-related-grid{ grid-template-columns:repeat(3,1fr); gap:16px; } }
   @media (min-width:1024px){ .pf-related-grid{ grid-template-columns:repeat(4,1fr); } }
-  @media (min-width:1280px){ .pf-related-grid{ grid-template-columns:repeat(5,1fr); } }
 
   .pf-rel-card{
-    background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px;
+    background:#fff; border:1px solid var(--border); border-radius:10px; padding:10px;
     transition:box-shadow .2s ease, transform .2s ease; display:flex; flex-direction:column; text-decoration:none; color:inherit;
   }
-  .pf-rel-card:hover{ box-shadow:0 10px 20px rgba(0,0,0,0.08); transform:translateY(-2px); }
-  .pf-rel-imgwrap{ position:relative; margin-bottom:8px; }
+  .pf-rel-card:hover{ box-shadow:0 8px 16px rgba(0,0,0,0.06); transform:translateY(-2px); }
+  .pf-rel-imgwrap{ position:relative; margin-bottom:6px; height:130px; display:flex; align-items:center; justify-content:center; background:#f9fafb; border-radius:6px; overflow:hidden; }
   .pf-rel-badge{
-    position:absolute; top:6px; left:6px; background:var(--cedi-gold); color:#fff;
-    font-size:9px; font-weight:bold; padding:3px 8px; border-radius:999px;
-    display:flex; align-items:center; gap:4px; z-index:1;
+    position:absolute; top:4px; left:4px; background:var(--cedi-gold); color:#fff;
+    font-size:8px; font-weight:bold; padding:2px 6px; border-radius:999px;
+    display:flex; align-items:center; gap:3px; z-index:1;
   }
-  .pf-rel-card img{ width:100%; height:150px; object-fit:contain; border-radius:8px; background:#f9fafb; }
-  .pf-rel-card h4{ font-size:13px; margin:0 0 4px; color:#1f2937; font-weight:700; line-height:1.3; }
-  .pf-rel-author{ font-size:11px; color:var(--ink-soft); margin:0 0 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .pf-rel-stars{ display:flex; align-items:center; gap:1px; color:var(--cedi-gold); font-size:12px; margin-bottom:8px; }
-  .pf-rel-stars span{ font-size:10px; color:var(--ink-soft); margin-left:4px; }
-  .pf-rel-bottom{ margin-top:auto; border-top:1px solid #f3f4f6; padding-top:8px; display:flex; align-items:center; justify-content:space-between; gap:6px; }
-  .pf-rel-price{ font-size:14px; font-weight:bold; color:var(--cedi-red); white-space:nowrap; }
+  .pf-rel-card img{ max-width:100%; max-height:100%; object-fit:contain; border-radius:6px; }
+  .pf-rel-card h4{ font-size:12px; margin:0 0 4px; color:#1f2937; font-weight:700; line-height:1.2; }
+  .pf-rel-author{ font-size:10px; color:var(--ink-soft); margin:0 0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pf-rel-stars{ display:flex; align-items:center; gap:1px; color:var(--cedi-gold); font-size:11px; margin-bottom:6px; }
+  .pf-rel-stars span{ font-size:9px; color:var(--ink-soft); margin-left:3px; }
+  .pf-rel-bottom{ margin-top:auto; border-top:1px solid #f3f4f6; padding-top:6px; display:flex; align-items:center; justify-content:space-between; gap:4px; }
+  .pf-rel-price{ font-size:12px; font-weight:bold; color:var(--cedi-red); white-space:nowrap; }
   .pf-rel-add{
-    background:var(--cedi-red); color:#fff; border:none; border-radius:6px; font-size:11px; font-weight:bold;
-    padding:6px 10px; display:flex; align-items:center; gap:4px; cursor:pointer; flex-shrink:0;
+    background:var(--cedi-red); color:#fff; border:none; border-radius:6px; font-size:10px; font-weight:bold;
+    padding:5px 8px; display:flex; align-items:center; gap:3px; cursor:pointer; flex-shrink:0; text-decoration:none;
   }
-  .pf-rel-add:hover{ background:var(--cedi-red-dark); }
 
-  .pf-back{ margin:32px 0; text-align:center; }
-  .pf-back a{ color:var(--cedi-red); font-weight:bold; font-size:14px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; }
-  .pf-back a:hover{ color:var(--cedi-red-dark); }
+  .pf-back{ margin:24px 0; text-align:center; }
+  .pf-back a{ color:var(--cedi-red); font-weight:bold; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
 
-  /* ===== RESPONSIVE POUR TRÈS PETITS ÉCRANS (téléphones) ===== */
   @media (max-width: 480px) {
-    .pf-container {
-        padding: 0 12px;
-    }
-    .pf-product {
-        grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 16px 0 4px;
-    }
-    .pf-gallery-main img {
-        height: 250px;
-        object-fit: contain;
-    }
-    .pf-thumbs {
-        gap: 8px;
-        justify-content: center;
-    }
-    .pf-thumb {
-        width: 56px;
-        height: 56px;
-    }
-    .pf-title {
-        font-size: 20px;
-    }
-    .pf-meta {
-        font-size: 12px;
-        gap: 8px;
-    }
-    .pf-price {
-        font-size: 24px;
-    }
-    .pf-description {
-        font-size: 13px;
-    }
-    .pf-action-row {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .pf-qty input {
-        width: 36px;
-    }
+    .pf-container { padding: 0 8px; }
+    .pf-gallery-main { height: 260px; }
+    .pf-perks div { font-size: 9px; padding: 6px 1px; }
+    .pf-perks i { font-size: 12px; }
     .pf-btn-add {
-        padding: 10px 16px;
-        font-size: 13px;
-        flex: 1 1 100%;
-    }
-    .pf-perks {
-        grid-template-columns: 1fr 1fr;
-        gap: 6px;
-    }
-    .pf-perks div {
-        padding: 8px 4px;
-        font-size: 11px;
-    }
-    .pf-pickup-list li {
-        font-size: 12px;
-        padding: 4px 10px;
-    }
-    .pf-tab-nav {
-        gap: 14px;
-        font-size: 13px;
-    }
-    .pf-tab-nav button {
-        padding-bottom: 8px;
-    }
-    .pf-review-summary {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 16px;
-    }
-    .pf-review-score .num {
-        font-size: 28px;
-    }
-    .pf-review-bars {
-        min-width: unset;
-    }
-    .pf-review {
-        padding: 14px 0;
-    }
-    .pf-related {
-        padding: 20px 12px;
-        border-radius: 10px;
-    }
-    .pf-related h3 {
-        font-size: 17px;
-    }
-    .pf-related-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-    .pf-rel-card img {
-        height: 120px;
-    }
-    .pf-rel-card h4 {
-        font-size: 12px;
-    }
-    .pf-rel-price {
-        font-size: 13px;
-    }
-    .pf-rel-add {
-        font-size: 10px;
-        padding: 4px 8px;
-    }
-    .pf-back a {
-        font-size: 13px;
-    }
-    /* Éviter tout débordement horizontal */
-    .pf-container,
-    .pf-product,
-    .pf-tabs,
-    .pf-related {
-        overflow-x: hidden;
-        word-wrap: break-word;
-    }
-    img {
-        max-width: 100%;
-        height: auto;
+      font-size: 13px;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
     }
   }
 </style>
@@ -284,7 +216,7 @@
     <nav class="pf-breadcrumb">
         <a href="{% url 'accueil' %}">Accueil</a>
         <span>/</span>
-        <a href="#boutique">Boutique</a>
+        <a href="{% url 'accueil' %}#boutique">Boutique</a>
         <span>/</span>
         <span class="current">{{ produit.titre|truncatechars:30 }}</span>
     </nav>
@@ -356,19 +288,30 @@
             </div>
             {% endif %}
 
-            <div class="pf-action-row">
-                <div class="pf-qty">
-                    <button type="button" onclick="document.getElementById('pfQty').stepDown()">−</button>
-                    <input id="pfQty" type="number" value="1" min="1">
-                    <button type="button" onclick="document.getElementById('pfQty').stepUp()">+</button>
+            <!-- Quantité + Bouton Ajouter au Panier -->
+            <form action="{% url 'ajouter_au_panier' produit.pk %}" method="post" style="margin: 0;">
+                {% csrf_token %}
+                <div class="pf-action-row">
+                    <div class="pf-qty">
+                        <button type="button" onclick="document.getElementById('pfQty').stepDown()">−</button>
+                        <input id="pfQty" type="number" name="quantite" value="1" min="1" max="{{ produit.quantite_stock }}">
+                        <button type="button" onclick="document.getElementById('pfQty').stepUp()">+</button>
+                    </div>
+                    {% if produit.quantite_stock > 0 %}
+                        <button type="submit" class="pf-btn-add"><i class="fa-solid fa-cart-shopping"></i> Ajouter au panier</button>
+                    {% else %}
+                        <button type="button" class="pf-btn-add" disabled style="opacity: 0.6; cursor: not-allowed;"><i class="fa-solid fa-cart-shopping"></i> Indisponible</button>
+                    {% endif %}
                 </div>
-                <button class="pf-btn-add"><i class="fa-solid fa-cart-shopping"></i> Ajouter au panier</button>
-            </div>
+            </form>
 
-            <div class="pf-perks">
-                <div><i class="fa-solid fa-box-open"></i>Retrait gratuit</div>
-                <div><i class="fa-solid fa-truck"></i>Livraison à domicile</div>
-                <div><i class="fa-solid fa-mobile-screen-button"></i>Paiement Mobile Money</div>
+            <!-- Avantages -->
+            <div class="pf-perks-wrapper">
+                <div class="pf-perks">
+                    <div><i class="fa-solid fa-box-open"></i>Retrait gratuit</div>
+                    <div><i class="fa-solid fa-truck"></i>Livraison à domicile</div>
+                    <div><i class="fa-solid fa-mobile-screen-button"></i>Paiement Mobile</div>
+                </div>
             </div>
 
             {% if points_vente %}
@@ -415,6 +358,45 @@
                 </div>
             </div>
 
+            <!-- Formulaire d'Avis Dynamique (Ajout ou Modification) -->
+            {% if user.is_authenticated %}
+            <div class="pf-add-review-form">
+                {% if mon_avis %}
+                    <h4><i class="fa-solid fa-pen-to-square"></i> Modifier votre avis</h4>
+                {% else %}
+                    <h4>Laisser un avis</h4>
+                {% endif %}
+
+                <form action="{% url 'ajouter_avis_produit' produit.id %}" method="post">
+                    {% csrf_token %}
+                    <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Note :</label>
+                    <select name="note" required>
+                        <option value="5" {% if mon_avis and mon_avis.note == 5 %}selected{% endif %}>5 ★★★★★ (Excellent)</option>
+                        <option value="4" {% if mon_avis and mon_avis.note == 4 %}selected{% endif %}>4 ★★★★☆ (Très bon)</option>
+                        <option value="3" {% if mon_avis and mon_avis.note == 3 %}selected{% endif %}>3 ★★★☆☆ (Moyen)</option>
+                        <option value="2" {% if mon_avis and mon_avis.note == 2 %}selected{% endif %}>2 ★★☆☆☆ (Passable)</option>
+                        <option value="1" {% if mon_avis and mon_avis.note == 1 %}selected{% endif %}>1 ★☆☆☆☆ (Mauvais)</option>
+                    </select>
+
+                    <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Commentaire :</label>
+                    <textarea name="commentaire" rows="3" placeholder="Partagez votre expérience avec ce livre...">{% if mon_avis %}{{ mon_avis.commentaire }}{% endif %}</textarea>
+
+                    <button type="submit" class="pf-btn-add" style="display: inline-flex; width: auto; padding: 0 16px;">
+                        {% if mon_avis %}
+                            <i class="fa-solid fa-arrows-rotate"></i> Mettre à jour mon avis
+                        {% else %}
+                            Envoyer mon avis
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="pf-empty-box" style="margin-bottom: 20px;">
+                <p><a href="{% url 'login' %}?next={{ request.path }}" style="color: var(--cedi-red); font-weight: bold;">Connectez-vous</a> pour laisser un avis sur ce produit.</p>
+            </div>
+            {% endif %}
+
+            <!-- Liste des avis approuvés -->
             {% if avis_approuves %}
                 {% for a in avis_approuves %}
                 <div class="pf-review">
@@ -445,34 +427,39 @@
         <h3>Vous aimerez aussi</h3>
         <div class="pf-related-grid">
             {% for similaire in produits_similaires %}
-            <a href="{% url 'detail_produit' similaire.pk %}" class="pf-rel-card">
-                <div class="pf-rel-imgwrap">
-                    {% if similaire.est_edition_cedi %}
-                        <span class="pf-rel-badge"><i class="fa-solid fa-certificate"></i> Édition CEDI</span>
-                    {% endif %}
-                    {% with similaire.images.all|first as img %}
-                        {% if img %}
-                            <img src="{{ img.url_image.url }}" alt="{{ similaire.titre }}">
-                        {% else %}
-                            <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&auto=format&fit=crop&q=70" alt="{{ similaire.titre }}">
+            <div class="pf-rel-card">
+                <a href="{% url 'detail_produit' similaire.pk %}" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="pf-rel-imgwrap">
+                        {% if similaire.est_edition_cedi %}
+                            <span class="pf-rel-badge"><i class="fa-solid fa-certificate"></i> Édition CEDI</span>
                         {% endif %}
-                    {% endwith %}
-                </div>
-                <h4>{{ similaire.titre|truncatechars:28 }}</h4>
-                <p class="pf-rel-author">Auteur : {{ similaire.auteur|default:"Inconnu" }}</p>
-                <div class="pf-rel-stars">
-                    {% with note=similaire.moyenne_avis %}
-                        {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= note|floatformat:0|add:"0" %}★{% else %}☆{% endif %}
-                        {% endfor %}
-                        <span>({{ similaire.nombre_avis }})</span>
-                    {% endwith %}
-                </div>
+                        {% with similaire.images.all|first as img %}
+                            {% if img %}
+                                <img src="{{ img.url_image.url }}" alt="{{ similaire.titre }}">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&auto=format&fit=crop&q=70" alt="{{ similaire.titre }}">
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    <h4>{{ similaire.titre|truncatechars:28 }}</h4>
+                    <p class="pf-rel-author">Auteur : {{ similaire.auteur|default:"Inconnu" }}</p>
+                    <div class="pf-rel-stars">
+                        {% with note=similaire.moyenne_avis %}
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= note|floatformat:0|add:"0" %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                            <span>({{ similaire.nombre_avis }})</span>
+                        {% endwith %}
+                    </div>
+                </a>
+
                 <div class="pf-rel-bottom">
                     <span class="pf-rel-price">{{ similaire.prix|floatformat:0 }} FCFA</span>
-                    <button type="button" class="pf-rel-add"><i class="fa-solid fa-cart-shopping"></i> Ajouter</button>
+                    {% if similaire.quantite_stock > 0 %}
+                        <a href="{% url 'ajouter_au_panier' similaire.pk %}" class="pf-rel-add"><i class="fa-solid fa-cart-shopping"></i> Ajouter</a>
+                    {% endif %}
                 </div>
-            </a>
+            </div>
             {% endfor %}
         </div>
     </section>
@@ -485,7 +472,7 @@
 </div>
 
 <script>
-    // Galerie : changer l'image principale au clic sur une miniature
+    // Galerie : changer l'image principale
     document.querySelectorAll('.pf-thumb').forEach(function (btn) {
         btn.addEventListener('click', function () {
             document.getElementById('pfMainImage').src = btn.getAttribute('data-img');

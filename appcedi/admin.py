@@ -21,16 +21,19 @@ class ArticleBlogAdmin(admin.ModelAdmin):
     list_filter = ('categorie_article', 'statut')
     search_fields = ('titre', 'contenu')
 
+@admin.register(AvisClient)
 class AvisClientAdmin(admin.ModelAdmin):
     list_display = ('produit', 'utilisateur', 'note', 'date_creation', 'statut')
-    list_filter = ('statut', 'note')
-    search_fields = ('produit__titre', 'utilisateur__username')
+    list_filter = ('statut', 'note', 'date_creation')
+    search_fields = ('produit__titre', 'utilisateur__username', 'commentaire')
+    list_editable = ('statut',)
 
+# Enregistrement des autres modèles
 admin.site.register(Produit, ProduitAdmin)
 admin.site.register(PointVente, PointVenteAdmin)
 admin.site.register(Promotion, PromotionAdmin)
 admin.site.register(ArticleBlog, ArticleBlogAdmin)
-admin.site.register(AvisClient, AvisClientAdmin)
+# La ligne AvisClient a été supprimée d'ici pour éviter le doublon
 admin.site.register(Categorie)
 admin.site.register(Image)
 admin.site.register(Commande)

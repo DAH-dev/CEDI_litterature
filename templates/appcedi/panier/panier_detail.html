@@ -1,0 +1,68 @@
+{% extends 'appcedi/base.html' %}
+
+{% block title %}Mon Panier{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Votre Panier</h1>
+
+    {% if articles %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Liste des articles -->
+        <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+            <div class="divide-y divide-gray-200">
+                {% for article in articles %}
+                <div class="py-4 flex items-center justify-between">
+                    <div class="flex-1">
+                        <h2 class="text-lg font-semibold text-gray-800">{{ article.produit.titre }}</h2>
+                        <p class="text-gray-600 text-sm">Prix unitaire: {{ article.produit.prix }} FCFA</p>
+                    </div>
+
+                    <!-- Quantité -->
+                    <div class="flex items-center space-x-2">
+                        <form method="POST" action="{% url 'modifier_quantite_panier' article.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="reduire">
+                            <button type="submit" class="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 font-bold text-gray-700">-</button>
+                        </form>
+                        <span class="w-8 text-center font-semibold">{{ article.quantite }}</span>
+                        <form method="POST" action="{% url 'modifier_quantite_panier' article.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="augmenter">
+                            <button type="submit" class="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 font-bold text-gray-700">+</button>
+                        </form>
+                    </div>
+
+                    <!-- Supprimer -->
+                    <div class="ml-6">
+                        <a href="{% url 'supprimer_du_panier' article.id %}" class="text-red-500 hover:text-red-700 font-medium text-sm">
+                            Supprimer
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Récapitulatif -->
+        <div class="bg-white rounded-lg shadow-md p-6 h-fit">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Récapitulatif</h2>
+            <div class="flex justify-between items-center text-lg font-bold mb-6">
+                <span>Total :</span>
+                <span class="text-indigo-600">{{ total }} FCFA</span>
+            </div>
+            <a href="{% url 'valider_commande' %}" class="w-block text-center w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md transition">
+                Passer la commande
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow-md p-8 text-center">
+        <p class="text-gray-600 text-lg mb-4">Votre panier est actuellement vide.</p>
+        <a href="{% url 'accueil' %}" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-md">
+            Découvrir nos produits
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

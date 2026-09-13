@@ -1,0 +1,168 @@
+{% extends 'appcedi/base.html' %}
+
+{% block title %}Mon Espace Client - CEDI Littérature{% endblock %}
+
+{% block content %}
+<main class="max-w-7xl mx-auto px-4 py-6 sm:py-10 w-full">
+    <!-- En-tête Client -->
+    <div class="bg-cediCream border border-cediGold rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left mb-6 sm:mb-8 shadow-sm">
+        <div class="w-16 h-16 rounded-full bg-cediRed text-white text-2xl font-bold flex items-center justify-center border-2 border-cediGold shrink-0">
+            {{ user.username|slice:":1"|upper }}
+        </div>
+        <div class="space-y-1">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Bonjour, {{ user.first_name|default:user.username }}</h1>
+            <p class="text-xs sm:text-sm text-gray-500 flex items-center justify-center sm:justify-start gap-1">
+                <i class="fa-regular fa-envelope"></i> {{ user.email }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Navigation par Onglets (Scrollable horizontalement sur mobile) -->
+    <div class="flex gap-2 border-b-2 border-gray-200 mb-6 sm:mb-8 overflow-x-auto whitespace-nowrap pb-1 no-scrollbar">
+        <a href="?tab=profil" class="px-4 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 shrink-0 {% if active_tab == 'profil' %}text-cediRed border-cediRed{% else %}text-gray-500 border-transparent hover:text-cediRed{% endif %}">
+            <i class="fa-regular fa-user"></i> Mon Profil
+        </a>
+        <a href="?tab=commandes" class="px-4 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 shrink-0 {% if active_tab == 'commandes' %}text-cediRed border-cediRed{% else %}text-gray-500 border-transparent hover:text-cediRed{% endif %}">
+            <i class="fa-solid fa-box"></i> Mes Commandes
+        </a>
+        <a href="?tab=souhaits" class="px-4 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 shrink-0 {% if active_tab == 'souhaits' %}text-cediRed border-cediRed{% else %}text-gray-500 border-transparent hover:text-cediRed{% endif %}">
+            <i class="fa-regular fa-heart"></i> Liste de Souhaits ({{ souhaits|length }})
+        </a>
+        <a href="?tab=panier" class="px-4 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 shrink-0 {% if active_tab == 'panier' %}text-cediRed border-cediRed{% else %}text-gray-500 border-transparent hover:text-cediRed{% endif %}">
+            <i class="fa-solid fa-cart-shopping"></i> Mon Panier
+        </a>
+    </div>
+
+    <!-- CONTENU DES ONGLETS -->
+
+    <!-- Onglet 1: Profil -->
+    {% if active_tab == 'profil' %}
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+        <h2 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Informations Personnelles</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+            <div class="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100">
+                <span class="text-xs text-gray-500 uppercase tracking-wider block font-medium mb-1">Nom d'utilisateur</span>
+                <p class="font-bold text-gray-800 text-sm sm:text-base break-words">{{ user.username }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100">
+                <span class="text-xs text-gray-500 uppercase tracking-wider block font-medium mb-1">Adresse E-mail</span>
+                <p class="font-bold text-gray-800 text-sm sm:text-base break-words">{{ user.email|default:"Non renseignée" }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100">
+                <span class="text-xs text-gray-500 uppercase tracking-wider block font-medium mb-1">Inscrit depuis le</span>
+                <p class="font-bold text-gray-800 text-sm sm:text-base">{{ user.date_joined|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onglet 2: Commandes -->
+    {% elif active_tab == 'commandes' %}
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+        <h2 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Historique de vos commandes</h2>
+        {% if commandes %}
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+            <table class="w-full text-left text-xs sm:text-sm min-w-[500px]">
+                <thead class="bg-gray-50 text-gray-600 font-bold border-b border-gray-200 uppercase text-[11px] tracking-wider">
+                    <tr>
+                        <th class="p-3 sm:p-4">N° Commande</th>
+                        <th class="p-3 sm:p-4">Date</th>
+                        <th class="p-3 sm:p-4">Statut</th>
+                        <th class="p-3 sm:p-4">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for commande in commandes %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-3 sm:p-4 font-bold text-gray-900">#{{ commande.id }}</td>
+                        <td class="p-3 sm:p-4 text-gray-600">{{ commande.date_commande|date:"d/m/Y" }}</td>
+                        <td class="p-3 sm:p-4">
+                            {% if commande.statut == 'LIVRE' %}
+                                <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">
+                                    {{ commande.get_statut_display|default:commande.statut }}
+                                </span>
+                            {% else %}
+                                <span class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">
+                                    {{ commande.get_statut_display|default:commande.statut }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3 sm:p-4 font-bold text-cediRed">{{ commande.total }} FCFA</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-xs sm:text-sm text-gray-500 py-4">Vous n'avez pas encore passé de commande.</p>
+        {% endif %}
+    </div>
+
+    <!-- Onglet 3: Liste de Souhaits -->
+    {% elif active_tab == 'souhaits' %}
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+        <h2 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Vos ouvrages enregistrés</h2>
+        {% if souhaits %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for item in souhaits %}
+            <div class="border border-gray-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <h3 class="text-xs sm:text-sm font-bold text-gray-800 line-clamp-2 mb-1">{{ item.produit.titre }}</h3>
+                    <p class="text-cediRed font-bold text-sm mb-3">{{ item.produit.prix }} FCFA</p>
+                </div>
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <form method="POST" action="{% url 'ajouter_au_panier' item.produit.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-cediRed hover:bg-cediRedDark text-white text-xs font-bold py-2 px-3 rounded-lg flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-cart-shopping"></i> Panier
+                        </button>
+                    </form>
+                    <a href="{% url 'basculer_liste_souhaits' item.produit.id %}" class="text-gray-400 hover:text-red-600 p-2 transition" title="Retirer">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-xs sm:text-sm text-gray-500 py-4">Votre liste de souhaits est vide.</p>
+        {% endif %}
+    </div>
+
+    <!-- Onglet 4: Panier -->
+    {% elif active_tab == 'panier' %}
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+        <h2 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Récapitulatif de votre Panier</h2>
+        {% if panier_items %}
+        <div class="overflow-x-auto rounded-lg border border-gray-200 mb-6">
+            <table class="w-full text-left text-xs sm:text-sm min-w-[500px]">
+                <thead class="bg-gray-50 text-gray-600 font-bold border-b border-gray-200 uppercase text-[11px] tracking-wider">
+                    <tr>
+                        <th class="p-3 sm:p-4">Article</th>
+                        <th class="p-3 sm:p-4">Prix Unit.</th>
+                        <th class="p-3 sm:p-4">Quantité</th>
+                        <th class="p-3 sm:p-4">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for item in panier_items %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-3 sm:p-4 font-medium text-gray-800">{{ item.produit.titre }}</td>
+                        <td class="p-3 sm:p-4 text-gray-600">{{ item.produit.prix }} FCFA</td>
+                        <td class="p-3 sm:p-4 text-gray-600 font-semibold">{{ item.quantite }}</td>
+                        <td class="p-3 sm:p-4 font-bold text-cediRed">{% widthratio item.produit.prix 1 item.quantite %} FCFA</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-gray-200">
+            <h3 class="text-base sm:text-lg font-bold text-gray-800">Total: <span class="text-cediRed">{{ panier_total }} FCFA</span></h3>
+            <a href="#" class="w-full sm:w-auto bg-cediRed hover:bg-cediRedDark text-white font-bold py-2.5 px-6 rounded-lg text-center text-xs sm:text-sm transition">Valider la commande</a>
+        </div>
+        {% else %}
+        <p class="text-xs sm:text-sm text-gray-500 py-4">Votre panier est actuellement vide.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</main>
+{% endblock %}

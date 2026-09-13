@@ -2,10 +2,10 @@
 
 {% block content %}
 <!-- SECTION HERO -->
-<section class="relative bg-cediCream text-gray-900 py-16 px-4 overflow-hidden">
+<section class="relative bg-cediCream text-gray-900 py-12 px-3 overflow-hidden">
     <div class="pointer-events-none absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full" style="background: radial-gradient(circle, rgba(243,156,18,0.35) 0%, rgba(212,175,55,0.18) 45%, transparent 72%);"></div>
     <div class="pointer-events-none absolute -bottom-40 -left-20 w-[380px] h-[380px] rounded-full" style="background: radial-gradient(circle, rgba(139,30,34,0.10) 0%, transparent 70%);"></div>
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center gap-8 relative">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6 relative">
         <div class="max-w-xl text-center md:text-left">
             <span class="hero-badge bg-white border-2 border-cediGold text-cediRed text-xs font-bold uppercase px-3 py-1 rounded-full inline-block mb-3 relative shadow-sm">
                 <span class="pulse-dot relative inline-block w-2 h-2 bg-cediGoldLight rounded-full mr-1 align-middle"></span>
@@ -13,51 +13,24 @@
             </span>
             <h2 class="hero-enter text-3xl md:text-5xl font-extrabold leading-tight mb-4 text-gray-900" style="animation-delay:.08s">Distribuer la vie à travers la <span class="text-cediRed">Parole</span> et la Littérature</h2>
             <p class="hero-enter text-gray-600 text-base md:text-lg mb-6" style="animation-delay:.16s">Commandez vos ouvrages en ligne et retirez-les facilement dans l'un de nos 4 points de vente à Abidjan et Attiékoi.</p>
-            <div class="hero-enter flex flex-wrap justify-center md:justify-start gap-4" style="animation-delay:.24s">
+            <div class="hero-enter flex flex-wrap justify-center md:justify-start gap-3" style="animation-delay:.24s">
                 <a href="#boutique" class="bg-cediRed hover:bg-cediRedDark text-white font-bold py-3 px-6 rounded-lg transition shadow-md hover:-translate-y-0.5"><i class="fa-solid fa-store text-xs"></i> Explorer la Boutique</a>
                 <a href="#ressources" class="border-2 border-cediRed text-cediRed hover:bg-cediRed hover:text-white font-bold py-3 px-6 rounded-lg transition"><i class="fa-solid fa-book text-xs"></i> Ressources Spirituelles</a>
             </div>
         </div>
-        <div class="w-full md:w-1/2 flex justify-center">
-            <div class="hero-card bg-white p-4 rounded-xl shadow-2xl text-gray-800 max-w-sm w-full border-2 border-cediGold">
-                <div class="bg-cediCreamDark p-3 rounded-lg border border-cediGold/40 mb-3 text-center">
-                    <span class="text-xs font-semibold text-cediRed">📖 LIVRE DU MOIS</span>
+<div class="w-full md:w-1/2 flex justify-center">
+            <div class="hero-card bg-white p-3 rounded-xl shadow-2xl text-gray-800 max-w-sm w-full border-2 border-cediGold">
+                <div class="bg-cediCreamDark p-2 rounded-lg border border-cediGold/40 mb-2 text-center">
+                    <span class="text-xs font-semibold text-cediRed">LE PÈRE FONDATEUR</span>
                 </div>
-                <div class="img-zoom p-2 flex items-center justify-center rounded-lg">
-                    {% with produits_recents|first as livre_mois %}
-                        {% if livre_mois %}
-                            {% with livre_mois.image_principale as img %}
-                                {% if img %}
-                                    <img src="{{ img.url_image.url }}" alt="{{ livre_mois.titre }}" class="h-52 object-contain rounded shadow-sm w-full" loading="lazy">
-                                {% else %}
-                                    <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&auto=format&fit=crop&q=70" alt="Livre du mois" class="h-52 object-contain rounded shadow-sm w-full" loading="lazy">
-                                {% endif %}
-                            {% endwith %}
-                            <h3 class="font-bold text-lg text-gray-900 mt-2 text-left">{{ livre_mois.titre|truncatechars:35 }}</h3>
-                            <p class="text-xs text-gray-500 mb-2 text-left">Auteur : {{ livre_mois.auteur|default:"Inconnu" }}</p>
-                            <div class="flex items-center justify-start gap-1 text-cediGold text-sm mt-1 mb-2">
-                                {% with note=livre_mois.moyenne_avis %}
-                                    {% for i in "12345"|make_list %}
-                                        {% if forloop.counter <= note|floatformat:0|add:"0" %}
-                                            <i class="fa-solid fa-star"></i>
-                                        {% else %}
-                                            <i class="fa-regular fa-star"></i>
-                                        {% endif %}
-                                    {% endfor %}
-                                    <span class="text-xs text-gray-500 ml-1">({{ livre_mois.nombre_avis }} avis)</span>
-                                {% endwith %}
-                            </div>
-                            <p class="text-xs text-gray-600 mb-4 text-left">{{ livre_mois.description|truncatechars:60 }}</p>
-                            <div class="flex items-center justify-between gap-2 border-t pt-4">
-                                <span class="text-lg font-bold text-cediRed">{{ livre_mois.prix|floatformat:0 }} FCFA</span>
-                                <button class="bg-cediRed text-white text-xs font-bold px-4 py-2 rounded hover:bg-cediRedDark transition flex items-center gap-1">
-                                    <i class="fa-solid fa-cart-shopping"></i> Ajouter
-                                </button>
-                            </div>
-                        {% else %}
-                            <p class="text-gray-500 text-center">Aucun livre disponible</p>
-                        {% endif %}
-                    {% endwith %}
+                
+                <!-- Zone d'affichage de la photo (ajustée parfaitement sans débordement ni rognage) -->
+                <div class="p-1 flex items-center justify-center rounded-lg overflow-hidden bg-white">
+                    {% load static %}
+                    <img src="{% static 'images/pere_fondateur.jpg' %}" 
+                         alt="Le Père Fondateur" 
+                         class="max-h-72 w-auto object-contain rounded shadow-sm mx-auto" 
+                         loading="lazy">
                 </div>
             </div>
         </div>
@@ -65,39 +38,39 @@
 </section>
 
 <!-- 4 PILIERS -->
-<section class="reveal bg-white border-b border-gray-200 px-4 py-6">
-    <div class="max-w-7xl mx-auto flex flex-wrap justify-center gap-6 text-center">
-        <div class="stagger-item flex flex-col items-center w-40">
-            <i class="fa-solid fa-store text-2xl text-cediGold mb-2"></i>
+<section class="reveal bg-white border-b border-gray-200 px-2 py-6">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-center gap-4 text-center">
+        <div class="stagger-item flex flex-col items-center w-36">
+            <i class="fa-solid fa-store text-2xl text-cediGold mb-1"></i>
             <h4 class="font-bold text-sm text-gray-800">4 Points de Vente</h4>
-            <p class="text-xs text-gray-500">Adjamé, Attiékoi, Riviera, Yopougon</p>
+            <p class="text-[11px] text-gray-500">Adjamé, Attiékoi, Riviera, Yopougon</p>
         </div>
-        <div class="stagger-item flex flex-col items-center w-40">
-            <i class="fa-solid fa-box-open text-2xl text-cediGold mb-2"></i>
+        <div class="stagger-item flex flex-col items-center w-36">
+            <i class="fa-solid fa-box-open text-2xl text-cediGold mb-1"></i>
             <h4 class="font-bold text-sm text-gray-800">Retrait Gratuit</h4>
-            <p class="text-xs text-gray-500">Disponible dans nos librairies</p>
+            <p class="text-[11px] text-gray-500">Disponible dans nos librairies</p>
         </div>
-        <div class="stagger-item flex flex-col items-center w-40">
-            <i class="fa-solid fa-mobile-screen-button text-2xl text-cediGold mb-2"></i>
+        <div class="stagger-item flex flex-col items-center w-36">
+            <i class="fa-solid fa-mobile-screen-button text-2xl text-cediGold mb-1"></i>
             <h4 class="font-bold text-sm text-gray-800">Paiement Mobile</h4>
-            <p class="text-xs text-gray-500">Orange Money & MTN MoMo</p>
+            <p class="text-[11px] text-gray-500">Orange Money & MTN MoMo</p>
         </div>
-        <div class="stagger-item flex flex-col items-center w-40">
-            <i class="fa-solid fa-hands-praying text-2xl text-cediGold mb-2"></i>
+        <div class="stagger-item flex flex-col items-center w-36">
+            <i class="fa-solid fa-hands-praying text-2xl text-cediGold mb-1"></i>
             <h4 class="font-bold text-sm text-gray-800">Conseil Spirituel</h4>
-            <p class="text-xs text-gray-500">Accompagnement & Orientation</p>
+            <p class="text-[11px] text-gray-500">Accompagnement & Orientation</p>
         </div>
     </div>
 </section>
 
 {% if promos_data %}
-<section id="section-promotions" class="reveal px-4 py-12">
+<section id="section-promotions" class="reveal px-1 sm:px-4 py-8">
     <div class="max-w-7xl mx-auto">
-        <div class="bg-amber-50 border border-cediGold rounded-2xl p-6 shadow-sm">
+        <div class="bg-amber-50 border border-cediGold rounded-2xl p-2 sm:p-5 shadow-sm">
             
-            <!-- En-tête avec Compteur Global -->
-            <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
-                <div class="flex items-center gap-3">
+            <!-- En-tête -->
+            <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-3">
+                <div class="flex items-center gap-2">
                     <i class="fa-solid fa-bolt text-2xl text-cediGold"></i>
                     <div>
                         <h3 class="text-xl font-bold text-gray-900">Promotions & Ventes Flash</h3>
@@ -105,7 +78,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-amber-200 shadow-sm">
+                <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-amber-200 shadow-sm">
                     <span class="text-xs font-bold text-gray-500">SE TERMINE DANS :</span>
                     {% with promos_data|first as first_promo %}
                         {% if first_promo %}
@@ -120,16 +93,15 @@
                 </div>
             </div>
 
-            <!-- Grille des Produits -->
-            <div id="grille-promotions" class="flex flex-wrap justify-center gap-6">
+            <!-- Grille des Produits en Promotion (Marges réduites : gap-2 et p-1.5 sur mobile) -->
+            <div id="grille-promotions" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-5">
                 {% for promo_data in promos_data %}
                     {% for item in promo_data.produits %}
-                    <div class="carte-promo stagger-item card-lift bg-white p-4 rounded-xl shadow border border-gray-100 flex flex-col justify-between w-full sm:w-[calc(50%-1.5rem)] md:w-[calc(33.33%-1.5rem)] lg:w-[calc(25%-1.5rem)]"
+                    <div class="carte-promo stagger-item card-lift bg-white p-1.5 sm:p-3 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between w-full"
                          data-fin="{{ promo_data.promotion.date_fin|date:'c' }}">
                         <div>
                             <div class="relative img-zoom rounded-lg">
-                                <!-- Badge de réduction avec vraie icône Flash blanche -->
-                                <span class="absolute top-2 left-2 z-10 bg-cediRed text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                                <span class="absolute top-1 left-1 z-10 bg-cediRed text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shadow-sm">
                                     {% if promo_data.promotion.est_vente_flash %}
                                         <i class="fa-solid fa-bolt text-white"></i> 
                                     {% endif %}
@@ -139,38 +111,37 @@
                                         -{{ promo_data.promotion.valeur_reduction|floatformat:0 }} FCFA
                                     {% endif %}
                                 </span>
-                                <div class="p-2 flex items-center justify-center">
+                                <div class="p-0.5 sm:p-1 flex items-center justify-center">
                                     {% with item.produit.image_principale as img %}
                                         {% if img %}
-                                            <img src="{{ img.url_image.url }}" alt="{{ item.produit.titre }}" class="h-48 object-contain w-full rounded" loading="lazy">
+                                            <img src="{{ img.url_image.url }}" alt="{{ item.produit.titre }}" class="h-40 sm:h-52 object-contain w-full rounded" loading="lazy">
                                         {% else %}
-                                            <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&auto=format&fit=crop&q=70" alt="Couverture" class="h-48 object-contain w-full rounded" loading="lazy">
+                                            <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&auto=format&fit=crop&q=70" alt="Couverture" class="h-40 sm:h-52 object-contain w-full rounded" loading="lazy">
                                         {% endif %}
                                     {% endwith %}
                                 </div>
                             </div>
 
-                            <h4 class="font-bold text-sm text-gray-800 mt-2 mb-1 text-left">{{ item.produit.titre|truncatechars:30 }}</h4>
-                            <p class="text-xs text-gray-500 mb-2 text-left">Auteur : {{ item.produit.auteur|default:"Inconnu" }}</p>
+                            <h4 class="font-bold text-xs sm:text-sm text-gray-800 mt-1.5 mb-0.5 text-left leading-tight">{{ item.produit.titre|truncatechars:32 }}</h4>
+                            <p class="text-[10px] sm:text-xs text-gray-500 mb-1 text-left truncate">Auteur : {{ item.produit.auteur|default:"Inconnu" }}</p>
 
-                            <!-- Compteur Individuel de la carte produit -->
-                            <div class="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                            <div class="flex items-center gap-1 mt-0.5 text-[10px] sm:text-xs text-gray-500">
                                 <i class="fa-regular fa-clock text-cediGold"></i>
-                                <span>Fin dans :</span>
+                                <span>Fin :</span>
                                 <span class="compteur-individuel font-bold text-cediRed font-mono">
                                     Calcul...
                                 </span>
                             </div>
                         </div>
 
-                        <div class="mt-auto pt-2 border-t border-gray-100">
-                            <div class="flex items-center justify-between gap-2">
+                        <div class="mt-auto pt-1.5 border-t border-gray-100">
+                            <div class="flex items-center justify-between gap-1">
                                 <div>
-                                    <span class="text-base font-bold text-cediRed">{{ item.prix_reduit|floatformat:0 }} FCFA</span>
-                                    <span class="text-xs text-gray-400 line-through ml-2">{{ item.prix_original|floatformat:0 }} FCFA</span>
+                                    <span class="text-xs sm:text-base font-bold text-cediRed block sm:inline leading-none">{{ item.prix_reduit|floatformat:0 }} FCFA</span>
+                                    <span class="text-[9px] sm:text-xs text-gray-400 line-through block sm:inline sm:ml-1 leading-none">{{ item.prix_original|floatformat:0 }} FCFA</span>
                                 </div>
-                                <button class="bg-cediRed text-white text-xs font-bold px-3 py-2 rounded hover:bg-cediRedDark transition flex items-center gap-1">
-                                    <i class="fa-solid fa-cart-shopping"></i> Ajouter
+                                <button class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
                                 </button>
                             </div>
                         </div>
@@ -183,49 +154,49 @@
 </section>
 {% endif %}
 
-<!-- NOS PUBLICATIONS (BOUTON AJOUTER MAINTENU SUR MOBILE) -->
-<section id="boutique" class="reveal px-2 sm:px-4 py-8">
+<!-- NOS PUBLICATIONS -->
+<section id="boutique" class="reveal px-1 sm:px-4 py-8">
     <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4 px-2 sm:px-0">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-3 px-1 sm:px-0">
             <div>
                 <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Nos Publications & Livres</h3>
                 <p class="text-xs sm:text-sm text-gray-500">Découvrez nos bibles, ouvrages d'étude et nos propres éditions</p>
             </div>
-            <div class="flex flex-wrap justify-start md:justify-center gap-1.5 sm:gap-2 text-xs font-medium">
-                <button class="bg-cediRed text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition">Tous les livres</button>
-                <button class="bg-white border border-gray-300 text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:border-cediRed transition">Édition CEDI</button>
-                <button class="bg-white border border-gray-300 text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:border-cediRed transition">Bibles</button>
-                <button class="bg-white border border-gray-300 text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:border-cediRed transition">Jeunesse</button>
+            <div class="flex flex-wrap justify-start md:justify-center gap-1.5 text-xs font-medium">
+                <button class="bg-cediRed text-white px-3 py-1.5 rounded-full transition">Tous les livres</button>
+                <button class="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-full hover:border-cediRed transition">Édition CEDI</button>
+                <button class="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-full hover:border-cediRed transition">Bibles</button>
+                <button class="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-full hover:border-cediRed transition">Jeunesse</button>
             </div>
         </div>
 
-        <!-- Grid Responsive : 2 colonnes sur mobile -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
+        <!-- Grid Responsive avec espacement resserré (gap-2 et p-1.5 sur mobile) -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-5">
             {% for produit in produits_recents %}
-            <div class="stagger-item card-lift bg-white p-2.5 sm:p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between w-full">
+            <div class="stagger-item card-lift bg-white p-1.5 sm:p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between w-full">
                 <div>
                     <a href="{% url 'detail_produit' produit.pk %}" class="block">
-                    <div class="relative img-zoom rounded-lg">
-                        {% if produit.est_edition_cedi %}
-                            <span class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 z-10 bg-cediGold text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded flex items-center gap-1">
-                                <i class="fa-solid fa-certificate"></i> Édition CEDI
-                            </span>
-                        {% endif %}
-                        <div class="p-1 sm:p-2 flex items-center justify-center">
-                            {% with produit.image_principale as img %}
-                                {% if img %}
-                                    <img src="{{ img.url_image.url }}" alt="{{ produit.titre }}" class="h-36 sm:h-52 object-contain w-full rounded" loading="lazy">
-                                {% else %}
-                                    <img src="https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=400&auto=format&fit=crop&q=70" alt="Couverture Livre CEDI" class="h-36 sm:h-52 object-contain w-full rounded" loading="lazy">
-                                {% endif %}
-                            {% endwith %}
+                        <div class="relative img-zoom rounded-lg">
+                            {% if produit.est_edition_cedi %}
+                                <span class="absolute top-1 left-1 z-10 bg-cediGold text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shadow-sm">
+                                    <i class="fa-solid fa-certificate"></i> Édition CEDI
+                                </span>
+                            {% endif %}
+                            <div class="p-0.5 sm:p-1 flex items-center justify-center">
+                                {% with produit.image_principale as img %}
+                                    {% if img %}
+                                        <img src="{{ img.url_image.url }}" alt="{{ produit.titre }}" class="h-40 sm:h-56 object-contain w-full rounded" loading="lazy">
+                                    {% else %}
+                                        <img src="https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=400&auto=format&fit=crop&q=70" alt="Couverture Livre CEDI" class="h-40 sm:h-56 object-contain w-full rounded" loading="lazy">
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
                         </div>
-                    </div>
-                  
-                    <h4 class="font-bold text-xs sm:text-sm text-gray-800 mt-2 mb-0.5 sm:mb-1 text-left leading-snug">{{ produit.titre|truncatechars:28 }}</h4>
+                      
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800 mt-1.5 mb-0.5 text-left leading-tight">{{ produit.titre|truncatechars:30 }}</h4>
                     </a>
-                    <p class="text-[11px] sm:text-xs text-gray-500 mb-1.5 sm:mb-2 text-left truncate">Auteur : {{ produit.auteur|default:"Inconnu" }}</p>
-                    <div class="flex items-center justify-start gap-0.5 sm:gap-1 text-cediGold text-[11px] sm:text-sm mt-0.5 mb-2">
+                    <p class="text-[10px] sm:text-xs text-gray-500 mb-1 text-left truncate">Auteur : {{ produit.auteur|default:"Inconnu" }}</p>
+                    <div class="flex items-center justify-start gap-0.5 text-cediGold text-[10px] sm:text-xs mt-0.5 mb-1.5">
                         {% with note=produit.moyenne_avis %}
                             {% for i in "12345"|make_list %}
                                 {% if forloop.counter <= note|floatformat:0|add:"0" %}
@@ -234,14 +205,14 @@
                                     <i class="fa-regular fa-star"></i>
                                 {% endif %}
                             {% endfor %}
-                            <span class="text-[10px] sm:text-xs text-gray-500 ml-0.5">({{ produit.nombre_avis }})</span>
+                            <span class="text-[9px] sm:text-xs text-gray-500 ml-0.5">({{ produit.nombre_avis }})</span>
                         {% endwith %}
                     </div>
                 </div>
-                <div class="mt-auto border-t border-gray-100 pt-2 sm:pt-3">
+                <div class="mt-auto border-t border-gray-100 pt-1.5 sm:pt-2">
                     <div class="flex items-center justify-between gap-1">
                         <span class="text-xs sm:text-base font-bold text-cediRed whitespace-nowrap">{{ produit.prix|floatformat:0 }} FCFA</span>
-                        <button class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
+                        <button class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
                             <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
                         </button>
                     </div>
@@ -255,20 +226,20 @@
 </section>
 
 <!-- RESSOURCES -->
-<section id="ressources" class="reveal bg-gray-100 px-4 py-12 border-t border-b border-gray-200">
+<section id="ressources" class="reveal bg-gray-100 px-4 py-10 border-t border-b border-gray-200">
     <div class="max-w-7xl mx-auto">
-        <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-center max-w-2xl mx-auto mb-8">
             <h3 class="text-2xl font-bold text-gray-900 mb-2">Ressources & Enseignements Spirituels</h3>
             <p class="text-sm text-gray-600">Nourrissez votre foi avec nos contenus doctrinaux, nos cours et conseils de vie chrétienne pratique.</p>
         </div>
 
-        <div class="flex flex-wrap justify-center gap-6">
+        <div class="flex flex-wrap justify-center gap-5">
             {% for article in articles_blog %}
-            <div class="stagger-item card-lift bg-white p-6 rounded-xl shadow-sm border-t-4 border-cediRed w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.33%-1.5rem)]">
-                <div class="text-cediRed text-3xl mb-3 text-center"><i class="fa-solid fa-book-bible"></i></div>
-                <h4 class="font-bold text-xl text-gray-900 mb-2 text-center">{{ article.titre|truncatechars:40 }}</h4>
-                <p class="text-sm text-gray-600 mb-4 text-center leading-relaxed">{{ article.contenu|truncatechars:120|striptags }}</p>
-                <a href="{% url 'article_detail' article.id %}" class="text-cediRed font-bold text-sm hover:underline inline-flex items-center justify-center w-full gap-1">Lire les études <i class="fa-solid fa-arrow-right"></i></a>
+            <div class="stagger-item card-lift bg-white p-5 rounded-xl shadow-sm border-t-4 border-cediRed w-full sm:w-[calc(50%-1.25rem)] lg:w-[calc(33.33%-1.25rem)]">
+                <div class="text-cediRed text-3xl mb-2 text-center"><i class="fa-solid fa-book-bible"></i></div>
+                <h4 class="font-bold text-lg text-gray-900 mb-2 text-center">{{ article.titre|truncatechars:40 }}</h4>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4 text-center leading-relaxed">{{ article.contenu|truncatechars:120|striptags }}</p>
+                <a href="{% url 'article_detail' article.id %}" class="text-cediRed font-bold text-xs sm:text-sm hover:underline inline-flex items-center justify-center w-full gap-1">Lire les études <i class="fa-solid fa-arrow-right"></i></a>
             </div>
             {% empty %}
             <p class="text-gray-500 w-full text-center">Aucun article publié pour le moment.</p>
@@ -278,27 +249,27 @@
 </section>
 
 <!-- POINTS DE VENTE -->
-<section id="points-de-vente" class="reveal px-4 py-12">
+<section id="points-de-vente" class="reveal px-4 py-10">
     <div class="max-w-7xl mx-auto">
-        <div class="text-center max-w-xl mx-auto mb-10">
+        <div class="text-center max-w-xl mx-auto mb-8">
             <h3 class="text-2xl font-bold text-gray-900 mb-2">Nos Points de Vente Physiques</h3>
             <p class="text-sm text-gray-600">Venez nous visiter ou retirez vos commandes gratuites en boutique</p>
         </div>
 
-        <div class="flex flex-wrap justify-center gap-6">
+        <div class="flex flex-wrap justify-center gap-5">
             {% for point in points_de_vente %}
-            <div class="stagger-item card-lift bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:border-cediGold w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)]">
-                <div class="relative img-zoom h-64 lg:h-72">
+            <div class="stagger-item card-lift bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:border-cediGold w-full sm:w-[calc(50%-1.25rem)] lg:w-[calc(25%-1.25rem)]">
+                <div class="relative img-zoom h-60 lg:h-68">
                     {% if point.url_image %}
                         <img src="{{ point.url_image.url }}" alt="Librairie CEDI {{ point.nom }}" class="w-full h-full object-cover" loading="lazy">
                     {% else %}
                         <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=900&auto=format&fit=crop&q=70" alt="Librairie CEDI {{ point.nom }}" class="w-full h-full object-cover" loading="lazy">
                     {% endif %}
-                    <div class="absolute top-4 left-4 w-10 h-10 bg-cediGold text-white rounded-full flex items-center justify-center font-bold shadow-md">{{ forloop.counter }}</div>
-                    <div class="absolute bottom-4 left-5 right-5">
-                        <h4 class="text-white font-bold text-xl drop-shadow-lg mb-1">{{ point.nom }}</h4>
-                        <p class="text-white/90 text-sm drop-shadow-lg mb-2">{{ point.adresse_complete|truncatechars:50 }}</p>
-                        <span class="inline-block bg-white/15 backdrop-blur-sm border border-white/30 text-white text-xs px-3 py-1.5 rounded-full">Retrait de commande gratuit</span>
+                    <div class="absolute top-3 left-3 w-8 h-8 bg-cediGold text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">{{ forloop.counter }}</div>
+                    <div class="absolute bottom-3 left-4 right-4">
+                        <h4 class="text-white font-bold text-lg drop-shadow-lg mb-1">{{ point.nom }}</h4>
+                        <p class="text-white/90 text-xs drop-shadow-lg mb-2">{{ point.adresse_complete|truncatechars:50 }}</p>
+                        <span class="inline-block bg-white/15 backdrop-blur-sm border border-white/30 text-white text-[10px] px-2.5 py-1 rounded-full">Retrait de commande gratuit</span>
                     </div>
                 </div>
             </div>
@@ -308,6 +279,7 @@
         </div>
     </div>
 </section>
+
 <!-- Script de Décompte et Disparition Dynamique -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -324,12 +296,10 @@
                 const diff = dateFin - maintenant;
 
                 if (diff <= 0) {
-                    // LA PROMO EST FINIE : Masquage automatique et instantané de la carte
                     carte.style.display = 'none';
                 } else {
                     cartesVisibles++;
 
-                    // Calcul du temps restant
                     const jours = Math.floor(diff / (1000 * 60 * 60 * 24));
                     const heures = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -350,7 +320,6 @@
                 }
             });
 
-            // Mise à jour du compteur global en haut
             const compteurGlobal = document.getElementById('compteur-global');
             if (compteurGlobal) {
                 const dateFinGlobalAttr = compteurGlobal.getAttribute('data-fin');
@@ -377,7 +346,6 @@
                 }
             }
 
-            // SI PLUS AUCUNE PROMO EN COURS : Masque la section entière immédiatement
             if (cartesVisibles === 0) {
                 const sectionPromos = document.getElementById('section-promotions');
                 if (sectionPromos) {
@@ -386,7 +354,6 @@
             }
         }
 
-        // Lancement direct et répétition chaque seconde
         majCompteursEtMasquage();
         setInterval(majCompteursEtMasquage, 1000);
     });

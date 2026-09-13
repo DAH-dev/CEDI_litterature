@@ -1,39 +1,155 @@
 {% extends 'appcedi/base.html' %}
 
 {% block content %}
-<section class="max-w-md mx-auto px-4 py-16">
-    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-        <h2 class="text-2xl font-bold text-gray-900 text-center mb-6">📝 Inscription</h2>
-        
-        {% if messages %}
-            {% for message in messages %}
-                <div class="mb-4 p-3 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
+<style>
+    /* ===== TAINLE ET CENTRAGE DU FORMULAIRE ===== */
+    .form-container {
+        max-width: 630px; /* Ajuste cette valeur pour élargir ou rétrécir le formulaire */
+        width: 100%;
+        margin: 40px auto;
+        padding: 40px;
+        background-color: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
 
-        <form method="post" class="space-y-4">
-            {% csrf_token %}
-            {% for field in form %}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                    <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
-                {% endif %}
-                {% if field.errors %}
-                    <p class="text-xs text-red-500 mt-1">{{ field.errors.0 }}</p>
-                {% endif %}
-            </div>
-            {% endfor %}
-            <button type="submit" class="w-full bg-cediRed text-white font-bold py-3 rounded-lg hover:bg-cediRedDark transition">
-                S'inscrire
-            </button>
-        </form>
-        <p class="text-center text-sm text-gray-600 mt-4">
-            Déjà un compte ? <a href="{% url 'connexion' %}" class="text-cediRed font-bold hover:underline">Connectez-vous</a>
-        </p>
+    /* ===== STYLE DE TOUS LES CHAMPS DE SAISIE ===== */
+    #inscription-form input {
+        display: block !important;
+        width: 100% !important;
+        height: 38px !important;
+        border: 1.5px solid #d1d5db !important;
+        border-radius: 10px !important;
+        padding: 12px 16px !important;
+        font-size: 15px !important;
+        background-color: #ffffff !important;
+        outline: none !important;
+        box-sizing: border-box;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    #inscription-form input:focus {
+        border-color: #8B1E22 !important;
+        box-shadow: 0 0 0 3px rgba(139, 30, 34, 0.1) !important;
+    }
+
+    /* ===== STYLE DES BOUTONS ET TEXTES ===== */
+    .btn-submit {
+        width: 100%;
+        background-color: #8B1E22;
+        color: #ffffff;
+        font-weight: bold;
+        padding: 14px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 15px;
+        transition: background-color 0.2s;
+    }
+
+    .btn-submit:hover {
+        background-color: #6b171a;
+    }
+
+    #inscription-form .helptext {
+        display: none;
+    }
+
+    #inscription-form ul.errorlist {
+        color: #dc2626;
+        font-size: 12px;
+        list-style: none;
+        padding: 0;
+        margin: 4px 0 0;
+    }
+</style>
+
+<section class="form-container">
+    <!-- En-tête -->
+    <div class="text-center mb-8">
+        <i class="fa-solid fa-user-plus text-5xl text-cediRed mb-3"></i>
+        <h2 class="text-3xl font-bold text-gray-900">Inscription</h2>
+        <p class="text-sm text-gray-500 mt-2">Créez votre compte CEDI Littérature</p>
     </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mb-6 p-3 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" id="inscription-form" class="space-y-5">
+        {% csrf_token %}
+
+        {# Nom d'utilisateur #}
+        <div>
+            <label for="{{ form.username.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fa-solid fa-user text-cediRed mr-1"></i> Nom d'utilisateur
+            </label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.username.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        {# Email #}
+        <div>
+            <label for="{{ form.email.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fa-solid fa-envelope text-cediRed mr-1"></i> Adresse email
+            </label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.email.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        {# Téléphone #}
+        <div>
+            <label for="{{ form.telephone.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fa-solid fa-phone text-cediRed mr-1"></i> Numéro de téléphone
+            </label>
+            {{ form.telephone }}
+            {% if form.telephone.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.telephone.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        {# Mot de passe #}
+        <div>
+            <label for="{{ form.password1.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fa-solid fa-lock text-cediRed mr-1"></i> Mot de passe
+            </label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.password1.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        {# Confirmation #}
+        <div>
+            <label for="{{ form.password2.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fa-solid fa-lock text-cediRed mr-1"></i> Confirmer le mot de passe
+            </label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.password2.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn-submit flex items-center justify-center gap-2">
+            <i class="fa-solid fa-user-plus"></i> S'inscrire
+        </button>
+    </form>
+
+    <p class="text-center text-sm text-gray-600 mt-6">
+        Déjà un compte ?
+        <a href="{% url 'connexion' %}" class="text-cediRed font-bold hover:underline">
+            <i class="fa-solid fa-key mr-1"></i>Connectez-vous
+        </a>
+    </p>
 </section>
 {% endblock %}

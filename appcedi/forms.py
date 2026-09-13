@@ -1,5 +1,10 @@
 from django import forms
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.models import User
 from .models import *
+
 
 # ========== FORMULAIRE PRODUIT ==========
 class ProduitForm(forms.ModelForm):
@@ -42,6 +47,7 @@ class CategorieForm(forms.ModelForm):
                     'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
                 })
 
+
 class PointVenteForm(forms.ModelForm):
     class Meta:
         model = PointVente
@@ -56,13 +62,8 @@ class PointVenteForm(forms.ModelForm):
                     'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
                 })
 
-from django import forms
-from django.utils import timezone
-from datetime import timedelta
-from .models import Promotion
 
-
-
+# ========== FORMULAIRE PROMOTION ==========
 class PromotionForm(forms.ModelForm):
     duree_heures = forms.FloatField(
         required=False,
@@ -121,6 +122,8 @@ class PromotionForm(forms.ModelForm):
 
         return cleaned_data
 
+
+# ========== FORMULAIRE ARTICLE BLOG ==========
 class ArticleBlogForm(forms.ModelForm):
     class Meta:
         model = ArticleBlog
@@ -135,6 +138,8 @@ class ArticleBlogForm(forms.ModelForm):
                     'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
                 })
 
+
+# ========== FORMULAIRE IMAGE ==========
 class ImageForm(forms.ModelForm):
     class Meta:
         model = Image
@@ -147,3 +152,55 @@ class ImageForm(forms.ModelForm):
                 self.fields[field].widget.attrs.update({
                     'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
                 })
+
+
+# ========== FORMULAIRE INSCRIPTION ==========
+
+class InscriptionForm(UserCreationForm):
+    email = forms.EmailField(required=True, label="Adresse email")
+    telephone = forms.CharField(
+        max_length=20, 
+        required=True, 
+        label="Numéro de téléphone",
+        widget=forms.TextInput(attrs={'placeholder': '+225 07 00 00 00 00'})
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'telephone', 'password1', 'password2']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = "Nom d'utilisateur"
+        self.fields['password1'].label = "Mot de passe"
+        self.fields['password2'].label = "Confirmer le mot de passe"
+
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
+            })
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+            # Création du profil associé avec le téléphone
+            Profil.objects.create(
+                user=user,
+                telephone=self.cleaned_data.get('telephone')
+            )
+        return user
+
+
+# ========== FORMULAIRE CONNEXION ==========
+class ConnexionForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = "Nom d'utilisateur"
+        self.fields['password'].label = "Mot de passe"
+
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed'
+            })
