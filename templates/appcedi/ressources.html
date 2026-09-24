@@ -1,0 +1,151 @@
+{% extends 'appcedi/base.html' %}
+
+{% block title %}Ressources Spirituelles - CEDI Littérature{% endblock %}
+
+{% block content %}
+<!-- ===== BANNIÈRE ===== -->
+<section class="bg-cediCream py-12 px-4 border-b-2 border-cediGold">
+    <div class="max-w-7xl mx-auto text-center">
+        <i class="fa-solid fa-book-bible text-4xl text-cediRed mb-3"></i>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-cediRed mb-2">Ressources & Enseignements</h1>
+        <p class="text-sm md:text-base text-gray-600 max-w-2xl mx-auto">
+            Nourrissez votre foi avec nos contenus doctrinaux, nos cours bibliques et conseils de vie chrétienne pratique.
+        </p>
+    </div>
+</section>
+
+<!-- ===== CONTENU ===== -->
+<section class="py-10 px-4">
+    <div class="max-w-7xl mx-auto">
+
+        <!-- ===== FILTRES ===== -->
+<!-- ===== FILTRES ===== -->
+<form method="get" class="mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-2 sm:p-3 flex flex-nowrap gap-1 sm:gap-2 items-center overflow-x-auto">
+
+        <!-- Recherche -->
+        <div class="relative flex-1 min-w-0">
+            <i class="fa-solid fa-magnifying-glass absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm"></i>
+            <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Rechercher..."
+                   class="w-full pl-7 sm:pl-10 pr-2 sm:pr-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-cediRed">
+        </div>
+
+        <!-- Catégorie -->
+        <select name="categorie" class="border border-gray-300 rounded-lg px-1.5 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-cediRed shrink-0 max-w-[110px] sm:max-w-none">
+            <option value="">Toutes</option>
+            {% for key, label in categories %}
+                <option value="{{ key }}" {% if cat_selectionnee == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Bouton Filtrer -->
+        <button type="submit" class="bg-cediRed hover:bg-cediRedDark text-white text-xs sm:text-sm font-bold py-2 px-2 sm:px-5 rounded-lg transition shrink-0 flex items-center gap-1">
+            <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Filtrer</span>
+        </button>
+
+        <!-- Bouton Réinitialiser -->
+        <a href="{% url 'liste_ressources' %}" class="border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition shrink-0 flex items-center justify-center py-2 px-2 sm:px-3" title="Réinitialiser">
+            <i class="fa-solid fa-rotate-left text-xs sm:text-sm"></i>
+        </a>
+    </div>
+</form>
+
+        <!-- Compteur -->
+        <p class="text-sm text-gray-500 mb-6">
+            <strong>{{ total_articles }}</strong> article{{ total_articles|pluralize }} trouvé{{ total_articles|pluralize }}
+        </p>
+
+        <!-- ===== GRILLE D'ARTICLES ===== -->
+        {% if page_obj %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for article in page_obj %}
+            <div class="bg-white rounded-xl shadow-sm border-t-4 border-cediRed overflow-hidden card-lift flex flex-col">
+
+                <!-- Image de couverture (optionnelle) : à ajouter si tu ajoutes un champ "image" plus tard -->
+
+                <div class="p-5 flex flex-col flex-1">
+                    <!-- Badge catégorie -->
+                    <span class="inline-block self-start bg-cediGold text-white text-[10px] font-bold px-3 py-1 rounded-full mb-3">
+                        {{ article.get_categorie_article_display }}
+                    </span>
+
+                    <!-- Icône + Titre -->
+                    <div class="flex items-start gap-3 mb-3">
+                        <i class="fa-solid fa-book-bible text-2xl text-cediRed shrink-0 mt-0.5"></i>
+                        <h3 class="font-bold text-lg text-gray-900 leading-tight">
+                            {{ article.titre|truncatechars:60 }}
+                        </h3>
+                    </div>
+
+                    <!-- Extrait -->
+                    <p class="text-sm text-gray-600 mb-4 leading-relaxed flex-1">
+                        {{ article.contenu|truncatechars:120|striptags }}
+                    </p>
+
+                    <!-- Meta -->
+                    <div class="flex items-center justify-between text-[11px] text-gray-500 border-t pt-3 mb-3">
+                        <span><i class="fa-regular fa-user text-cediGold"></i> {{ article.auteur.username }}</span>
+                        <span><i class="fa-regular fa-calendar text-cediGold"></i> {{ article.date_publication|date:"d/m/Y" }}</span>
+                    </div>
+
+                    <!-- Lien -->
+                    <a href="{% url 'article_detail' article.id %}" class="text-cediRed font-bold text-sm hover:underline inline-flex items-center gap-1">
+                        Lire la suite <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- ===== PAGINATION ===== -->
+        {% if page_obj.has_other_pages %}
+        <div class="flex justify-center items-center gap-2 mt-10">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if cat_selectionnee %}&categorie={{ cat_selectionnee }}{% endif %}"
+                   class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-cediRed hover:text-white transition">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="px-4 py-2 bg-cediRed text-white rounded-lg font-bold">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if cat_selectionnee %}&categorie={{ cat_selectionnee }}{% endif %}"
+                       class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-cediRed hover:text-white transition">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if cat_selectionnee %}&categorie={{ cat_selectionnee }}{% endif %}"
+                   class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-cediRed hover:text-white transition">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+            <i class="fa-solid fa-book-open text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-600 text-lg mb-2">Aucun article trouvé.</p>
+            <p class="text-sm text-gray-400 mb-4">Essayez de modifier vos filtres ou votre recherche.</p>
+            <a href="{% url 'liste_ressources' %}" class="inline-block bg-cediRed hover:bg-cediRedDark text-white font-bold py-2 px-6 rounded-lg transition">
+                Voir toutes les ressources
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="py-10 px-4 bg-gray-50 border-t border-gray-200">
+    <div class="max-w-3xl mx-auto text-center">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Vous avez une question spirituelle ?</h3>
+        <p class="text-sm text-gray-600 mb-5">Notre équipe est disponible pour vous accompagner dans votre marche avec Dieu.</p>
+        <a href="{% url 'accueil' %}#conseils" class="inline-flex items-center gap-2 bg-cediRed hover:bg-cediRedDark text-white font-bold py-2.5 px-6 rounded-lg transition">
+            <i class="fa-solid fa-comments"></i> Poser une question
+        </a>
+    </div>
+</section>
+{% endblock %}

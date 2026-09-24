@@ -238,8 +238,89 @@ def supprimer_produit(request, pk):
         messages.success(request, f'Produit "{titre}" supprimé avec succès !')
         return redirect('liste_produits')
     return render(request, 'appcedi/admin/supprimer_produit.html', {'produit': produit})
+from django.core.paginator import Paginator
+from django.db.models import Q
 
+def liste_catalogue(request):
+    """Affiche tous les produits avec filtres et recherche."""
+    produits = Produit.objects.filter(statut=True).order_by('-id')
+    categories = Categorie.objects.all()
 
+    # 🔍 Recherche
+    q = request.GET.get('q')
+    if q:
+        produits = produits.filter(
+            Q(titre__icontains=q) |
+            Q(auteur__icontains=q) |
+            Q(editeur__icontains=q) |
+            Q(description__icontains=q)
+        )
+
+    # 🏷️ Filtre par catégorie
+    cat_id = request.GET.get('categorie')
+    if cat_id:
+        produits = produits.filter(categories__id=cat_id)
+
+    # 💰 Filtre par prix
+    prix = request.GET.get('prix')
+    if prix == 'bas':
+        produits = produits.filter(prix__lt=3000)
+    elif prix == 'moyen':
+        produits = produits.filter(prix__gte=3000, prix__lte=6000)
+    elif prix == 'haut':
+        produits = produits.filter(prix__gt=6000)
+
+    # ⭐ Filtre Édition CEDI
+    if request.GET.get('cedi') == '1':
+        produits = produits.filter(est_edition_cedi=True)
+
+    # 📄 Pagination
+    paginator = Paginator(produits.distinct(), 12)  # 12 produits par page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'categories': categories,
+        'q': q,
+        'cat_selectionnee': cat_id,
+        'prix_selectionne': prix,
+        'cedi_selectionne': request.GET.get('cedi') == '1',
+        'total_produits': produits.distinct().count(),
+    }
+    return render(request, 'appcedi/catalogue.html', context)
+def liste_ressources(request):
+    """Affiche tous les articles publiés (Enseignements, Vérités, Conseils, Partages)."""
+    articles = ArticleBlog.objects.filter(statut='publie').order_by('-date_publication')
+
+    # 🔍 Recherche
+    q = request.GET.get('q')
+    if q:
+        articles = articles.filter(
+            Q(titre__icontains=q) | Q(contenu__icontains=q)
+        )
+
+    # 📂 Filtre par catégorie
+    cat = request.GET.get('categorie')
+    if cat:
+        articles = articles.filter(categorie_article=cat)
+
+    # 📄 Pagination
+    paginator = Paginator(articles, 9)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Liste des catégories disponibles (depuis le modèle)
+    categories = ArticleBlog.CATEGORIES
+
+    context = {
+        'page_obj': page_obj,
+        'categories': categories,
+        'q': q,
+        'cat_selectionnee': cat,
+        'total_articles': articles.count(),
+    }
+    return render(request, 'appcedi/ressources.html', context)
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def definir_principale(request, image_id):

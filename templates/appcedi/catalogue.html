@@ -1,0 +1,177 @@
+{% extends 'appcedi/base.html' %}
+
+{% block title %}Catalogue - CEDI Littérature{% endblock %}
+
+{% block content %}
+<section class="bg-cediCream py-10 px-4 border-b-2 border-cediGold">
+    <div class="max-w-7xl mx-auto text-center">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-cediRed mb-2">Notre Catalogue</h1>
+        <p class="text-sm md:text-base text-gray-600">
+            {{ total_produits }} ouvrage{{ total_produits|pluralize }} disponible{{ total_produits|pluralize }}
+        </p>
+    </div>
+</section>
+
+<section class="py-10 px-4">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+            <!-- ===== FILTRES (colonne gauche) ===== -->
+            <aside class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
+                    <h2 class="text-lg font-bold text-cediRed mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-filter"></i> Filtres
+                    </h2>
+
+                    <form method="get" action="{% url 'liste_catalogue' %}">
+                        <!-- Recherche -->
+                        <div class="mb-5">
+                            <label class="block text-xs font-semibold text-gray-600 uppercase mb-2">Recherche</label>
+                            <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Titre, auteur..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cediRed">
+                        </div>
+
+                        <!-- Catégories -->
+                        <div class="mb-5">
+                            <label class="block text-xs font-semibold text-gray-600 uppercase mb-2">Catégorie</label>
+                            <select name="categorie" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cediRed">
+                                <option value="">Toutes les catégories</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}" {% if cat_selectionnee == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Prix -->
+                        <div class="mb-5">
+                            <label class="block text-xs font-semibold text-gray-600 uppercase mb-2">Prix</label>
+                            <select name="prix" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cediRed">
+                                <option value="">Toutes les gammes</option>
+                                <option value="bas" {% if prix_selectionne == 'bas' %}selected{% endif %}>Moins de 3 000 FCFA</option>
+                                <option value="moyen" {% if prix_selectionne == 'moyen' %}selected{% endif %}>3 000 — 6 000 FCFA</option>
+                                <option value="haut" {% if prix_selectionne == 'haut' %}selected{% endif %}>Plus de 6 000 FCFA</option>
+                            </select>
+                        </div>
+
+                        <!-- Édition CEDI -->
+                        <div class="mb-5">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="cedi" value="1" {% if cedi_selectionne %}checked{% endif %} class="accent-cediRed">
+                                <span class="text-sm text-gray-700">Édité par CEDI uniquement</span>
+                            </label>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button type="submit" class="flex-1 bg-cediRed hover:bg-cediRedDark text-white text-sm font-bold py-2 rounded-lg transition">
+                                <i class="fa-solid fa-magnifying-glass"></i> Filtrer
+                            </button>
+                            <a href="{% url 'liste_catalogue' %}" class="px-3 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition" title="Réinitialiser">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </aside>
+
+            <!-- ===== GRILLE DE PRODUITS (colonne droite) ===== -->
+            <div class="lg:col-span-3">
+                {% if page_obj %}
+                <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    {% for produit in page_obj %}
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between card-lift">
+                        <a href="{% url 'detail_produit' produit.pk %}" class="block">
+                            <div class="relative img-zoom rounded-t-xl overflow-hidden">
+                                {% if produit.est_edition_cedi %}
+                                <span class="absolute top-2 left-2 z-10 bg-cediGold text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                                    <i class="fa-solid fa-certificate"></i> Édition CEDI
+                                </span>
+                                {% endif %}
+                                <div class="p-2 flex items-center justify-center bg-white">
+                                    {% with produit.image_principale as img %}
+                                        {% if img %}
+                                            <img src="{{ img.url_image.url }}" alt="{{ produit.titre }}" class="h-36 sm:h-48 object-contain w-full" loading="lazy">
+                                        {% else %}
+                                            <img src="https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=400&auto=format&fit=crop&q=70" alt="{{ produit.titre }}" class="h-36 sm:h-48 object-contain w-full" loading="lazy">
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                            <div class="px-3 pt-2">
+                                <h4 class="font-bold text-xs sm:text-sm text-gray-800 mb-1 leading-snug">{{ produit.titre|truncatechars:35 }}</h4>
+                                <p class="text-[11px] sm:text-xs text-gray-500 mb-1 truncate">Auteur : {{ produit.auteur|default:"Inconnu" }}</p>
+                                <div class="flex items-center gap-0.5 text-cediGold text-[11px] sm:text-sm mb-2">
+                                    {% with note=produit.moyenne_avis %}
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= note|floatformat:0|add:"0" %}
+                                                <i class="fa-solid fa-star"></i>
+                                            {% else %}
+                                                <i class="fa-regular fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="text-[10px] sm:text-xs text-gray-500 ml-1">({{ produit.nombre_avis }})</span>
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        </a>
+                        <div class="px-3 pb-3 border-t border-gray-100 pt-2 mt-auto">
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="text-xs sm:text-base font-bold text-cediRed whitespace-nowrap">{{ produit.prix|floatformat:0 }} FCFA</span>
+                                {% if produit.quantite_stock > 0 %}
+                                    <form action="{% url 'ajouter_au_panier' produit.pk %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quantite" value="1">
+                                        <button type="submit" class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
+                                            <i class="fa-solid fa-cart-shopping"></i> <span class="hidden sm:inline">Ajouter</span>
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-[10px] text-gray-400 italic">Rupture</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- ===== PAGINATION ===== -->
+                {% if page_obj.has_other_pages %}
+                <div class="flex justify-center items-center gap-2 mt-10">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if cat_selectionnee %}&categorie={{ cat_selectionnee }}{% endif %}{% if prix_selectionne %}&prix={{ prix_selectionne }}{% endif %}{% if cedi_selectionne %}&cedi=1{% endif %}"
+                           class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-cediRed hover:text-white transition">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="px-4 py-2 bg-cediRed text-white rounded-lg font-bold">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if cat_selectionnee %}&categorie={{ cat_selectionnee }}{% endif %}{% if prix_selectionne %}&prix={{ prix_selectionne }}{% endif %}{% if cedi_selectionne %}&cedi=1{% endif %}"
+                               class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-cediRed hover:text-white transition">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if cat_selectionnee %}&categorie={{ cat_selectionnee }}{% endif %}{% if prix_selectionne %}&prix={{ prix_selectionne }}{% endif %}{% if cedi_selectionne %}&cedi=1{% endif %}"
+                           class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-cediRed hover:text-white transition">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                    <i class="fa-solid fa-box-open text-5xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-600 text-lg mb-2">Aucun produit trouvé.</p>
+                    <p class="text-sm text-gray-400 mb-4">Essayez de modifier vos filtres ou votre recherche.</p>
+                    <a href="{% url 'liste_catalogue' %}" class="inline-block bg-cediRed hover:bg-cediRedDark text-white font-bold py-2 px-6 rounded-lg transition">
+                        Voir tout le catalogue
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

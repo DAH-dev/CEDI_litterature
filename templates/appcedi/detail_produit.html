@@ -392,7 +392,7 @@
             </div>
             {% else %}
             <div class="pf-empty-box" style="margin-bottom: 20px;">
-                <p><a href="{% url 'login' %}?next={{ request.path }}" style="color: var(--cedi-red); font-weight: bold;">Connectez-vous</a> pour laisser un avis sur ce produit.</p>
+                <p><a href="{% url 'connexion' %}?next={{ request.path }}" style="color: var(--cedi-red); font-weight: bold;">Connectez-vous</a> pour laisser un avis sur ce produit.</p>
             </div>
             {% endif %}
 

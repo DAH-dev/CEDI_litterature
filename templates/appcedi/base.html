@@ -136,11 +136,16 @@
     </a>
 {% endif %}
 
-            <!-- Panier -->
-            <a href="#" class="hover:text-cediRed relative transition">
-                <i class="fa-solid fa-cart-shopping text-xl text-cediRed"></i>
-                <span class="absolute -top-2 -right-2 bg-cediGold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
-            </a>
+           
+<!-- Panier -->
+<a href="{% url 'voir_panier' %}" class="hover:text-cediRed relative transition" title="Mon panier">
+    <i class="fa-solid fa-cart-shopping text-xl text-cediRed"></i>
+    {% if nombre_articles_panier > 0 %}
+        <span class="absolute -top-2 -right-2 bg-cediGold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+            {{ nombre_articles_panier }}
+        </span>
+    {% endif %}
+</a>
 
             <!-- Filtre -->
             <div class="relative">
@@ -182,9 +187,9 @@
                 <div id="menuDropdown" class="hidden absolute right-0 top-full mt-3 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
                     <!-- Liens de navigation -->
                     <a href="{% url 'accueil' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Accueil</a>
-                    <a href="#boutique" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Boutique & Catalogue</a>
+                    <a href="{% url 'liste_catalogue' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Boutique & Catalogue</a>
                     <a href="#editions" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Éditions CEDI</a>
-                    <a href="#ressources" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Ressources Spirituelles</a>
+                    <a href="{% url 'liste_ressources' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Ressources Spirituelles</a>
                     <a href="#points-de-vente" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Points de Vente</a>
                     <a href="#conseils" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Conseils & Blog</a>
                     <a href="{% url 'a_propos' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">À propos</a>
@@ -192,7 +197,7 @@
 
                     <!-- ====== ZONE AUTHENTIFICATION ====== -->
                     <!-- APRES -->
-<!-- ====== ZONE AUTHENTIFICATION ====== -->
+                 <!-- ====== ZONE AUTHENTIFICATION ====== -->
 {% if user.is_authenticated %}
     <div class="px-4 py-2 text-sm text-gray-500 flex items-center gap-2">
         <i class="fa-solid fa-circle-user text-cediRed text-base"></i>
@@ -230,9 +235,9 @@
     <nav class="bg-gray-100 border-t border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 flex space-x-6 overflow-x-auto text-sm font-medium py-2.5 text-gray-700">
             <a href="/" class="text-cediRed font-bold hover:text-cediRed transition">Accueil</a>
-            <a href="#boutique" class="hover:text-cediRed whitespace-nowrap transition">Boutique & Catalogue</a>
+            <a href="{% url 'liste_catalogue' %}" class="hover:text-cediRed whitespace-nowrap transition">Boutique & Catalogue</a>
             <a href="#editions" class="hover:text-cediRed whitespace-nowrap transition">Éditions CEDI</a>
-            <a href="#ressources" class="hover:text-cediRed whitespace-nowrap transition">Ressources Spirituelles</a>
+            <a href="{% url 'liste_ressources' %}" class="hover:text-cediRed whitespace-nowrap transition">Ressources Spirituelles</a>
             <a href="#points-de-vente" class="hover:text-cediRed whitespace-nowrap transition">Points de Vente</a>
             <a href="#conseils" class="hover:text-cediRed whitespace-nowrap transition">Conseils & Blog</a>
             <a href="{% url 'a_propos' %}" class="hover:text-cediRed whitespace-nowrap transition">À propos</a>
@@ -264,9 +269,9 @@
             <div>
                 <h5 class="text-cediRed font-bold text-base mb-3">Navigation</h5>
                 <ul class="space-y-2 text-xs">
-                    <li><a href="#boutique" class="hover:text-cediRed transition">Boutique en ligne</a></li>
+                    <li><a href="{% url 'liste_catalogue' %}" class="hover:text-cediRed transition">Boutique en ligne</a></li>
                     <li><a href="#editions" class="hover:text-cediRed transition">Éditions CEDI</a></li>
-                    <li><a href="#ressources" class="hover:text-cediRed transition">Vérités Fondamentales</a></li>
+                    <li><a href="{% url 'liste_ressources' %}" class="hover:text-cediRed transition">Vérités Fondamentales</a></li>
                     <li><a href="#points-de-vente" class="hover:text-cediRed transition">Nos 4 Points de Vente</a></li>
                 </ul>
             </div>

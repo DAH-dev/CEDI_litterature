@@ -77,4 +77,7 @@ urlpatterns = [
     path('admin_commandes/', views.liste_commandes, name='liste_commandes'),
     path('admin_commandes/statut/<int:pk>/', views.changer_statut_commande, name='changer_statut_commande'),
     path('temoignage/ajouter/', views.ajouter_temoignage_site, name='ajouter_temoignage_site'),
+    
+    path('catalogue/', views.liste_catalogue, name='liste_catalogue'),
+    path('ressources/', views.liste_ressources, name='liste_ressources'),
 ]
