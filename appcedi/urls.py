@@ -14,8 +14,8 @@ urlpatterns = [
 
     # --- PRODUITS (BOUTIQUE & ADMIN) ---
     path('produit/<int:pk>/', views.detail_produit, name='detail_produit'),
-    path('produit/<int:produit_id>/avis/ajouter/', views.ajouter_avis_produit, name='ajouter_avis_produit'),
-    
+    path('produit/<int:produit_id>/ajouter-avis/', views.ajouter_avis_produit, name='ajouter_avis_produit'),
+
     path('admin_produits/', views.liste_produits, name='liste_produits'),
     path('admin_produits/ajouter/', views.ajouter_produit, name='ajouter_produit'),
     path('admin_produits/modifier/<int:pk>/', views.modifier_produit, name='modifier_produit'),
@@ -68,6 +68,8 @@ urlpatterns = [
     path('admin_avis/', views.liste_avis, name='liste_avis'),
     path('admin_avis/approuver/<int:pk>/', views.approuver_avis, name='approuver_avis'),
     path('admin_avis/rejeter/<int:pk>/', views.rejeter_avis, name='rejeter_avis'),
+    path('admin_avis/detail/<int:pk>/', views.detail_avis, name='detail_avis'),
+    path('admin_avis/statut/<int:pk>/', views.changer_statut_avis, name='changer_statut_avis'),
 
     # --- QUESTIONS / CONSEILS ---
     path('admin_questions/', views.liste_questions, name='liste_questions'),
@@ -80,4 +82,16 @@ urlpatterns = [
     
     path('catalogue/', views.liste_catalogue, name='liste_catalogue'),
     path('ressources/', views.liste_ressources, name='liste_ressources'),
+    
+        # --- TÉMOIGNAGES (ADMIN) ---
+    path('admin_temoignages/', views.liste_temoignages, name='liste_temoignages'),
+    path('admin_temoignages/detail/<int:pk>/', views.detail_temoignage, name='detail_temoignage'),
+    path('admin_temoignages/approuver/<int:pk>/', views.approuver_temoignage, name='approuver_temoignage'),
+    path('admin_temoignages/rejeter/<int:pk>/', views.rejeter_temoignage, name='rejeter_temoignage'),
+    path('admin_temoignages/statut/<int:pk>/', views.changer_statut_temoignage, name='changer_statut_temoignage'),
+    path('admin_temoignages/supprimer/<int:pk>/', views.supprimer_temoignage, name='supprimer_temoignage'),
+
+    # --- TÉMOIGNAGES (PUBLIC) ---
+    path('temoignages/', views.liste_temoignages_publics, name='liste_temoignages_publics'),
+    path('temoignages/soumettre/', views.soumettre_temoignage, name='soumettre_temoignage'),
 ]

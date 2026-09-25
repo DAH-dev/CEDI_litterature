@@ -226,3 +226,23 @@ class Profil(models.Model):
     def __str__(self):
         return f"Profil de {self.user.username}"
     
+class Temoignage(models.Model):
+    STATUT_CHOICES = [
+        ('en_attente', 'En attente'),
+        ('approuve', 'Approuvé'),
+        ('rejete', 'Rejeté'),
+    ]
+
+    utilisateur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='temoignages')
+    contenu = models.TextField(verbose_name="Témoignage")
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Témoignage"
+        verbose_name_plural = "Témoignages"
+        ordering = ['-date_creation']
+
+    def __str__(self):
+        return f"Témoignage de {self.utilisateur.username}"
+    

@@ -3,14 +3,19 @@
 {% block title %}Catalogue - CEDI Littérature{% endblock %}
 
 {% block content %}
-<section class="bg-cediCream py-10 px-4 border-b-2 border-cediGold">
-    <div class="max-w-7xl mx-auto text-center">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-cediRed mb-2">Notre Catalogue</h1>
-        <p class="text-sm md:text-base text-gray-600">
-            {{ total_produits }} ouvrage{{ total_produits|pluralize }} disponible{{ total_produits|pluralize }}
+{% if q %}
+<section class="bg-white py-4 px-4 border-b border-gray-200">
+    <div class="max-w-7xl mx-auto">
+        <p class="text-sm text-gray-600">
+            <i class="fa-solid fa-magnifying-glass text-cediRed"></i>
+            Résultats pour : <strong>"{{ q }}"</strong>
+            <a href="{% url 'liste_catalogue' %}" class="text-cediRed hover:underline ml-2 text-xs">
+                <i class="fa-solid fa-xmark"></i> Effacer
+            </a>
         </p>
     </div>
 </section>
+{% endif %}
 
 <section class="py-10 px-4">
     <div class="max-w-7xl mx-auto">

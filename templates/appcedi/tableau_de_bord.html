@@ -12,6 +12,9 @@
     <a href="{% url 'liste_avis' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-star"></i> Avis</a>
     <a href="{% url 'liste_commandes' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-truck"></i> Commandes</a>
     <a href="{% url 'liste_questions' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-question"></i> Questions</a>
+    <a href="{% url 'liste_temoignages' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold">
+    <i class="fa-solid fa-comment-dots"></i> Témoignages
+</a>
 </div>
 {% endblock %}
 
@@ -35,6 +38,10 @@
     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center">
         <div class="text-3xl font-bold text-cediRed">{{ total_promotions }}</div>
         <div class="text-sm text-gray-600">Promotions</div>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center">
+    <div class="text-3xl font-bold text-cediRed">{{ temoignages_en_attente }}</div>
+    <div class="text-sm text-gray-600">Témoignages en attente</div>
     </div>
 </div>
 

@@ -1,4 +1,4 @@
-from .models import Panier
+from .models import *
 
 
 def panier_context(request):
@@ -24,4 +24,5 @@ def panier_context(request):
 
     return {
         'nombre_articles_panier': nombre_articles,
+        'categories_menu': Categorie.objects.all(),
     }

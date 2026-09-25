@@ -1,0 +1,65 @@
+{% extends 'appcedi/base.html' %}
+
+{% block title %}Témoignages - CEDI Littérature{% endblock %}
+
+{% block content %}
+<section class="bg-cediCream py-12 px-4 border-b-2 border-cediGold">
+    <div class="max-w-7xl mx-auto text-center">
+        <i class="fa-solid fa-comment-dots text-4xl text-cediRed mb-3"></i>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-cediRed mb-2">Témoignages</h1>
+        <p class="text-sm md:text-base text-gray-600 max-w-2xl mx-auto">
+            Découvrez ce que notre communauté dit de CEDI Littérature.
+        </p>
+    </div>
+</section>
+
+<section class="py-10 px-4">
+    <div class="max-w-5xl mx-auto">
+
+        <!-- Formulaire de soumission (pour utilisateurs connectés) -->
+        {% if user.is_authenticated %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <h2 class="text-lg font-bold text-gray-800 mb-3">Partagez votre témoignage</h2>
+            <form action="{% url 'soumettre_temoignage' %}" method="post">
+                {% csrf_token %}
+                <textarea name="contenu" rows="4" required placeholder="Racontez votre expérience..."
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:border-cediRed text-sm"></textarea>
+                <button type="submit" class="bg-cediRed hover:bg-cediRedDark text-white font-bold py-2 px-5 rounded-lg text-sm transition">
+                    <i class="fa-solid fa-paper-plane"></i> Envoyer
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div class="bg-gray-50 rounded-xl border border-gray-200 p-4 mb-8 text-center text-sm text-gray-600">
+            <a href="{% url 'connexion' %}?next={{ request.path }}" class="text-cediRed font-bold hover:underline">Connectez-vous</a> pour partager votre témoignage.
+        </div>
+        {% endif %}
+
+        <!-- Liste des témoignages approuvés -->
+        {% if temoignages %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {% for t in temoignages %}
+            <div class="bg-white rounded-xl shadow-sm border-l-4 border-cediGold p-5">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-cediRed text-white font-bold flex items-center justify-center">
+                        {{ t.utilisateur.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm">{{ t.utilisateur.username }}</p>
+                        <p class="text-xs text-gray-500">{{ t.date_creation|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{{ t.contenu }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+            <i class="fa-solid fa-comment-slash text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-600 text-lg">Aucun témoignage publié pour le moment.</p>
+            <p class="text-sm text-gray-400 mt-2">Soyez le premier à partager votre expérience !</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

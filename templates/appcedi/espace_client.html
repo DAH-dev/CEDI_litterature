@@ -64,7 +64,7 @@
             <table class="w-full text-left text-xs sm:text-sm min-w-[500px]">
                 <thead class="bg-gray-50 text-gray-600 font-bold border-b border-gray-200 uppercase text-[11px] tracking-wider">
                     <tr>
-                        <th class="p-3 sm:p-4">N° Commande</th>
+                        <th class="p-3 sm:p-4">Référence</th>
                         <th class="p-3 sm:p-4">Date</th>
                         <th class="p-3 sm:p-4">Statut</th>
                         <th class="p-3 sm:p-4">Total</th>
@@ -73,20 +73,28 @@
                 <tbody class="divide-y divide-gray-200">
                     {% for commande in commandes %}
                     <tr class="hover:bg-gray-50 transition">
-                        <td class="p-3 sm:p-4 font-bold text-gray-900">#{{ commande.id }}</td>
+                        <td class="p-3 sm:p-4 font-bold text-gray-900">{{ commande.reference_commande }}</td>
                         <td class="p-3 sm:p-4 text-gray-600">{{ commande.date_commande|date:"d/m/Y" }}</td>
                         <td class="p-3 sm:p-4">
-                            {% if commande.statut == 'LIVRE' %}
+                            {% if commande.statut == 'livree' %}
                                 <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">
-                                    {{ commande.get_statut_display|default:commande.statut }}
+                                    {{ commande.get_statut_display }}
+                                </span>
+                            {% elif commande.statut == 'payee' or commande.statut == 'expediee' %}
+                                <span class="bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">
+                                    {{ commande.get_statut_display }}
+                                </span>
+                            {% elif commande.statut == 'prete_retrait' %}
+                                <span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">
+                                    {{ commande.get_statut_display }}
                                 </span>
                             {% else %}
                                 <span class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">
-                                    {{ commande.get_statut_display|default:commande.statut }}
+                                    {{ commande.get_statut_display }}
                                 </span>
                             {% endif %}
                         </td>
-                        <td class="p-3 sm:p-4 font-bold text-cediRed">{{ commande.total }} FCFA</td>
+                        <td class="p-3 sm:p-4 font-bold text-cediRed">{{ commande.montant_total }} FCFA</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -157,7 +165,7 @@
         </div>
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-gray-200">
             <h3 class="text-base sm:text-lg font-bold text-gray-800">Total: <span class="text-cediRed">{{ panier_total }} FCFA</span></h3>
-            <a href="#" class="w-full sm:w-auto bg-cediRed hover:bg-cediRedDark text-white font-bold py-2.5 px-6 rounded-lg text-center text-xs sm:text-sm transition">Valider la commande</a>
+            <a href="{% url 'valider_commande' %}" class="w-full sm:w-auto bg-cediRed hover:bg-cediRedDark text-white font-bold py-2.5 px-6 rounded-lg text-center text-xs sm:text-sm transition">Valider la commande</a>
         </div>
         {% else %}
         <p class="text-xs sm:text-sm text-gray-500 py-4">Votre panier est actuellement vide.</p>

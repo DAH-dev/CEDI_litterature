@@ -125,6 +125,7 @@ def tableau_de_bord(request):
         'commandes_attente': Commande.objects.filter(statut='attente_paiement').count(),
         'avis_en_attente': AvisClient.objects.filter(statut='en_attente').count(),
         'questions_en_attente': QuestionConseil.objects.filter(statut='en_attente').count(),
+        'temoignages_en_attente': Temoignage.objects.filter(statut='en_attente').count(),
     }
     return render(request, 'appcedi/tableau_de_bord.html', context)
 
@@ -164,7 +165,7 @@ def detail_produit(request, pk):
     produit = get_object_or_404(Produit, pk=pk, statut=True)
     mon_avis = None
     if request.user.is_authenticated:
-        mon_avis = AvisProduit.objects.filter(produit=produit, utilisateur=request.user).first()
+        mon_avis = AvisClient.objects.filter(produit=produit, utilisateur=request.user).first()
     images = produit.images.all()
     image_principale = images.filter(est_principale=True).first()
     if not image_principale and images.exists():
@@ -241,27 +242,47 @@ def supprimer_produit(request, pk):
 from django.core.paginator import Paginator
 from django.db.models import Q
 
+import re
+from django.db.models import Q
+from django.core.paginator import Paginator
+
 def liste_catalogue(request):
-    """Affiche tous les produits avec filtres et recherche."""
+    """Affiche tous les produits avec filtres, recherche texte ET prix."""
     produits = Produit.objects.filter(statut=True).order_by('-id')
     categories = Categorie.objects.all()
 
-    # 🔍 Recherche
-    q = request.GET.get('q')
+    # 🔍 Recherche intelligente (texte OU prix)
+    q = request.GET.get('q', '').strip()
+
     if q:
-        produits = produits.filter(
-            Q(titre__icontains=q) |
-            Q(auteur__icontains=q) |
-            Q(editeur__icontains=q) |
-            Q(description__icontains=q)
-        )
+        # Détection d'une plage de prix : "3000-6000" ou "3000 et 6000" ou "entre 3000 et 6000"
+        plage_match = re.match(r'^(?:entre\s+)?(\d+)\s*(?:-|et|à)\s*(\d+)\s*(?:fcfa|f)?$', q.lower())
+
+        # Détection d'un prix max : "5000" ou "moins de 5000" ou "<5000" ou "5000 fcfa"
+        prix_match = re.match(r'^(?:moins\s+de\s+|<\s*)?(\d+)\s*(?:fcfa|f)?$', q.lower())
+
+        if plage_match:
+            min_p = int(plage_match.group(1))
+            max_p = int(plage_match.group(2))
+            produits = produits.filter(prix__gte=min_p, prix__lte=max_p)
+        elif prix_match:
+            max_p = int(prix_match.group(1))
+            produits = produits.filter(prix__lte=max_p)
+        else:
+            # Recherche textuelle normale
+            produits = produits.filter(
+                Q(titre__icontains=q) |
+                Q(auteur__icontains=q) |
+                Q(editeur__icontains=q) |
+                Q(description__icontains=q)
+            )
 
     # 🏷️ Filtre par catégorie
     cat_id = request.GET.get('categorie')
     if cat_id:
         produits = produits.filter(categories__id=cat_id)
 
-    # 💰 Filtre par prix
+    # 💰 Filtre par prix (depuis le menu déroulant)
     prix = request.GET.get('prix')
     if prix == 'bas':
         produits = produits.filter(prix__lt=3000)
@@ -270,12 +291,17 @@ def liste_catalogue(request):
     elif prix == 'haut':
         produits = produits.filter(prix__gt=6000)
 
+    # 📚 Filtre par type de produit
+    type_produit = request.GET.get('type')
+    if type_produit:
+        produits = produits.filter(type_produit=type_produit)
+
     # ⭐ Filtre Édition CEDI
     if request.GET.get('cedi') == '1':
         produits = produits.filter(est_edition_cedi=True)
 
     # 📄 Pagination
-    paginator = Paginator(produits.distinct(), 12)  # 12 produits par page
+    paginator = Paginator(produits.distinct(), 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -285,10 +311,12 @@ def liste_catalogue(request):
         'q': q,
         'cat_selectionnee': cat_id,
         'prix_selectionne': prix,
+        'type_selectionne': type_produit,
         'cedi_selectionne': request.GET.get('cedi') == '1',
         'total_produits': produits.distinct().count(),
     }
     return render(request, 'appcedi/catalogue.html', context)
+
 def liste_ressources(request):
     """Affiche tous les articles publiés (Enseignements, Vérités, Conseils, Partages)."""
     articles = ArticleBlog.objects.filter(statut='publie').order_by('-date_publication')
@@ -321,6 +349,7 @@ def liste_ressources(request):
         'total_articles': articles.count(),
     }
     return render(request, 'appcedi/ressources.html', context)
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def definir_principale(request, image_id):
@@ -664,23 +693,23 @@ def basculer_liste_souhaits(request, produit_id):
     return redirect('voir_liste_souhaits')
 @login_required
 def espace_client(request):
-    # Récupérer l'onglet actif passé en paramètre GET (ex: ?tab=commandes), par défaut 'profil'
+    # Onglet actif
     tab = request.GET.get('tab', 'profil')
-    
-    # 1. Historique des commandes
-    commandes = Commande.objects.filter(utilisateur=request.user).order_by('-date_commande') if hasattr(Commande, 'utilisateur') else []
-    
-    # 2. Produits dans la liste de souhaits
+
+    # 1. Historique des commandes (champ = client, pas utilisateur)
+    commandes = Commande.objects.filter(client=request.user).order_by('-date_commande')
+
+    # 2. Liste de souhaits
     souhaits = ListeSouhaits.objects.filter(utilisateur=request.user).select_related('produit')
-    
-    # 3. Contenu du panier
+
+    # 3. Panier (related_name = articles)
     panier_items = []
     panier_total = 0
     try:
         panier = Panier.objects.get(utilisateur=request.user)
-        panier_items = panier.items.all()
+        panier_items = panier.articles.select_related('produit').all()
         panier_total = sum(item.produit.prix * item.quantite for item in panier_items)
-    except Exception:
+    except Panier.DoesNotExist:
         pass
 
     context = {
@@ -703,18 +732,18 @@ def ajouter_avis_produit(request, produit_id):
     if request.method == 'POST':
         produit = get_object_or_404(Produit, pk=produit_id)
         note = request.POST.get('note')
-        commentaire = request.POST.get('commentaire')
+        commentaire = request.POST.get('commentaire', '')
 
-        # - S'il n'en trouve pas : il en CRÉE un nouveau.
-        AvisProduit.objects.update_or_create(
+        AvisClient.objects.update_or_create(
             produit=produit,
             utilisateur=request.user,
             defaults={
                 'note': note,
                 'commentaire': commentaire,
+                'statut': 'en_attente',  # modération par l'admin
             }
         )
-        
+        messages.success(request, "Merci ! Votre avis sera publié après modération.")
     return redirect('detail_produit', pk=produit_id)
 
 
@@ -722,12 +751,15 @@ def ajouter_avis_produit(request, produit_id):
 # 4. VALIDER LA COMMANDE (CHECKOUT)
 # ==========================================
 
+import uuid
+from django.utils import timezone
+
 @login_required
 def valider_commande(request):
     """Transforme le contenu du panier en une commande."""
     try:
         panier = Panier.objects.get(utilisateur=request.user)
-        articles = panier.articles.all()
+        articles = panier.articles.select_related('produit').all()
         if not articles.exists():
             messages.warning(request, "Votre panier est vide.")
             return redirect('voir_panier')
@@ -736,35 +768,41 @@ def valider_commande(request):
         return redirect('voir_panier')
 
     if request.method == 'POST':
-        adresse_livraison = request.POST.get('adresse_livraison')
-        telephone = request.POST.get('telephone')
-        
-        # Calcul du montant total
+        adresse_livraison = request.POST.get('adresse_livraison', '')
+        telephone = request.POST.get('telephone', '')
+        mode = request.POST.get('mode_livraison', 'retrait')  # 'retrait' ou 'livraison'
+
+        # Calcul du total
         total = sum(item.produit.prix * item.quantite for item in articles)
-        
-        # Création de la commande
+
+        # Référence unique
+        reference = f"CMD-{timezone.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+
+        # Création de la commande (noms de champs corrigés)
         commande = Commande.objects.create(
-            utilisateur=request.user,
+            client=request.user,
+            statut='attente_paiement',
+            mode_livraison=mode,
             adresse_livraison=adresse_livraison,
-            telephone=telephone,
-            total=total,
-            statut='en_attente'
+            frais_port=0,
+            montant_total=total,
+            reference_commande=reference,
         )
-        
-        # Transfert des articles du panier vers les lignes de commande
+
+        # Lignes de commande (champ prix_unitaire_au_moment)
         for item in articles:
             LigneCommande.objects.create(
                 commande=commande,
                 produit=item.produit,
                 quantite=item.quantite,
-                prix_unitaire=item.produit.prix
+                prix_unitaire_au_moment=item.produit.prix,
             )
-            
+
         # Vider le panier
         articles.delete()
-        
-        messages.success(request, f"Votre commande N°{commande.id} a été enregistrée avec succès !")
-        return redirect('profil')
+
+        messages.success(request, f"Votre commande {reference} a été enregistrée avec succès !")
+        return redirect('espace_client')
 
     total = sum(item.produit.prix * item.quantite for item in articles)
     return render(request, 'appcedi/panier/checkout.html', {'articles': articles, 'total': total})
@@ -774,15 +812,98 @@ def valider_commande(request):
 @login_required
 def ajouter_temoignage_site(request):
     if request.method == 'POST':
-        commentaire = request.POST.get('commentaire')
-        AvisClient.objects.create(
-            utilisateur=request.user,
-            commentaire=commentaire,
-            approuve=False
-        )
-        messages.success(request, "Merci ! Votre témoignage sur le site a été transmis à l'équipe.")
+        contenu = request.POST.get('commentaire') or request.POST.get('contenu')
+        if contenu:
+            Temoignage.objects.create(
+                utilisateur=request.user,
+                contenu=contenu,
+                statut='en_attente',
+            )
+            messages.success(request, "Merci ! Votre témoignage a été transmis à l'équipe.")
     return redirect(request.META.get('HTTP_REFERER', 'accueil'))
 
+# ========== TÉMOIGNAGES (ADMIN) ==========
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def liste_temoignages(request):
+    temoignages = Temoignage.objects.all().order_by('-date_creation')
+    return render(request, 'appcedi/admin/liste_temoignages.html', {'temoignages': temoignages})
+
+
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def detail_temoignage(request, pk):
+    temoignage = get_object_or_404(Temoignage, pk=pk)
+    return render(request, 'appcedi/admin/detail_temoignage.html', {'temoignage': temoignage})
+
+
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def approuver_temoignage(request, pk):
+    temoignage = get_object_or_404(Temoignage, pk=pk)
+    temoignage.statut = 'approuve'
+    temoignage.save()
+    messages.success(request, "Témoignage approuvé avec succès !")
+    return redirect('liste_temoignages')
+
+
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def rejeter_temoignage(request, pk):
+    temoignage = get_object_or_404(Temoignage, pk=pk)
+    temoignage.statut = 'rejete'
+    temoignage.save()
+    messages.success(request, "Témoignage rejeté.")
+    return redirect('liste_temoignages')
+
+
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def changer_statut_temoignage(request, pk):
+    temoignage = get_object_or_404(Temoignage, pk=pk)
+    if request.method == 'POST':
+        nouveau_statut = request.POST.get('statut')
+        if nouveau_statut in dict(Temoignage.STATUT_CHOICES).keys():
+            temoignage.statut = nouveau_statut
+            temoignage.save()
+            messages.success(request, f'Statut mis à jour : {temoignage.get_statut_display()}')
+        return redirect('liste_temoignages')
+    return render(request, 'appcedi/admin/changer_statut_temoignage.html', {'temoignage': temoignage})
+
+
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def supprimer_temoignage(request, pk):
+    temoignage = get_object_or_404(Temoignage, pk=pk)
+    if request.method == 'POST':
+        temoignage.delete()
+        messages.success(request, "Témoignage supprimé.")
+        return redirect('liste_temoignages')
+    return render(request, 'appcedi/admin/supprimer_temoignage.html', {'temoignage': temoignage})
+
+
+# ========== TÉMOIGNAGES (PUBLIC) ==========
+def liste_temoignages_publics(request):
+    """Affiche tous les témoignages approuvés."""
+    temoignages = Temoignage.objects.filter(statut='approuve').order_by('-date_creation')
+    return render(request, 'appcedi/temoignages.html', {'temoignages': temoignages})
+
+
+@login_required
+def soumettre_temoignage(request):
+    """Un utilisateur connecté soumet un témoignage."""
+    if request.method == 'POST':
+        contenu = request.POST.get('contenu', '').strip()
+        if contenu:
+            Temoignage.objects.create(
+                utilisateur=request.user,
+                contenu=contenu,
+                statut='en_attente',
+            )
+            messages.success(request, "Merci ! Votre témoignage sera publié après modération.")
+        else:
+            messages.error(request, "Merci d'écrire votre témoignage avant d'envoyer.")
+    return redirect(request.META.get('HTTP_REFERER', 'accueil'))
 
 
 
@@ -849,6 +970,27 @@ def liste_avis(request):
     avis = AvisClient.objects.all().order_by('-date_creation')
     return render(request, 'appcedi/admin/liste_avis.html', {'avis': avis})
 
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def detail_avis(request, pk):
+    """Affiche le détail d'un avis."""
+    avis = get_object_or_404(AvisClient, pk=pk)
+    return render(request, 'appcedi/admin/detail_avis.html', {'avis': avis})
+
+
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def changer_statut_avis(request, pk):
+    """Change le statut d'un avis (approuvé, rejeté, en attente)."""
+    avis = get_object_or_404(AvisClient, pk=pk)
+    if request.method == 'POST':
+        nouveau_statut = request.POST.get('statut')
+        if nouveau_statut in dict(AvisClient.STATUT_CHOICES).keys():
+            avis.statut = nouveau_statut
+            avis.save()
+            messages.success(request, f'Statut mis à jour : {avis.get_statut_display()}')
+        return redirect('liste_avis')
+    return render(request, 'appcedi/admin/changer_statut_avis.html', {'avis': avis})
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -910,3 +1052,16 @@ def changer_statut_commande(request, pk):
             messages.success(request, f'Statut de la commande mis à jour : {commande.get_statut_display()}')
         return redirect('liste_commandes')
     return render(request, 'appcedi/admin/changer_statut_commande.html', {'commande': commande})
+
+@login_required
+def ajouter_temoignage_site(request):
+    if request.method == 'POST':
+        contenu = request.POST.get('commentaire') or request.POST.get('contenu')
+        if contenu:
+            Temoignage.objects.create(
+                utilisateur=request.user,
+                contenu=contenu,
+                statut='en_attente',
+            )
+            messages.success(request, "Merci ! Votre témoignage a été transmis à l'équipe.")
+    return redirect(request.META.get('HTTP_REFERER', 'accueil'))
