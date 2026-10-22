@@ -12,32 +12,43 @@
         <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
             <div class="divide-y divide-gray-200">
                 {% for article in articles %}
-                <div class="py-4 flex items-center justify-between">
-                    <div class="flex-1">
-                        <h2 class="text-lg font-semibold text-gray-800">{{ article.produit.titre }}</h2>
-                        <p class="text-gray-600 text-sm">Prix unitaire: {{ article.produit.prix }} FCFA</p>
+                <div class="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                     data-article-id="{{ article.id }}"
+                     data-prix-unitaire="{{ article.produit.prix }}">
+                    <div class="flex-1 min-w-0">
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-800 break-words">
+                            {{ article.produit.titre }}
+                        </h2>
+                        <p class="text-gray-600 text-sm mt-1">
+                            Prix unitaire: <span class="prix-unitaire">{{ article.produit.prix }}</span> FCFA
+                        </p>
                     </div>
 
-                    <!-- Quantité -->
-                    <div class="flex items-center space-x-2">
-                        <form method="POST" action="{% url 'modifier_quantite_panier' article.id %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="reduire">
-                            <button type="submit" class="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 font-bold text-gray-700">-</button>
-                        </form>
-                        <span class="w-8 text-center font-semibold">{{ article.quantite }}</span>
-                        <form method="POST" action="{% url 'modifier_quantite_panier' article.id %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="augmenter">
-                            <button type="submit" class="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 font-bold text-gray-700">+</button>
-                        </form>
-                    </div>
+                    <div class="flex items-center justify-between sm:justify-end gap-4">
+                        <!-- Quantité avec boutons data-action -->
+                        <div class="flex items-center space-x-2">
+                            <button type="button"
+                                    class="btn-quantite w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 font-bold text-gray-700"
+                                    data-action="reduire"
+                                    data-url="{% url 'modifier_quantite_panier' article.id %}">
+                                -
+                            </button>
+                            <span class="w-8 text-center font-semibold quantite-valeur">{{ article.quantite }}</span>
+                            <button type="button"
+                                    class="btn-quantite w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 font-bold text-gray-700"
+                                    data-action="augmenter"
+                                    data-url="{% url 'modifier_quantite_panier' article.id %}">
+                                +
+                            </button>
+                        </div>
 
-                    <!-- Supprimer -->
-                    <div class="ml-6">
-                        <a href="{% url 'supprimer_du_panier' article.id %}" class="text-red-500 hover:text-red-700 font-medium text-sm">
-                            Supprimer
-                        </a>
+                        <!-- Supprimer -->
+                        <div>
+                            <a href="{% url 'supprimer_du_panier' article.id %}"
+                               class="text-red-500 hover:text-red-700 font-medium text-sm whitespace-nowrap">
+                                Supprimer
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
@@ -49,9 +60,10 @@
             <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Récapitulatif</h2>
             <div class="flex justify-between items-center text-lg font-bold mb-6">
                 <span>Total :</span>
-                <span class="text-cediRed">{{ total }} FCFA</span>
+                <span class="text-cediRed" id="panier-total">{{ total }} FCFA</span>
             </div>
-            <a href="{% url 'valider_commande' %}" class="block text-center w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md transition">
+            <a href="{% url 'valider_commande' %}"
+               class="block text-center w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md transition">
                 Passer la commande
             </a>
         </div>
@@ -59,10 +71,62 @@
     {% else %}
     <div class="bg-white rounded-lg shadow-md p-8 text-center">
         <p class="text-gray-600 text-lg mb-4">Votre panier est actuellement vide.</p>
-        <a href="{% url 'accueil' %}" class="inline-block bg-cediRed hover:bg-cediRedDark text-white font-medium py-2 px-6 rounded-md transition">
+        <a href="{% url 'liste_catalogue' %}"
+           class="inline-block bg-cediRed hover:bg-cediRedDark text-white font-medium py-2 px-6 rounded-md transition">
             Découvrir nos produits
         </a>
     </div>
     {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value
+                    || '{{ csrf_token }}';
+
+  document.querySelectorAll('.btn-quantite').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const url = btn.dataset.url;
+      const action = btn.dataset.action;
+      const articleDiv = btn.closest('[data-article-id]');
+
+      // Désactive le bouton pendant la requête
+      btn.disabled = true;
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest',  // ← détecté par Django
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=' + encodeURIComponent(action),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (!data.success) return;
+
+          if (data.quantite === 0) {
+              // L'article a été supprimé, on retire la ligne du DOM
+              articleDiv.remove();
+              // Si le panier est vide, on recharge la page
+              if (document.querySelectorAll('[data-article-id]').length === 0) {
+                  window.location.reload();
+              }
+          } else {
+              // Mise à jour de la quantité
+              articleDiv.querySelector('.quantite-valeur').textContent = data.quantite;
+          }
+
+          // Mise à jour du total général
+          document.getElementById('panier-total').textContent = data.total_panier + ' FCFA';
+        })
+        .catch(err => console.error('Erreur AJAX:', err))
+        .finally(() => {
+          btn.disabled = false;
+        });
+    });
+  });
+});
+</script>
 {% endblock %}

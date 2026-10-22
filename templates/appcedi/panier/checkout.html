@@ -1,50 +1,119 @@
 {% extends 'appcedi/base.html' %}
 
-{% block title %}Valider la commande{% endblock %}
+{% block title %}Valider ma commande - CEDI Littérature{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-8 px-4">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Validation de la Commande</h1>
+<div class="max-w-5xl mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Finaliser ma commande</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Formulaire de livraison -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Informations de livraison</h2>
-            <form method="POST">
-                {% csrf_token %}
-                <div class="mb-4">
-                    <label for="adresse_livraison" class="block text-sm font-medium text-gray-700 mb-1">Adresse de livraison</label>
-                    <textarea name="adresse_livraison" id="adresse_livraison" rows="3" required class="w-full border border-gray-300 rounded-md p-2 focus:ring-cediRed focus:border-cediRed"></textarea>
+    <form method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {% csrf_token %}
+        
+        <!-- Colonne de gauche : Informations de livraison -->
+        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-3">Informations de réception</h2>
+
+            <!-- Choix du mode -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Comment souhaitez-vous recevoir votre commande ?</label>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <label class="flex-1 border border-gray-300 rounded-lg p-4 cursor-pointer hover:border-cediRed transition flex items-center gap-3">
+                        <input type="radio" name="mode_livraison" value="retrait" checked class="accent-cediRed w-4 h-4">
+                        <div>
+                            <span class="block font-bold text-gray-800">Retrait gratuit en boutique</span>
+                            <span class="text-xs text-gray-500">Disponible sous 24h</span>
+                        </div>
+                    </label>
+                    <label class="flex-1 border border-gray-300 rounded-lg p-4 cursor-pointer hover:border-cediRed transition flex items-center gap-3">
+                        <input type="radio" name="mode_livraison" value="livraison" class="accent-cediRed w-4 h-4">
+                        <div>
+                            <span class="block font-bold text-gray-800">Livraison à domicile</span>
+                            <span class="text-xs text-gray-500">Frais de port à confirmer</span>
+                        </div>
+                    </label>
                 </div>
-                <div class="mb-6">
-                    <label for="telephone" class="block text-sm font-medium text-gray-700 mb-1">Numéro de téléphone</label>
-                    <input type="text" name="telephone" id="telephone" required class="w-full border border-gray-300 rounded-md p-2 focus:ring-cediRed focus:border-cediRed">
-                </div>
-                <button type="submit" class="w-full bg-cediRed hover:bg-cediRedDark text-white font-bold py-3 px-4 rounded-md transition">
-                    Confirmer la commande ({{ total }} FCFA)
-                </button>
-            </form>
+            </div>
+
+            <!-- Zone Retrait (Affichée par défaut) -->
+            <div id="zone-retrait" class="mb-4">
+                <label for="point_vente_retrait" class="block text-sm font-bold text-gray-700 mb-2">Choisissez votre point de retrait :</label>
+                <select name="point_vente_retrait" id="point_vente_retrait" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed">
+                    {% for pv in points_vente %}
+                        <option value="{{ pv.id }}">{{ pv.nom }} - {{ pv.adresse_complete|truncatechars:40 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Zone Livraison (Cachée par défaut) -->
+            <div id="zone-livraison" class="mb-4 hidden">
+                <label for="adresse_livraison" class="block text-sm font-bold text-gray-700 mb-2">Adresse de livraison :</label>
+                <textarea name="adresse_livraison" id="adresse_livraison" rows="3" placeholder="Quartier, rue, repère..." class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed"></textarea>
+            </div>
+
+            <!-- Téléphone (toujours demandé) -->
+            <div>
+                <label for="telephone" class="block text-sm font-bold text-gray-700 mb-2">Numéro de téléphone (pour vous joindre) :</label>
+                <input type="tel" name="telephone" id="telephone" required placeholder="Ex: 07 00 00 00 00" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cediRed">
+            </div>
+
+            <!-- Info paiement -->
+            <div class="mt-8 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <p class="text-sm text-amber-800">
+                    <i class="fa-solid fa-circle-info mr-1"></i> <strong>Paiement hors-ligne :</strong> Le paiement se fera par Orange Money :0777891070, MTN MoMo 0504101014 , Wave 0777891070/0504101014 ou en espèces lors du retrait ou de la livraison. Nous vous contacterons pour confirmer.
+                </p>
+            </div>
         </div>
 
-        <!-- Résumé de la commande -->
-        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Résumé des articles</h2>
+        <!-- Colonne de droite : Récapitulatif -->
+        <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 h-fit sticky top-24">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Résumé de la commande</h2>
+            
             <ul class="divide-y divide-gray-200 mb-4">
                 {% for item in articles %}
-                <li class="py-2 flex justify-between">
-                    <div>
-                        <p class="font-medium text-gray-800">{{ item.produit.titre }}</p>
-                        <p class="text-xs text-gray-500">Quantité: {{ item.quantite }}</p>
+                <li class="py-3 flex justify-between items-start gap-2">
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800 text-sm">{{ item.produit.titre|truncatechars:30 }}</p>
+                        <p class="text-xs text-gray-500">Qté: {{ item.quantite }}</p>
                     </div>
-                    <span class="font-semibold text-gray-700">{{ item.produit.prix }} FCFA</span>
+                    <span class="font-bold text-gray-700 text-sm">{{ item.produit.prix }} FCFA</span>
                 </li>
                 {% endfor %}
             </ul>
-            <div class="pt-4 border-t flex justify-between font-bold text-lg">
-                <span>Total à payer :</span>
+            
+            <div class="pt-4 border-t border-gray-300 flex justify-between items-center font-bold text-xl mb-6">
+                <span>Total :</span>
                 <span class="text-cediRed">{{ total }} FCFA</span>
             </div>
+            
+            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 px-4 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                <i class="fa-solid fa-check-circle"></i> Confirmer la commande
+            </button>
         </div>
-    </div>
+    </form>
 </div>
+
+<script>
+    // Gérer l'affichage conditionnel (Retrait vs Livraison)
+    document.addEventListener('DOMContentLoaded', function() {
+        const radioRetrait = document.querySelector('input[value="retrait"]');
+        const radioLivraison = document.querySelector('input[value="livraison"]');
+        const zoneRetrait = document.getElementById('zone-retrait');
+        const zoneLivraison = document.getElementById('zone-livraison');
+
+        function updateZones() {
+            if (radioLivraison.checked) {
+                zoneRetrait.classList.add('hidden');
+                zoneLivraison.classList.remove('hidden');
+                document.getElementById('adresse_livraison').required = true;
+            } else {
+                zoneLivraison.classList.add('hidden');
+                zoneRetrait.classList.remove('hidden');
+                document.getElementById('adresse_livraison').required = false;
+            }
+        }
+
+        radioRetrait.addEventListener('change', updateZones);
+        radioLivraison.addEventListener('change', updateZones);
+    });
+</script>
 {% endblock %}

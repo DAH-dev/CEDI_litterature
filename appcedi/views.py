@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -83,6 +84,12 @@ def connexion(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Bonjour {username} !')
+                
+                # 👇 GESTION DU PARAMÈTRE NEXT (Redirection après connexion)
+                next_url = request.GET.get('next') or request.POST.get('next')
+                if next_url:
+                    return redirect(next_url)
+                    
                 return redirect('accueil')
     else:
         form = AuthenticationForm()
@@ -641,21 +648,45 @@ def ajouter_au_panier(request, produit_id):
     return redirect('voir_panier')
 
 
+from django.http import JsonResponse
+
 def modifier_quantite_panier(request, article_id):
     """Met à jour la quantité d'un article dans le panier."""
     article = get_object_or_404(ArticlePanier, id=article_id)
-    action = request.POST.get('action') # 'augmenter' ou 'reduire'
+    action = request.POST.get('action')  # 'augmenter' ou 'reduire'
 
+    quantite_affichage = 0
+    
     if action == 'augmenter':
         article.quantite += 1
         article.save()
+        quantite_affichage = article.quantite
     elif action == 'reduire':
         if article.quantite > 1:
             article.quantite -= 1
             article.save()
+            quantite_affichage = article.quantite
         else:
+            # Si la quantité tombe à 0, on supprime l'article
             article.delete()
+            quantite_affichage = 0
 
+    # Si la requête vient du JavaScript (AJAX), on renvoie du JSON
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # Recalcul du panier
+        try:
+            panier = article.panier
+            total = sum(item.total_ligne() for item in panier.articles.all())
+        except:
+            total = 0
+            
+        return JsonResponse({
+            'success': True,
+            'quantite': quantite_affichage,
+            'total_panier': total
+        })
+
+    # Sinon, comportement classique (rechargement de la page)
     return redirect('voir_panier')
 
 
@@ -753,10 +784,13 @@ def ajouter_avis_produit(request, produit_id):
 
 import uuid
 from django.utils import timezone
+from django.http import JsonResponse
 
 @login_required
 def valider_commande(request):
-    """Transforme le contenu du panier en une commande."""
+    """Transforme le contenu du panier en une commande (paiement hors-ligne)."""
+    
+    # Récupération du panier
     try:
         panier = Panier.objects.get(utilisateur=request.user)
         articles = panier.articles.select_related('produit').all()
@@ -768,28 +802,31 @@ def valider_commande(request):
         return redirect('voir_panier')
 
     if request.method == 'POST':
+        # Récupération des infos du formulaire
+        mode_livraison = request.POST.get('mode_livraison', 'retrait')
+        point_vente_id = request.POST.get('point_vente_retrait')
         adresse_livraison = request.POST.get('adresse_livraison', '')
         telephone = request.POST.get('telephone', '')
-        mode = request.POST.get('mode_livraison', 'retrait')  # 'retrait' ou 'livraison'
-
-        # Calcul du total
+        
+        # Calcul du montant total
         total = sum(item.produit.prix * item.quantite for item in articles)
-
-        # Référence unique
+        
+        # Génération d'une référence unique (ex: CMD-20260925-A1B2C3)
         reference = f"CMD-{timezone.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
 
-        # Création de la commande (noms de champs corrigés)
+        # Création de la commande
         commande = Commande.objects.create(
             client=request.user,
-            statut='attente_paiement',
-            mode_livraison=mode,
-            adresse_livraison=adresse_livraison,
-            frais_port=0,
+            statut='attente_paiement',  # On attend le paiement hors-ligne
+            mode_livraison=mode_livraison,
+            point_vente_retrait_id=point_vente_id if mode_livraison == 'retrait' else None,
+            adresse_livraison=adresse_livraison if mode_livraison == 'livraison' else '',
+            frais_port=0, # À modifier si tu ajoutes des frais de livraison
             montant_total=total,
             reference_commande=reference,
         )
 
-        # Lignes de commande (champ prix_unitaire_au_moment)
+        # Création des lignes de commande
         for item in articles:
             LigneCommande.objects.create(
                 commande=commande,
@@ -801,11 +838,19 @@ def valider_commande(request):
         # Vider le panier
         articles.delete()
 
-        messages.success(request, f"Votre commande {reference} a été enregistrée avec succès !")
-        return redirect('espace_client')
+        # Message de succès
+        messages.success(request, f"Votre commande {reference} a été enregistrée avec succès ! Veuillez procéder au paiement pour la valider.")
+        return redirect('espace_client') # Redirige vers l'espace client pour voir la commande
 
+    # Si c'est un GET, on affiche la page de checkout
     total = sum(item.produit.prix * item.quantite for item in articles)
-    return render(request, 'appcedi/panier/checkout.html', {'articles': articles, 'total': total})
+    points_vente = PointVente.objects.all()
+    
+    return render(request, 'appcedi/panier/checkout.html', {
+        'articles': articles, 
+        'total': total,
+        'points_vente': points_vente
+    })
 
 
 # Soumettre un témoignage général sur le site (ex: page d'accueil ou à propos)

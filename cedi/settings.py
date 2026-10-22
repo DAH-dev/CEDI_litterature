@@ -78,3 +78,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Emails (affichés dans la console pour le test)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Redirection personnalisée pour la connexion
+LOGIN_URL = 'connexion'
+LOGIN_REDIRECT_URL = 'accueil'
+LOGOUT_REDIRECT_URL = 'accueil'

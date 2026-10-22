@@ -14,24 +14,65 @@
   }
   .ap-container{ max-width:1100px; margin:0 auto; padding:0 20px; }
 
-  /* Hero avec image */
-  .ap-hero{ position:relative; margin-bottom:56px; overflow:hidden; }
-  .ap-hero img{ width:100%; height:320px; object-fit:cover; display:block; }
-  .ap-hero-overlay{
-    position:absolute; inset:0; background:linear-gradient(to top, rgba(107,21,24,0.85), rgba(107,21,24,0.35));
-    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;
-  }
-  .ap-eyebrow{
-    display:inline-flex; align-items:center; gap:8px; background:#fff; border:2px solid var(--cedi-gold);
-    color:var(--cedi-red); font-size:12px; font-weight:bold; text-transform:uppercase;
-    padding:6px 16px; border-radius:999px; margin-bottom:16px;
-  }
-  .ap-hero h1{ font-size:32px; color:#fff; margin:0 0 12px; }
-  .ap-hero p{ font-size:15px; color:rgba(255,255,255,0.9); max-width:520px; margin:0 auto; line-height:1.6; }
-
   .ap-section{ margin-bottom:60px; }
   .ap-section h2{ font-size:24px; color:#111827; margin:0 0 8px; }
   .ap-section .ap-sub{ font-size:14px; color:var(--ink-soft); margin:0 0 28px; max-width:640px; }
+
+  /* ===== NOTRE HISTOIRE (LAYOUT 2 COLONNES) ===== */
+  .ap-history-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .ap-history-layout { grid-template-columns: 1fr; gap: 30px; }
+  }
+
+  /* Image à gauche */
+  .ap-history-img-wrap {
+    position: sticky; /* L'image reste fixe pendant le scroll de la frise */
+    top: 100px;
+  }
+  .ap-history-img {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border: 3px solid #fff;
+  }
+  @media (max-width: 860px) {
+    .ap-history-img { height: 300px; }
+    .ap-history-img-wrap { position: relative; top: 0; }
+  }
+
+  /* ===== FRISE CHRONOLOGIQUE (TIMELINE) ===== */
+  .ap-timeline { position: relative; padding-left: 30px; }
+  .ap-timeline::before { 
+    content: ''; position: absolute; left: 11px; top: 0; bottom: 0; width: 3px; 
+    background: var(--cedi-gold); border-radius: 3px; 
+  }
+  .ap-timeline-item { position: relative; margin-bottom: 30px; }
+  .ap-timeline-item:last-child { margin-bottom: 0; }
+  .ap-timeline-item::before { 
+    content: ''; position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; 
+    border-radius: 50%; background: var(--cedi-red); border: 3px solid #fff; 
+    box-shadow: 0 0 0 2px var(--cedi-gold); z-index: 1;
+  }
+  .ap-timeline-date { font-weight: bold; color: var(--cedi-red); font-size: 15px; margin-bottom: 6px; display: block; }
+  .ap-timeline-content { 
+    background: #fff; border: 1px solid var(--border); border-radius: 12px; 
+    padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+  }
+  .ap-timeline-content h3 { font-size: 17px; color: #111827; margin: 0 0 8px; }
+  .ap-timeline-content p { font-size: 14px; color: #4b5563; margin: 0; line-height: 1.7; }
+  
+  @media (max-width: 600px) {
+    .ap-timeline { padding-left: 20px; }
+    .ap-timeline::before { left: 6px; }
+    .ap-timeline-item::before { left: -21px; width: 12px; height: 12px; }
+  }
 
   /* Mission */
   .ap-mission{ display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; }
@@ -77,16 +118,6 @@
   .ap-member .role{ font-size:12.5px; color:var(--cedi-red); font-weight:bold; margin:0 0 8px; }
   .ap-member .bio{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin:0; }
 
-  /* Librairies avec photo (DYNAMIQUE) */
-  .ap-stores{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }
-  @media (max-width:860px){ .ap-stores{ grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:480px){ .ap-stores{ grid-template-columns:1fr; } }
-  .ap-store{ background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
-  .ap-store img{ width:100%; height:110px; object-fit:cover; display:block; }
-  .ap-store-body{ padding:14px; }
-  .ap-store h4{ font-size:15px; color:#111827; margin:0 0 4px; }
-  .ap-store p{ font-size:12.5px; color:var(--ink-soft); margin:0; }
-
   /* CTA */
   .ap-cta{ background:var(--bg-soft); border-radius:14px; padding:40px 24px; text-align:center; }
   .ap-cta h2{ font-size:22px; color:#111827; margin:0 0 10px; }
@@ -98,17 +129,62 @@
   .ap-btn-secondary{ background:#fff; color:var(--cedi-red); border:2px solid var(--cedi-red); }
 </style>
 
-<!-- HERO -->
-<div class="ap-hero">
-    <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1400&auto=format&fit=crop&q=75" alt="Librairie CEDI Littérature">
-    <div class="ap-hero-overlay">
-        <span class="ap-eyebrow"><i class="fa-solid fa-book-bible"></i> Notre histoire</span>
-        <h1>Distribuer la vie, un livre à la fois</h1>
-        <p>CEDI Littérature est une maison d'édition chrétienne intégrée, associée à un réseau de librairies et à un service de conseil spirituel, présente à Abidjan et Attiékoi.</p>
-    </div>
-</div>
-
 <div class="ap-container">
+
+    <!-- ===== NOTRE HISTOIRE ===== -->
+    <section class="ap-section">
+        <h2>Notre histoire</h2>
+        <p class="ap-sub">De la vision initiale à aujourd'hui : un parcours au service de la Parole.</p>
+        
+        <div class="ap-history-layout">
+            <!-- Colonne gauche : Image -->
+            <div class="ap-history-img-wrap">
+                <!-- Remplace cette URL par une de tes propres photos si tu en as une -->
+                <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80" 
+                     alt="La communauté CEDI Littérature" 
+                     class="ap-history-img">
+            </div>
+
+            <!-- Colonne droite : Frise chronologique -->
+            <div class="ap-timeline">
+                <!-- Étape 1 -->
+                <div class="ap-timeline-item">
+                    <span class="ap-timeline-date">Les débuts</span>
+                    <div class="ap-timeline-content">
+                        <h3>La naissance d'une vision</h3>
+                        <p>Tout a commencé par un appel : celui de rendre la littérature chrétienne accessible à tous. Animés par le désir de voir la Parole de Dieu se répandre, les fondateurs de CEDI ont posé les premières pierres d'une aventure éditoriale unique en Côte d'Ivoire.</p>
+                    </div>
+                </div>
+                
+                <!-- Étape 2 -->
+                <div class="ap-timeline-item">
+                    <span class="ap-timeline-date">L'expansion</span>
+                    <div class="ap-timeline-content">
+                        <h3>De la librairie à la maison d'édition</h3>
+                        <p>D'abord simple point de vente, CEDI s'est rapidement transformé en une véritable maison d'édition. Écriture, correction, infographie, impression... Nous avons intégré toute la chaîne pour garantir la qualité et la fidélité doctrinale de chaque ouvrage publié.</p>
+                    </div>
+                </div>
+
+                <!-- Étape 3 -->
+                <div class="ap-timeline-item">
+                    <span class="ap-timeline-date">Aujourd'hui</span>
+                    <div class="ap-timeline-content">
+                        <h3>Un réseau de 4 librairies</h3>
+                        <p>Présents à Adjamé, Attiékoi, Riviera et Yopougon, nous sommes fiers de servir la communauté chrétienne au quotidien. Chaque point de vente est un lieu d'accueil, de conseil et de partage, où chaque lecteur peut trouver les ressources dont il a besoin pour sa marche spirituelle.</p>
+                    </div>
+                </div>
+
+                <!-- Étape 4 -->
+                <div class="ap-timeline-item">
+                    <span class="ap-timeline-date">Demain</span>
+                    <div class="ap-timeline-content">
+                        <h3>Une présence en ligne</h3>
+                        <p>Avec ce site web, nous franchissons un nouveau cap : celui de la proximité numérique. Commander en ligne, se faire livrer ou retirer en boutique, découvrir des enseignements exclusifs... CEDI Littérature se modernise pour mieux vous servir, partout et à tout moment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- NOTRE MISSION -->
     <section class="ap-section">
@@ -211,26 +287,35 @@
         </div>
     </section>
 
-    <!-- ===== NOS LIBRAIRIES (DYNAMIQUES) ===== -->
-    <section class="ap-section">
-        <h2>Nos librairies</h2>
-        <p class="ap-sub">Quatre points de vente pour vous accueillir.</p>
-        <div class="ap-stores">
-            {% for point in points_vente %}
-            <div class="ap-store">
-                {% if point.url_image %}
-                    <img src="{{ point.url_image.url }}" alt="Librairie CEDI {{ point.nom }}">
-                {% else %}
-                    <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=400&auto=format&fit=crop&q=70" alt="Librairie CEDI {{ point.nom }}">
-                {% endif %}
-                <div class="ap-store-body">
-                    <h4>{{ point.nom }}</h4>
-                    <p>{{ point.adresse_complete|truncatechars:50 }}</p>
-                </div>
+    <!-- ===== NOS LIBRAIRIES (DYNAMIQUES, style accueil) ===== -->
+    <section id="points-de-vente" class="reveal px-4 py-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center max-w-xl mx-auto mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Nos Points de Vente Physiques</h3>
+                <p class="text-sm text-gray-600">Venez nous visiter ou retirez vos commandes gratuites en boutique</p>
             </div>
-            {% empty %}
-                <p style="grid-column:1/-1;text-align:center;color:#6b7280;">Aucun point de vente configuré pour le moment.</p>
-            {% endfor %}
+
+            <div class="flex flex-wrap justify-center gap-5">
+                {% for point in points_vente %}
+                <div class="stagger-item card-lift bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:border-cediGold w-full sm:w-[calc(50%-1.25rem)] lg:w-[calc(25%-1.25rem)]">
+                    <div class="relative img-zoom h-60 lg:h-72">
+                        {% if point.url_image %}
+                            <img src="{{ point.url_image.url }}" alt="Librairie CEDI {{ point.nom }}" class="w-full h-full object-cover" loading="lazy">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=900&auto=format&fit=crop&q=70" alt="Librairie CEDI {{ point.nom }}" class="w-full h-full object-cover" loading="lazy">
+                        {% endif %}
+                        <div class="absolute top-3 left-3 w-8 h-8 bg-cediGold text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">{{ forloop.counter }}</div>
+                        <div class="absolute bottom-3 left-4 right-4">
+                            <h4 class="text-white font-bold text-lg drop-shadow-lg mb-1">{{ point.nom }}</h4>
+                            <p class="text-white/90 text-xs drop-shadow-lg mb-2">{{ point.adresse_complete|truncatechars:50 }}</p>
+                            <span class="inline-block bg-white/15 backdrop-blur-sm border border-white/30 text-white text-[10px] px-2.5 py-1 rounded-full">Retrait de commande gratuit</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 w-full text-center">Aucun point de vente configuré.</p>
+                {% endfor %}
+            </div>
         </div>
     </section>
 
@@ -240,7 +325,7 @@
             <h2>Une question, un besoin d'accompagnement ?</h2>
             <p>Notre équipe est disponible pour vous conseiller, en librairie ou en ligne.</p>
             <div class="ap-cta-buttons">
-                <a href="{% url 'accueil' %}#boutique" class="ap-btn ap-btn-primary"><i class="fa-solid fa-store"></i> Découvrir la boutique</a>
+                <a href="{% url 'liste_catalogue' %}" class="ap-btn ap-btn-primary"><i class="fa-solid fa-store"></i> Découvrir la boutique</a>
                 <a href="{% url 'accueil' %}#ressources" class="ap-btn ap-btn-secondary"><i class="fa-solid fa-comments"></i> Poser une question</a>
             </div>
         </div>

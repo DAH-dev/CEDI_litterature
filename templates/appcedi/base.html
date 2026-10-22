@@ -206,10 +206,7 @@
                     <!-- Liens de navigation -->
                     <a href="{% url 'accueil' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Accueil</a>
                     <a href="{% url 'liste_catalogue' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Boutique & Catalogue</a>
-                    <a href="#editions" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Éditions CEDI</a>
                     <a href="{% url 'liste_ressources' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Ressources Spirituelles</a>
-                    <a href="#points-de-vente" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Points de Vente</a>
-                    <a href="#conseils" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Conseils & Blog</a>
                     <a href="{% url 'liste_temoignages_publics' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">Témoignages</a>
                     <a href="{% url 'a_propos' %}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-cediRed transition">À propos</a>
                     <div class="my-1 border-t border-gray-100"></div>
@@ -255,11 +252,9 @@
         <div class="max-w-7xl mx-auto px-4 flex space-x-6 overflow-x-auto text-sm font-medium py-2.5 text-gray-700">
             <a href="/" class="text-cediRed font-bold hover:text-cediRed transition">Accueil</a>
             <a href="{% url 'liste_catalogue' %}" class="hover:text-cediRed whitespace-nowrap transition">Boutique & Catalogue</a>
-            <a href="#editions" class="hover:text-cediRed whitespace-nowrap transition">Éditions CEDI</a>
             <a href="{% url 'liste_ressources' %}" class="hover:text-cediRed whitespace-nowrap transition">Ressources Spirituelles</a>
-            <a href="#points-de-vente" class="hover:text-cediRed whitespace-nowrap transition">Points de Vente</a>
-            <a href="#conseils" class="hover:text-cediRed whitespace-nowrap transition">Conseils & Blog</a>
-            <a href="{% url 'a_propos' %}" class="hover:text-cediRed whitespace-nowrap transition">À propos</a>
+             <a href="{% url 'liste_temoignages_publics' %}" class="hover:text-cediRed whitespace-nowrap transition">Témoignages</a>
+             <a href="{% url 'a_propos' %}" class="hover:text-cediRed whitespace-nowrap transition">À propos</a>
             
         </div>
     </nav>
@@ -289,9 +284,9 @@
                 <h5 class="text-cediRed font-bold text-base mb-3">Navigation</h5>
                 <ul class="space-y-2 text-xs">
                     <li><a href="{% url 'liste_catalogue' %}" class="hover:text-cediRed transition">Boutique en ligne</a></li>
-                    <li><a href="#editions" class="hover:text-cediRed transition">Éditions CEDI</a></li>
                     <li><a href="{% url 'liste_ressources' %}" class="hover:text-cediRed transition">Vérités Fondamentales</a></li>
-                    <li><a href="#points-de-vente" class="hover:text-cediRed transition">Nos 4 Points de Vente</a></li>
+                    <li><a href="{% url 'liste_temoignages_publics' %}" class="hover:text-cediRed whitespace-nowrap transition">Témoignages</a></li>
+                    <li><a href="{% url 'a_propos' %}" class="hover:text-cediRed whitespace-nowrap transition">À propos</a></li>
                 </ul>
             </div>
             <div>
