@@ -292,17 +292,26 @@
             <form action="{% url 'ajouter_au_panier' produit.pk %}" method="post" style="margin: 0;">
                 {% csrf_token %}
                 <div class="pf-action-row">
-                    <div class="pf-qty">
-                        <button type="button" onclick="document.getElementById('pfQty').stepDown()">−</button>
-                        <input id="pfQty" type="number" name="quantite" value="1" min="1" max="{{ produit.quantite_stock }}">
-                        <button type="button" onclick="document.getElementById('pfQty').stepUp()">+</button>
-                    </div>
-                    {% if produit.quantite_stock > 0 %}
-                        <button type="submit" class="pf-btn-add"><i class="fa-solid fa-cart-shopping"></i> Ajouter au panier</button>
-                    {% else %}
-                        <button type="button" class="pf-btn-add" disabled style="opacity: 0.6; cursor: not-allowed;"><i class="fa-solid fa-cart-shopping"></i> Indisponible</button>
-                    {% endif %}
-                </div>
+    <div class="pf-qty">
+        <button type="button" onclick="document.getElementById('pfQty').stepDown()">−</button>
+        <input id="pfQty" type="number" name="quantite" value="1" min="1" max="{{ produit.quantite_stock }}">
+        <button type="button" onclick="document.getElementById('pfQty').stepUp()">+</button>
+    </div>
+    
+    {% if produit.quantite_stock > 0 %}
+        <button type="submit" class="pf-btn-add"><i class="fa-solid fa-cart-shopping"></i> Ajouter au panier</button>
+    {% else %}
+        <button type="button" class="pf-btn-add" disabled style="opacity: 0.6; cursor: not-allowed;"><i class="fa-solid fa-cart-shopping"></i> Indisponible</button>
+    {% endif %}
+
+    <!-- 👇 BOUTON LISTE DE SOUHAITS -->
+    <button type="button" 
+            class="btn-wishlist-detail" 
+            data-url="{% url 'basculer_liste_souhaits' produit.id %}"
+            style="width: 44px; height: 40px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+        <i class="{% if produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-400{% endif %} text-lg"></i>
+    </button>
+</div>
             </form>
 
             <!-- Avantages -->
@@ -491,5 +500,34 @@
             document.querySelectorAll('.pf-tab-nav button')[index].classList.add('active');
         }
     }
+
+    // Gestion du bouton Wishlist sur la fiche produit
+document.querySelector('.btn-wishlist-detail')?.addEventListener('click', function() {
+    const btn = this;
+    const url = btn.dataset.url;
+    const icon = btn.querySelector('i');
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(res => {
+        if(res.redirected) { window.location.href = res.url; return; } // Si non connecté, redirige vers login
+        return res.json();
+    })
+    .then(data => {
+        if(!data) return;
+        if(data.is_wishlisted) {
+            icon.classList.remove('fa-regular', 'text-gray-400');
+            icon.classList.add('fa-solid', 'text-cediRed');
+        } else {
+            icon.classList.remove('fa-solid', 'text-cediRed');
+            icon.classList.add('fa-regular', 'text-gray-400');
+        }
+    });
+});
 </script>
 {% endblock %}

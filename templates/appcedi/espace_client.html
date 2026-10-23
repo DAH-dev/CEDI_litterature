@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <!-- Navigation par Onglets (Scrollable horizontalement sur mobile) -->
+    <!-- Navigation par Onglets -->
     <div class="flex gap-2 border-b-2 border-gray-200 mb-6 sm:mb-8 overflow-x-auto whitespace-nowrap pb-1 no-scrollbar">
         <a href="?tab=profil" class="px-4 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 shrink-0 {% if active_tab == 'profil' %}text-cediRed border-cediRed{% else %}text-gray-500 border-transparent hover:text-cediRed{% endif %}">
             <i class="fa-regular fa-user"></i> Mon Profil
@@ -77,21 +77,13 @@
                         <td class="p-3 sm:p-4 text-gray-600">{{ commande.date_commande|date:"d/m/Y" }}</td>
                         <td class="p-3 sm:p-4">
                             {% if commande.statut == 'livree' %}
-                                <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">
-                                    {{ commande.get_statut_display }}
-                                </span>
+                                <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">{{ commande.get_statut_display }}</span>
                             {% elif commande.statut == 'payee' or commande.statut == 'expediee' %}
-                                <span class="bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">
-                                    {{ commande.get_statut_display }}
-                                </span>
+                                <span class="bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">{{ commande.get_statut_display }}</span>
                             {% elif commande.statut == 'prete_retrait' %}
-                                <span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">
-                                    {{ commande.get_statut_display }}
-                                </span>
+                                <span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">{{ commande.get_statut_display }}</span>
                             {% else %}
-                                <span class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">
-                                    {{ commande.get_statut_display }}
-                                </span>
+                                <span class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full inline-block">{{ commande.get_statut_display }}</span>
                             {% endif %}
                         </td>
                         <td class="p-3 sm:p-4 font-bold text-cediRed">{{ commande.montant_total }} FCFA</td>
@@ -105,34 +97,85 @@
         {% endif %}
     </div>
 
-    <!-- Onglet 3: Liste de Souhaits -->
+    <!-- Onglet 3: Liste de Souhaits (Design Catalogue) -->
     {% elif active_tab == 'souhaits' %}
     <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
-        <h2 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Vos ouvrages enregistrés</h2>
+        <h2 class="text-base sm:text-lg font-bold text-gray-800 mb-6">Vos ouvrages enregistrés</h2>
+        
         {% if souhaits %}
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {% for item in souhaits %}
-            <div class="border border-gray-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
-                <div>
-                    <h3 class="text-xs sm:text-sm font-bold text-gray-800 line-clamp-2 mb-1">{{ item.produit.titre }}</h3>
-                    <p class="text-cediRed font-bold text-sm mb-3">{{ item.produit.prix }} FCFA</p>
-                </div>
-                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                    <form method="POST" action="{% url 'ajouter_au_panier' item.produit.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="bg-cediRed hover:bg-cediRedDark text-white text-xs font-bold py-2 px-3 rounded-lg flex items-center gap-1.5 transition">
-                            <i class="fa-solid fa-cart-shopping"></i> Panier
-                        </button>
-                    </form>
-                    <a href="{% url 'basculer_liste_souhaits' item.produit.id %}" class="text-gray-400 hover:text-red-600 p-2 transition" title="Retirer">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </a>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between card-lift">
+                
+                <!-- Image + Titre + Infos -->
+                <a href="{% url 'detail_produit' item.produit.pk %}" class="block">
+                    <div class="relative img-zoom rounded-t-xl overflow-hidden">
+                        {% if item.produit.est_edition_cedi %}
+                        <span class="absolute top-2 left-2 z-10 bg-cediGold text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                            <i class="fa-solid fa-certificate"></i> Édition CEDI
+                        </span>
+                        {% endif %}
+                        <div class="p-2 flex items-center justify-center bg-white">
+                            {% with item.produit.image_principale as img %}
+                                {% if img %}
+                                    <img src="{{ img.url_image.url }}" alt="{{ item.produit.titre }}" class="h-36 sm:h-48 object-contain w-full" loading="lazy">
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=400&auto=format&fit=crop&q=70" alt="{{ item.produit.titre }}" class="h-36 sm:h-48 object-contain w-full" loading="lazy">
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                    <div class="px-3 pt-2">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800 mb-1 leading-snug line-clamp-2">{{ item.produit.titre }}</h4>
+                        <p class="text-[11px] sm:text-xs text-gray-500 mb-1 truncate">Auteur : {{ item.produit.auteur|default:"Inconnu" }}</p>
+                        <div class="flex items-center gap-0.5 text-cediGold text-[11px] sm:text-sm mb-2">
+                            {% with note=item.produit.moyenne_avis %}
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= note|floatformat:0|add:"0" %}
+                                        <i class="fa-solid fa-star"></i>
+                                    {% else %}
+                                        <i class="fa-regular fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="text-[10px] sm:text-xs text-gray-500 ml-1">({{ item.produit.nombre_avis }})</span>
+                            {% endwith %}
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Footer : Prix + Panier + Corbeille -->
+                <div class="px-3 pb-3 border-t border-gray-100 pt-2 mt-auto">
+                    <div class="flex items-center justify-between gap-1 mb-2">
+                        <span class="text-xs sm:text-base font-bold text-cediRed whitespace-nowrap">{{ item.produit.prix|floatformat:0 }} FCFA</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-1.5">
+                        {% if item.produit.quantite_stock > 0 %}
+                            <form action="{% url 'ajouter_au_panier' item.produit.pk %}" method="post" class="flex-1">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantite" value="1">
+                                <button type="submit" class="w-full bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 rounded hover:bg-cediRedDark transition flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-cart-shopping"></i> <span>Ajouter</span>
+                                </button>
+                            </form>
+                        {% else %}
+                            <span class="flex-1 text-center text-[10px] text-gray-400 italic py-1">Rupture</span>
+                        {% endif %}
+                        
+                        <!-- Bouton supprimer (corbeille) -->
+                        <a href="{% url 'basculer_liste_souhaits' item.produit.id %}" class="text-gray-400 hover:text-red-500 p-1.5 border border-gray-200 rounded hover:border-red-200 transition shrink-0" title="Retirer de la liste">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-xs sm:text-sm text-gray-500 py-4">Votre liste de souhaits est vide.</p>
+        <div class="text-center py-8">
+            <i class="fa-regular fa-heart text-5xl text-gray-300 mb-3"></i>
+            <p class="text-sm text-gray-500">Votre liste de souhaits est vide.</p>
+        </div>
         {% endif %}
     </div>
 

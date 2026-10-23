@@ -124,7 +124,7 @@
            <!-- APRES -->
 {% if user.is_authenticated %}
     {% if user.is_superuser or user.role == 'admin' or user.role == 'gestionnaire_stock' %}
-        <a href="{% url 'tableau_de_bord' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Tableau de bord">
+        <a href="{% url 'espace_client' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Tableau de bord">
     {% else %}
         <a href="{% url 'espace_client' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Mon Profil">
     {% endif %}
@@ -300,7 +300,7 @@
             <div>
                 <h5 class="text-cediRed font-bold text-base mb-3">Contact & Support</h5>
                 <p class="text-xs text-gray-500 mb-1">📍 Côte d'Ivoire (Abidjan & Attiékoi)</p>
-                <p class="text-xs text-gray-500 mb-1">📞 Contact / WhatsApp : +225 XX XX XX XX</p>
+                <p class="text-xs text-gray-500 mb-1">📞 Contact / WhatsApp : +225 0777891070/0504101014</p>
                 <p class="text-xs text-gray-500">✉️ Email : contact@cedi-litterature.com</p>
             </div>
         </div>

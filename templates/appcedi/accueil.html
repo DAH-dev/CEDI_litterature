@@ -120,6 +120,12 @@
                                         {% endif %}
                                     {% endwith %}
                                 </div>
+                                <!-- 👇 BOUTON WISHLIST POUR LES PROMOS -->
+    <button type="button" 
+            class="btn-wishlist-card absolute top-2 right-2 z-20 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition"
+            data-url="{% url 'basculer_liste_souhaits' item.produit.id %}">
+        <i class="{% if item.produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-500{% endif %} text-sm"></i>
+    </button>
                             </div>
 
                             <h4 class="font-bold text-xs sm:text-sm text-gray-800 mt-1.5 mb-0.5 text-left leading-tight">{{ item.produit.titre|truncatechars:32 }}</h4>
@@ -191,6 +197,13 @@
                                     {% endif %}
                                 {% endwith %}
                             </div>
+                            
+<!-- 👇 BOUTON WISHLIST POUR LES PRODUITS RÉCENTS -->
+    <button type="button" 
+            class="btn-wishlist-card absolute top-2 right-2 z-20 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition"
+            data-url="{% url 'basculer_liste_souhaits' produit.id %}">
+        <i class="{% if produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-500{% endif %} text-sm"></i>
+    </button>
                         </div>
                       
                         <h4 class="font-bold text-xs sm:text-sm text-gray-800 mt-1.5 mb-0.5 text-left leading-tight">{{ produit.titre|truncatechars:30 }}</h4>
@@ -367,6 +380,40 @@
 
         majCompteursEtMasquage();
         setInterval(majCompteursEtMasquage, 1000);
+    });
+     // Gestion AJAX des boutons Wishlist sur la page d'accueil
+    document.querySelectorAll('.btn-wishlist-card').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault(); // Empêche de cliquer sur le lien du produit
+            e.stopPropagation();
+            
+            const url = btn.dataset.url;
+            const icon = btn.querySelector('i');
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                if(res.redirected) { window.location.href = res.url; return; } // Si non connecté
+                return res.json();
+            })
+            .then(data => {
+                if(!data) return;
+                if(data.is_wishlisted) {
+                    // Ajouté : cœur plein et rouge
+                    icon.classList.remove('fa-regular', 'text-gray-500');
+                    icon.classList.add('fa-solid', 'text-cediRed');
+                } else {
+                    // Retiré : cœur vide et gris
+                    icon.classList.remove('fa-solid', 'text-cediRed');
+                    icon.classList.add('fa-regular', 'text-gray-500');
+                }
+            });
+        });
     });
 </script>
 {% endblock %}

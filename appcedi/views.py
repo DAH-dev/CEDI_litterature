@@ -708,20 +708,38 @@ def voir_liste_souhaits(request):
     items = ListeSouhaits.objects.filter(utilisateur=request.user).select_related('produit')
     return render(request, 'appcedi/panier/liste_souhaits.html', {'items': items})
 
+from django.http import JsonResponse
+
 @login_required
 def basculer_liste_souhaits(request, produit_id):
-    """Ajoute ou retire un produit de la liste de souhaits."""
     produit = get_object_or_404(Produit, id=produit_id)
-    soufait, created = ListeSouhaits.objects.get_or_create(
+    
+    # On cherche si le produit est déjà dans la liste
+    souhait, created = ListeSouhaits.objects.get_or_create(
         utilisateur=request.user, 
         produit=produit
     )
     
     if not created:
-        # Si le produit était déjà dans la liste, on le supprime
-        soufait.delete()
-        
-    return redirect('voir_liste_souhaits')
+        # S'il existait déjà, on le retire
+        souhait.delete()
+        is_wishlisted = False
+        message = "Retiré de vos souhaits."
+    else:
+        is_wishlisted = True
+        message = "Ajouté à vos souhaits."
+
+    # Si c'est une requête AJAX (JavaScript)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True, 
+            'is_wishlisted': is_wishlisted,
+            'message': message
+        })
+
+    # Sinon (comportement classique)
+    messages.success(request, message)
+    return redirect(request.META.get('HTTP_REFERER', 'accueil'))
 @login_required
 def espace_client(request):
     # Onglet actif
