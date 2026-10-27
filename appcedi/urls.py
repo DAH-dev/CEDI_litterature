@@ -32,7 +32,7 @@ urlpatterns = [
     path('panier/valider/', views.valider_commande, name='valider_commande'),
     path('produit/<int:pk>/ajouter-avis/', views.ajouter_avis_produit, name='ajouter_avis_produit'),
 
-    path('liste-souhaits/', views.voir_liste_souhaits, name='voir_liste_souhaits'),
+    # path('liste-souhaits/', views.voir_liste_souhaits, name='voir_liste_souhaits'),
     path('liste-souhaits/basculer/<int:produit_id>/', views.basculer_liste_souhaits, name='basculer_liste_souhaits'),
     # Espace client centralisé
     path('espace-client/', views.espace_client, name='espace_client'),

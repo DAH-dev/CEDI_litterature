@@ -27,6 +27,7 @@ class Produit(models.Model):
     editeur = models.CharField(max_length=255, blank=True, null=True)
     isbn = models.CharField(max_length=20, blank=True, null=True)
     description = models.TextField()
+    nombre_pages = models.PositiveIntegerField(blank=True, null=True, verbose_name="Nombre de pages")
     prix = models.IntegerField()
     poids = models.FloatField(blank=True, null=True)
     type_produit = models.CharField(max_length=20, choices=TYPES, default='livre')

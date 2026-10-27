@@ -702,11 +702,11 @@ def supprimer_du_panier(request, article_id):
 # 2. LISTE DE SOUHAITS (WISHLIST)
 # ==========================================
 
-@login_required
-def voir_liste_souhaits(request):
-    """Affiche tous les produits enregistrés par l'utilisateur."""
-    items = ListeSouhaits.objects.filter(utilisateur=request.user).select_related('produit')
-    return render(request, 'appcedi/panier/liste_souhaits.html', {'items': items})
+# @login_required
+# def voir_liste_souhaits(request):
+#     """Affiche tous les produits enregistrés par l'utilisateur."""
+#     items = ListeSouhaits.objects.filter(utilisateur=request.user).select_related('produit')
+#     return render(request, 'appcedi/panier/liste_souhaits.html', {'items': items})
 
 from django.http import JsonResponse
 

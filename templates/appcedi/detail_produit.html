@@ -252,7 +252,6 @@
             </div>
             {% endif %}
         </div>
-
         <!-- ===== COLONNE DROITE : INFOS ===== -->
         <div>
             <h1 class="pf-title">{{ produit.titre }}</h1>
@@ -260,6 +259,13 @@
                 {% if produit.auteur %}<span><b>Auteur :</b> <span class="pf-author-name">{{ produit.auteur }}</span></span>{% endif %}
                 {% if produit.editeur %}<span><b>Éditeur :</b> {{ produit.editeur }}</span>{% endif %}
                 {% if produit.isbn %}<span><b>ISBN :</b> {{ produit.isbn }}</span>{% endif %}
+                
+                <!-- 👇 AJOUT DU NOMBRE DE PAGES ICI 👇 -->
+                {% if produit.nombre_pages %}
+                    <span><b>Pages :</b> <span class="pf-author-name">{{ produit.nombre_pages }}</span></span>
+                {% endif %}
+                <!-- 👆 FIN DE L'AJOUT 👆 -->
+                
             </div>
 
             <div class="pf-rating-row">

@@ -11,7 +11,7 @@ class ProduitForm(forms.ModelForm):
     class Meta:
         model = Produit
         fields = [
-            'titre', 'auteur', 'editeur', 'isbn', 'description', 'prix', 
+            'titre', 'auteur', 'editeur', 'isbn','nombre_pages', 'description', 'prix', 
             'poids', 'type_produit', 'est_edition_cedi', 'quantite_stock', 
             'seuil_alerte', 'statut', 'categories'
         ]
