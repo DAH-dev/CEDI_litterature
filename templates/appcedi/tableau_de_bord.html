@@ -1,91 +1,100 @@
 {% extends 'appcedi/admin/base_admin.html' %}
 
-{% block admin_title %}📊 Tableau de bord{% endblock %}
+{% block admin_title %}
+    <span class="whitespace-nowrap"><i class="fa-solid fa-gauge-high text-cediRed mr-2"></i> Tableau de bord</span>
+{% endblock %}
 
 {% block admin_actions %}
-<div class="flex flex-wrap gap-2">
-    <a href="{% url 'liste_produits' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-box"></i> Produits</a>
-    <a href="{% url 'liste_categories' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-tags"></i> Catégories</a>
-    <a href="{% url 'liste_points_vente' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-location-dot"></i> Points de vente</a>
-    <a href="{% url 'liste_promotions' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-percent"></i> Promotions</a>
-    <a href="{% url 'liste_articles' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-newspaper"></i> Articles</a>
-    <a href="{% url 'liste_avis' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-star"></i> Avis</a>
-    <a href="{% url 'liste_commandes' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-truck"></i> Commandes</a>
-    <a href="{% url 'liste_questions' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold"><i class="fa-solid fa-question"></i> Questions</a>
-    <a href="{% url 'liste_temoignages' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold">
-    <i class="fa-solid fa-comment-dots"></i> Témoignages
-</a>
-</div>
+<!-- J'ai retiré la div "flex overflow-x-auto" qui englobait tout -->
+<a href="{% url 'liste_produits' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-box mr-1"></i> Produits</a>
+<a href="{% url 'liste_commandes' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-truck mr-1"></i> Commandes</a>
+<a href="{% url 'liste_categories' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-tags mr-1"></i> Catégories</a>
+<a href="{% url 'liste_promotions' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-percent mr-1"></i> Promos</a>
+<a href="{% url 'liste_articles' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-newspaper mr-1"></i> Articles</a>
+<a href="{% url 'liste_avis' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-star mr-1"></i> Avis</a>
+<a href="{% url 'liste_temoignages' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-comment-dots mr-1"></i> Témoignages</a>
+<a href="{% url 'liste_questions' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-question mr-1"></i> Questions</a>
+<a href="{% url 'liste_points_vente' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto col-span-2 md:col-span-1"><i class="fa-solid fa-location-dot mr-1"></i> Points de vente</a>
 {% endblock %}
 
 {% block admin_content %}
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center">
-        <div class="text-3xl font-bold text-cediRed">{{ total_produits }}</div>
-        <div class="text-sm text-gray-600">Produits</div>
+<!-- GRILLE 1 : STATS (2 colonnes sur mobile, 4 sur PC) -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 w-full">
+    <!-- Produits -->
+    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 text-center flex flex-col justify-center items-center">
+        <div class="text-2xl sm:text-3xl font-bold text-cediRed">{{ total_produits }}</div>
+        <div class="text-xs sm:text-sm text-gray-600 mt-1">Produits</div>
         {% if produits_stock_faible > 0 %}
-            <div class="text-xs text-red-500 mt-1">⚠️ {{ produits_stock_faible }} en stock faible</div>
+            <div class="text-[10px] sm:text-xs text-red-500 mt-2 font-bold bg-red-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-triangle-exclamation"></i> {{ produits_stock_faible }} stock faible</div>
         {% endif %}
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center">
-        <div class="text-3xl font-bold text-cediRed">{{ total_categories }}</div>
-        <div class="text-sm text-gray-600">Catégories</div>
-    </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center">
-        <div class="text-3xl font-bold text-cediRed">{{ total_points_vente }}</div>
-        <div class="text-sm text-gray-600">Points de vente</div>
-    </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center">
-        <div class="text-3xl font-bold text-cediRed">{{ total_promotions }}</div>
-        <div class="text-sm text-gray-600">Promotions</div>
-    </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center">
-    <div class="text-3xl font-bold text-cediRed">{{ temoignages_en_attente }}</div>
-    <div class="text-sm text-gray-600">Témoignages en attente</div>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center">
-        <div class="text-3xl font-bold text-cediRed">{{ total_articles }}</div>
-        <div class="text-sm text-gray-600">Articles de blog</div>
-    </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center">
-        <div class="text-3xl font-bold text-cediRed">{{ total_avis }}</div>
-        <div class="text-sm text-gray-600">Avis clients</div>
-        {% if avis_en_attente > 0 %}
-            <div class="text-xs text-orange-500 mt-1">⏳ {{ avis_en_attente }} en attente de modération</div>
-        {% endif %}
-    </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center">
-        <div class="text-3xl font-bold text-cediRed">{{ total_commandes }}</div>
-        <div class="text-sm text-gray-600">Commandes</div>
+    
+    <!-- Commandes -->
+    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 text-center flex flex-col justify-center items-center">
+        <div class="text-2xl sm:text-3xl font-bold text-cediRed">{{ total_commandes }}</div>
+        <div class="text-xs sm:text-sm text-gray-600 mt-1">Commandes</div>
         {% if commandes_attente > 0 %}
-            <div class="text-xs text-red-500 mt-1">⏳ {{ commandes_attente }} en attente de paiement</div>
+            <div class="text-[10px] sm:text-xs text-amber-600 mt-2 font-bold bg-amber-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-clock"></i> {{ commandes_attente }} en attente</div>
         {% endif %}
-        {% if questions_en_attente > 0 %}
-            <div class="text-xs text-orange-500 mt-1">❓ {{ questions_en_attente }} questions sans réponse</div>
+    </div>
+
+    <!-- Avis -->
+    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 text-center flex flex-col justify-center items-center">
+        <div class="text-2xl sm:text-3xl font-bold text-cediRed">{{ total_avis }}</div>
+        <div class="text-xs sm:text-sm text-gray-600 mt-1">Avis clients</div>
+        {% if avis_en_attente > 0 %}
+            <div class="text-[10px] sm:text-xs text-orange-500 mt-2 font-bold bg-orange-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-clock"></i> {{ avis_en_attente }} à modérer</div>
+        {% endif %}
+    </div>
+
+    <!-- Témoignages -->
+    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 text-center flex flex-col justify-center items-center">
+        <div class="text-2xl sm:text-3xl font-bold text-cediRed">{{ temoignages_en_attente }}</div>
+        <div class="text-xs sm:text-sm text-gray-600 mt-1">Témoignages</div>
+        {% if temoignages_en_attente > 0 %}
+            <div class="text-[10px] sm:text-xs text-blue-500 mt-2 font-bold bg-blue-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-clock"></i> En attente</div>
         {% endif %}
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 class="font-bold text-gray-800 mb-2">⚡ Actions rapides</h3>
+<!-- GRILLE 2 : STATS SECONDAIRES -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8 w-full">
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
+        <div class="text-xl sm:text-2xl font-bold text-cediRed">{{ total_categories }}</div>
+        <div class="text-[11px] sm:text-sm text-gray-600">Catégories</div>
+    </div>
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
+        <div class="text-xl sm:text-2xl font-bold text-cediRed">{{ total_points_vente }}</div>
+        <div class="text-[11px] sm:text-sm text-gray-600">Points de vente</div>
+    </div>
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
+        <div class="text-xl sm:text-2xl font-bold text-cediRed">{{ total_promotions }}</div>
+        <div class="text-[11px] sm:text-sm text-gray-600">Promotions</div>
+    </div>
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
+        <div class="text-xl sm:text-2xl font-bold text-cediRed">{{ total_articles }}</div>
+        <div class="text-[11px] sm:text-sm text-gray-600">Articles</div>
+    </div>
+</div>
+
+<!-- ACTIONS ET LIENS -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+    <div class="bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+        <h3 class="font-bold text-gray-800 mb-4 text-sm sm:text-base"><i class="fa-solid fa-bolt text-cediGold"></i> Actions rapides</h3>
         <div class="flex flex-wrap gap-2">
-            <a href="{% url 'ajouter_produit' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1 rounded hover:bg-cediRedDark">+ Produit</a>
-            <a href="{% url 'ajouter_categorie' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1 rounded hover:bg-cediRedDark">+ Catégorie</a>
-            <a href="{% url 'ajouter_point_vente' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1 rounded hover:bg-cediRedDark">+ Point de vente</a>
-            <a href="{% url 'ajouter_promotion' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1 rounded hover:bg-cediRedDark">+ Promotion</a>
-            <a href="{% url 'ajouter_article' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1 rounded hover:bg-cediRedDark">+ Article</a>
+            <a href="{% url 'ajouter_produit' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Produit</a>
+            <a href="{% url 'ajouter_categorie' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Catégorie</a>
+            <a href="{% url 'ajouter_point_vente' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Point de vente</a>
+            <a href="{% url 'ajouter_promotion' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Promotion</a>
+            <a href="{% url 'ajouter_article' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Article</a>
         </div>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 class="font-bold text-gray-800 mb-2">🔗 Liens rapides</h3>
-        <div class="flex flex-wrap gap-2">
-            <a href="/admin/appcedi/commande/" class="text-cediRed text-sm hover:underline">Commandes</a>
-            <a href="/admin/appcedi/avispaiement/" class="text-cediRed text-sm hover:underline">Paiements</a>
-            <a href="/admin/appcedi/image/" class="text-cediRed text-sm hover:underline">Images</a>
+    <div class="bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+        <h3 class="font-bold text-gray-800 mb-4 text-sm sm:text-base"><i class="fa-solid fa-link text-cediGold"></i> Liens utiles</h3>
+        <div class="flex flex-col gap-2">
+            <a href="/admin/appcedi/commande/" class="text-xs sm:text-sm text-gray-600 hover:text-cediRed flex items-center justify-between p-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-200 transition">Commandes (Django) <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+            <a href="/admin/appcedi/image/" class="text-xs sm:text-sm text-gray-600 hover:text-cediRed flex items-center justify-between p-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-200 transition">Images (Django) <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+            <a href="/admin/appcedi/promotion/" class="text-xs sm:text-sm text-gray-600 hover:text-cediRed flex items-center justify-between p-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-200 transition">Promotions (Django) <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
         </div>
     </div>
 </div>
