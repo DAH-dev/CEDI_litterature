@@ -76,6 +76,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# À ajouter tout en bas du fichier settings.py
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'CEDI Littérature <contact@cedi-litterature.com>'
+
 # Emails (affichés dans la console pour le test)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

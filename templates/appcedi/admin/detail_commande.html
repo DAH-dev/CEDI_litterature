@@ -1,0 +1,72 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}<i class="fa-solid fa-file-invoice text-cediRed mr-2"></i> Détails de la commande{% endblock %}
+
+{% block admin_actions %}
+<a href="{% url 'liste_commandes' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold flex items-center gap-2">
+    <i class="fa-solid fa-arrow-left"></i> Retour aux commandes
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    
+    <!-- Infos Client -->
+    <div class="md:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
+        <h3 class="font-bold text-gray-800 border-b pb-2 mb-4">Informations Client</h3>
+        <p class="text-sm text-gray-600 mb-2"><strong>Référence :</strong> {{ commande.reference_commande }}</p>
+        <p class="text-sm text-gray-600 mb-2"><strong>Client :</strong> {{ commande.client.username|default:"Invité" }}</p>
+        <p class="text-sm text-gray-600 mb-2"><strong>Date :</strong> {{ commande.date_commande|date:"d/m/Y à H:i" }}</p>
+        <p class="text-sm text-gray-600 mb-2"><strong>Mode :</strong> {{ commande.get_mode_livraison_display }}</p>
+        
+        {% if commande.adresse_livraison %}
+            <p class="text-sm text-gray-600 mb-2"><strong>Adresse :</strong> {{ commande.adresse_livraison }}</p>
+        {% endif %}
+        {% if commande.point_vente_retrait %}
+            <p class="text-sm text-gray-600 mb-2"><strong>Point de retrait :</strong> {{ commande.point_vente_retrait.nom }}</p>
+        {% endif %}
+        
+        <div class="mt-4 pt-4 border-t">
+            <p class="text-sm text-gray-600 mb-2"><strong>Statut actuel :</strong> <br>
+                <span class="inline-block mt-1 bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-xs font-bold">
+                    {{ commande.get_statut_display }}
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Détails des articles -->
+    <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="font-bold text-gray-800 border-b pb-2 mb-4">Articles commandés</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 text-gray-600 border-b">
+                    <tr>
+                        <th class="py-2 px-3">Produit</th>
+                        <th class="py-2 px-3 text-center">Qté</th>
+                        <th class="py-2 px-3 text-right">Prix unitaire</th>
+                        <th class="py-2 px-3 text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for ligne in lignes %}
+                    <tr>
+                        <td class="py-2 px-3 font-medium text-gray-800">{{ ligne.produit.titre }}</td>
+                        <td class="py-2 px-3 text-center">{{ ligne.quantite }}</td>
+                        <td class="py-2 px-3 text-right">{{ ligne.prix_unitaire_au_moment }} FCFA</td>
+                        <td class="py-2 px-3 text-right font-bold text-cediRed">{% widthratio ligne.prix_unitaire_au_moment 1 ligne.quantite %} FCFA</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="py-4 px-3 text-right font-bold text-gray-800 text-base">Montant total :</td>
+                        <td class="py-4 px-3 text-right font-bold text-cediRed text-lg">{{ commande.montant_total }} FCFA</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

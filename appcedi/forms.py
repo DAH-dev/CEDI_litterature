@@ -5,6 +5,44 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from .models import *
 
+from django.contrib.auth.models import User
+from .models import Profil
+
+class ModifierProfilForm(forms.ModelForm):
+    telephone = forms.CharField(max_length=20, required=False, label="Numéro de téléphone")
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        labels = {
+            'first_name': 'Prénom',
+            'last_name': 'Nom',
+            'email': 'Adresse email',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Pré-remplir le téléphone si le profil existe
+        if self.instance and self.instance.pk:
+            try:
+                self.fields['telephone'].initial = self.instance.profil.telephone
+            except Profil.DoesNotExist:
+                pass
+
+        # Appliquer le style Tailwind aux champs
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cediRed'
+            })
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+        if commit:
+            telephone = self.cleaned_data.get('telephone')
+            profil, created = Profil.objects.get_or_create(user=user)
+            profil.telephone = telephone
+            profil.save()
+        return user
 
 # ========== FORMULAIRE PRODUIT ==========
 class ProduitForm(forms.ModelForm):

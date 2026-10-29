@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Count, Sum, Avg
-
+from .forms import ModifierProfilForm
 from .models import *
 from .forms import InscriptionForm, ProduitForm, CategorieForm, PointVenteForm, PromotionForm, ArticleBlogForm
 
@@ -76,23 +76,31 @@ def inscription(request):
 
 def connexion(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
+        # On récupère directement ce que l'utilisateur a tapé
+        identifiant = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # On cherche si ça correspond à un nom d'utilisateur OU à un email
+        user_obj = User.objects.filter(Q(username=identifiant) | Q(email=identifiant)).first()
+        
+        if user_obj:
+            # Si on trouve l'utilisateur, on vérifie le mot de passe avec son VRAI nom d'utilisateur
+            user = authenticate(request, username=user_obj.username, password=password)
             if user is not None:
                 login(request, user)
-                messages.success(request, f'Bonjour {username} !')
+                messages.success(request, f'Bonjour {user.username} !')
                 
-                # 👇 GESTION DU PARAMÈTRE NEXT (Redirection après connexion)
+                # Gestion de la redirection (?next=...)
                 next_url = request.GET.get('next') or request.POST.get('next')
                 if next_url:
                     return redirect(next_url)
-                    
                 return redirect('accueil')
-    else:
-        form = AuthenticationForm()
+        
+        # Si on arrive ici, c'est que l'identifiant ou le mot de passe est faux
+        messages.error(request, "Nom d'utilisateur/Email ou mot de passe incorrect.")
+        
+    # Pour l'affichage de la page (GET), on passe un formulaire vide
+    form = AuthenticationForm()
     return render(request, 'appcedi/connexion.html', {'form': form})
 
 
@@ -137,12 +145,29 @@ def tableau_de_bord(request):
     return render(request, 'appcedi/tableau_de_bord.html', context)
 
 # ========== CRUD PRODUITS ==========
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def liste_produits(request):
+    query = request.GET.get('q', '').strip()
     produits = Produit.objects.all().order_by('-id')
-    return render(request, 'appcedi/admin/liste_produits.html', {'produits': produits})
 
+    # Si l'utilisateur tape quelque chose, on filtre
+    if query:
+        produits = produits.filter(
+            Q(titre__icontains=query) |
+            Q(auteur__icontains=query) |
+            Q(isbn__icontains=query)
+        )
+
+    # Si c'est une requête AJAX (recherche en direct), on renvoie juste le HTML des lignes
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        html = render_to_string('appcedi/admin/partials/_produits_rows.html', {'produits': produits})
+        return JsonResponse({'html': html})
+
+    # Sinon, on charge la page complète normalement
+    return render(request, 'appcedi/admin/liste_produits.html', {'produits': produits})
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -246,6 +271,37 @@ def supprimer_produit(request, pk):
         messages.success(request, f'Produit "{titre}" supprimé avec succès !')
         return redirect('liste_produits')
     return render(request, 'appcedi/admin/supprimer_produit.html', {'produit': produit})
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def actions_produits_bulk(request):
+    if request.method == 'POST':
+        produit_ids = request.POST.getlist('produit_ids')
+        action = request.POST.get('action')
+        
+        if not produit_ids:
+            messages.warning(request, "Veuillez sélectionner au moins un produit.")
+            return redirect('liste_produits')
+
+        produits = Produit.objects.filter(id__in=produit_ids)
+        count = produits.count()
+
+        if action == 'activate':
+            produits.update(statut=True)
+            messages.success(request, f"{count} produit(s) activé(s).")
+        elif action == 'deactivate':
+            produits.update(statut=False)
+            messages.success(request, f"{count} produit(s) désactivé(s).")
+        elif action == 'set_cedi':
+            produits.update(est_edition_cedi=True)
+            messages.success(request, f"{count} produit(s) marqué(s) comme Édition CEDI.")
+        elif action == 'delete':
+            produits.delete()
+            messages.success(request, f"{count} produit(s) supprimé(s) avec succès.")
+        else:
+            messages.warning(request, "Action non reconnue.")
+
+    return redirect('liste_produits')
+
 from django.core.paginator import Paginator
 from django.db.models import Q
 
@@ -554,7 +610,13 @@ def ajouter_promotion(request):
     else:
         form = PromotionForm()
     return render(request, 'appcedi/admin/ajouter_promotion.html', {'form': form})
-
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def detail_promotion(request, pk):
+    promo = get_object_or_404(Promotion, pk=pk)
+    # On récupère tous les produits liés à cette promotion
+    produits = promo.produits.all()
+    return render(request, 'appcedi/admin/detail_promotion.html', {'promo': promo, 'produits': produits})
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -740,18 +802,28 @@ def basculer_liste_souhaits(request, produit_id):
     # Sinon (comportement classique)
     messages.success(request, message)
     return redirect(request.META.get('HTTP_REFERER', 'accueil'))
+
 @login_required
 def espace_client(request):
-    # Onglet actif
     tab = request.GET.get('tab', 'profil')
+    form = None
+    messages_success = None
+    
+    # Gestion de la modification du profil
+    if request.method == 'POST' and request.POST.get('action') == 'update_profile':
+        form = ModifierProfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Votre profil a été mis à jour avec succès !")
+            return redirect(f"{request.path}?tab=profil")
+    else:
+        form = ModifierProfilForm(instance=request.user)
 
-    # 1. Historique des commandes (champ = client, pas utilisateur)
+    # Historique des commandes
     commandes = Commande.objects.filter(client=request.user).order_by('-date_commande')
-
-    # 2. Liste de souhaits
+    # Liste de souhaits
     souhaits = ListeSouhaits.objects.filter(utilisateur=request.user).select_related('produit')
-
-    # 3. Panier (related_name = articles)
+    # Panier
     panier_items = []
     panier_total = 0
     try:
@@ -763,6 +835,7 @@ def espace_client(request):
 
     context = {
         'active_tab': tab,
+        'form': form,
         'commandes': commandes,
         'souhaits': souhaits,
         'panier_items': panier_items,
@@ -870,7 +943,27 @@ def valider_commande(request):
         'points_vente': points_vente
     })
 
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def actions_categories_bulk(request):
+    if request.method == 'POST':
+        categorie_ids = request.POST.getlist('categorie_ids')
+        action = request.POST.get('action')
 
+        if not categorie_ids:
+            messages.warning(request, "Veuillez sélectionner au moins une catégorie.")
+            return redirect('liste_categories')
+
+        categories = Categorie.objects.filter(id__in=categorie_ids)
+        count = categories.count()
+
+        if action == 'delete':
+            categories.delete()
+            messages.success(request, f"{count} catégorie(s) supprimée(s) avec succès.")
+        else:
+            messages.warning(request, "Action non reconnue.")
+
+    return redirect('liste_categories')
 # Soumettre un témoignage général sur le site (ex: page d'accueil ou à propos)
 @login_required
 def ajouter_temoignage_site(request):
@@ -1096,25 +1189,65 @@ def repondre_question(request, pk):
 
 
 # ========== CRUD COMMANDES ==========
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.db.models import Q
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def liste_commandes(request):
+    query = request.GET.get('q', '').strip()
     commandes = Commande.objects.all().order_by('-date_commande')
-    return render(request, 'appcedi/admin/liste_commandes.html', {'commandes': commandes})
 
+    if query:
+        commandes = commandes.filter(
+            Q(reference_commande__icontains=query) |
+            Q(client__username__icontains=query) |
+            Q(client__email__icontains=query)
+        )
+
+    # Si c'est une requête AJAX (recherche ou changement de statut)
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        html = render_to_string('appcedi/admin/partials/_commandes_rows.html', {'commandes': commandes})
+        return JsonResponse({'html': html})
+
+    return render(request, 'appcedi/admin/liste_commandes.html', {'commandes': commandes})
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def detail_commande(request, pk):
+    commande = get_object_or_404(Commande, pk=pk)
+    lignes = commande.lignes.all()
+    return render(request, 'appcedi/admin/detail_commande.html', {'commande': commande, 'lignes': lignes})
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
-def changer_statut_commande(request, pk):
-    commande = get_object_or_404(Commande, pk=pk)
+def changer_statut_commande(request):
     if request.method == 'POST':
+        commande_ids = request.POST.getlist('commande_ids')
         nouveau_statut = request.POST.get('statut')
-        if nouveau_statut in dict(Commande.STATUTS).keys():
-            commande.statut = nouveau_statut
-            commande.save()
-            messages.success(request, f'Statut de la commande mis à jour : {commande.get_statut_display()}')
+        
+        if not commande_ids or not nouveau_statut:
+            return JsonResponse({'success': False, 'error': 'Données manquantes'}, status=400)
+
+        commandes = Commande.objects.filter(id__in=commande_ids)
+        commandes.update(statut=nouveau_statut)
+        
+        messages.success(request, f"Statut mis à jour pour {commandes.count()} commande(s).")
+        
+        # On renvoie le nouveau HTML pour rafraîchir le tableau
+        if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+            query = request.POST.get('q', '').strip()
+            commandes_list = Commande.objects.all().order_by('-date_commande')
+            if query:
+                commandes_list = commandes_list.filter(
+                    Q(reference_commande__icontains=query) | Q(client__username__icontains=query)
+                )
+            html = render_to_string('appcedi/admin/partials/_commandes_rows.html', {'commandes': commandes_list})
+            return JsonResponse({'success': True, 'html': html})
+            
         return redirect('liste_commandes')
-    return render(request, 'appcedi/admin/changer_statut_commande.html', {'commande': commande})
+    return redirect('liste_commandes')
+
 
 @login_required
 def ajouter_temoignage_site(request):

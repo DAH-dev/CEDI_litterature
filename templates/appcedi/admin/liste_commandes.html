@@ -1,62 +1,142 @@
 {% extends 'appcedi/admin/base_admin.html' %}
 
-{% block admin_title %}🚚 Gestion des commandes{% endblock %}
+{% block admin_title %}<i class="fa-solid fa-truck text-cediRed mr-2"></i> Gestion des commandes{% endblock %}
 
 {% block admin_actions %}
-<a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold">
-    <i class="fa-solid fa-arrow-left"></i> Retour
+<a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold flex items-center gap-2">
+    <i class="fa-solid fa-arrow-left"></i> Tableau de bord
 </a>
 {% endblock %}
 
 {% block admin_content %}
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
+    
+    <!-- Barre d'outils : Recherche et Actions groupées -->
+    <div class="p-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        
+        <!-- Recherche AJAX -->
+        <div class="relative w-full md:max-w-md">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="search-commandes" placeholder="Référence, nom du client..." 
+                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-cediRed transition">
+        </div>
+
+        <!-- Formulaire d'actions groupées -->
+        <form method="POST" id="bulk-form" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+            {% csrf_token %}
+            <select name="statut" required class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cediRed bg-white w-full sm:w-auto">
+                <option value="">-- Changer le statut de la sélection --</option>
+                <option value="attente_paiement">En attente</option>
+                <option value="payee">Payée</option>
+                <option value="en_preparation">En préparation</option>
+                <option value="prete_retrait">Prête pour retrait</option>
+                <option value="expediee">Expédiée</option>
+                <option value="livree">Livrée</option>
+            </select>
+            <button type="button" onclick="appliquerActionGroupee()" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-900 transition whitespace-nowrap">
+                Appliquer
+            </button>
+        </form>
+    </div>
+
+    <!-- Tableau Responsive -->
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200">
+            <thead class="bg-white border-b border-gray-200">
                 <tr>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Référence</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Client</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Montant</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Mode</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Statut</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Date</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                    <th class="px-2 sm:px-4 py-3 text-center w-10">
+                        <input type="checkbox" id="select-all" class="accent-cediRed w-4 h-4 cursor-pointer">
+                    </th>
+                    <th class="px-2 sm:px-4 py-3 text-left font-semibold text-gray-600">Référence</th>
+                    <th class="px-2 sm:px-4 py-3 text-left font-semibold text-gray-600">Client</th>
+                    <th class="px-2 sm:px-4 py-3 text-left font-semibold text-gray-600">Montant</th>
+                    <th class="px-2 sm:px-4 py-3 text-left font-semibold text-gray-600 hidden md:table-cell">Mode</th>
+                    <th class="px-2 sm:px-4 py-3 text-left font-semibold text-gray-600">Statut actuel</th>
+                    <th class="px-2 sm:px-4 py-3 text-left font-semibold text-gray-600 hidden lg:table-cell">Date</th>
+                    <th class="px-2 sm:px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
-                {% for commande in commandes %}
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium text-gray-800">{{ commande.reference_commande }}</td>
-                    <td class="px-4 py-3 text-gray-600">{{ commande.client.username|default:"Invité" }}</td>
-                    <td class="px-4 py-3 font-bold text-cediRed">{{ commande.montant_total|floatformat:0 }} F</td>
-                    <td class="px-4 py-3 text-gray-600">{{ commande.get_mode_livraison_display }}</td>
-                    <td class="px-4 py-3">
-                        {% if commande.statut == 'attente_paiement' %}
-                            <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs">⏳ En attente</span>
-                        {% elif commande.statut == 'payee' %}
-                            <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">💳 Payée</span>
-                        {% elif commande.statut == 'en_preparation' %}
-                            <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs">📦 En préparation</span>
-                        {% elif commande.statut == 'prete_retrait' %}
-                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">✅ Prête pour retrait</span>
-                        {% elif commande.statut == 'expediee' %}
-                            <span class="bg-teal-100 text-teal-700 px-2 py-1 rounded text-xs">🚚 Expédiée</span>
-                        {% elif commande.statut == 'livree' %}
-                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">🎯 Livrée</span>
-                        {% endif %}
-                    </td>
-                    <td class="px-4 py-3 text-gray-600">{{ commande.date_commande|date:"d/m/Y" }}</td>
-                    <td class="px-4 py-3">
-                        <a href="{% url 'changer_statut_commande' commande.id %}" class="bg-cediRed text-white px-3 py-1 rounded hover:bg-cediRedDark text-xs">Changer statut</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">Aucune commande pour le moment.</td>
-                </tr>
-                {% endfor %}
+            <tbody id="commandes-tbody" class="divide-y divide-gray-100">
+                {% include 'appcedi/admin/partials/_commandes_rows.html' %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+
+// 1. Recherche en direct
+const searchInput = document.getElementById('search-commandes');
+const tbody = document.getElementById('commandes-tbody');
+let timeout = null;
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', searchInput.value);
+        
+        fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.json())
+            .then(data => {
+                tbody.innerHTML = data.html;
+                document.getElementById('select-all').checked = false;
+            });
+    }, 300);
+});
+
+// 2. "Tout sélectionner"
+document.getElementById('select-all').addEventListener('change', function(e) {
+    document.querySelectorAll('.commande-checkbox').forEach(cb => cb.checked = e.target.checked);
+});
+
+// 3. Changement de statut individuel (AJAX)
+function changerStatut(event, form) {
+    event.preventDefault();
+    const formData = new FormData(form);
+    
+    fetch("{% url 'changer_statut_commande' %}", {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            tbody.innerHTML = data.html;
+            // On remet à zéro la case à cocher "Tout sélectionner"
+            document.getElementById('select-all').checked = false;
+        }
+    });
+}
+
+// 4. Action groupée
+function appliquerActionGroupee() {
+    const ids = Array.from(document.querySelectorAll('.commande-checkbox:checked')).map(cb => cb.value);
+    const statut = document.querySelector('#bulk-form select[name="statut"]').value;
+    
+    if(ids.length === 0) return alert("Veuillez sélectionner au moins une commande.");
+    if(!statut) return alert("Veuillez choisir un statut.");
+
+    const formData = new FormData();
+    ids.forEach(id => formData.append('commande_ids', id));
+    formData.append('statut', statut);
+    formData.append('q', searchInput.value); // On garde la recherche active
+    
+    fetch("{% url 'changer_statut_commande' %}", {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            tbody.innerHTML = data.html;
+            document.getElementById('select-all').checked = false;
+            document.querySelector('#bulk-form select').value = "";
+        }
+    });
+}
+</script>
 {% endblock %}

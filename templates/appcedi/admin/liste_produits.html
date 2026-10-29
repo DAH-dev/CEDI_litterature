@@ -1,19 +1,58 @@
 {% extends 'appcedi/admin/base_admin.html' %}
 
-{% block admin_title %}📚 Gestion des Produits{% endblock %}
+{% block admin_title %}<i class="fa-solid fa-book text-cediRed mr-2"></i> Gestion des Produits{% endblock %}
 
 {% block admin_actions %}
-<a href="{% url 'ajouter_produit' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold">
-    <i class="fa-solid fa-plus"></i> Ajouter un produit
-</a>
+<div class="flex flex-wrap items-center gap-2">
+    <!-- 👇 BOUTON RETOUR AU TABLEAU DE BORD 👇 -->
+    <a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Tableau de bord
+    </a>
+    
+    <!-- Ton bouton d'ajout existant -->
+    <a href="{% url 'ajouter_produit' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Ajouter un produit
+    </a>
+</div>
 {% endblock %}
 
 {% block admin_content %}
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    
+    <!-- Barre d'outils : Recherche et Actions groupées -->
+    <div class="p-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        
+        <!-- Recherche AJAX -->
+        <div class="relative w-full md:max-w-md">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="search-produits" placeholder="Rechercher par titre, auteur..." 
+                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-cediRed focus:ring-1 focus:ring-cediRed transition">
+        </div>
+
+        <!-- Formulaire d'actions groupées -->
+        <form method="POST" action="{% url 'actions_produits_bulk' %}" id="bulk-form" class="flex items-center gap-2 w-full md:w-auto">
+            {% csrf_token %}
+            <select name="action" required class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cediRed bg-white w-full md:w-auto">
+                <option value="">-- Action groupée --</option>
+                <option value="activate">Activer</option>
+                <option value="deactivate">Désactiver</option>
+                <option value="set_cedi">Marquer Édition CEDI</option>
+                <option value="delete">Supprimer</option>
+            </select>
+            <button type="submit" onclick="return confirm('Appliquer cette action aux produits sélectionnés ?');" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-900 transition whitespace-nowrap">
+                Appliquer
+            </button>
+        </form>
+    </div>
+
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200">
+            <thead class="bg-white border-b border-gray-200">
                 <tr>
+                    <!-- Case "Tout sélectionner" -->
+                    <th class="px-4 py-3 text-center w-10">
+                        <input type="checkbox" id="select-all" class="accent-cediRed w-4 h-4 cursor-pointer" title="Tout sélectionner">
+                    </th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-600">Image</th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-600">Titre</th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-600">Auteur</th>
@@ -24,61 +63,56 @@
                     <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
-                {% for produit in produits %}
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">
-                        {% with produit.image_principale as img %}
-                           {% if img %}
-                           <img src="{{ img.url_image.url }}" class="w-12 h-12 object-cover rounded" alt="{{ produit.titre }}">
-                            {% else %}
-        <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">📷</div>
-    {% endif %}
-{% endwith %}
-                    </td>
-                    <td class="px-4 py-3 font-medium text-gray-800">{{ produit.titre|truncatechars:30 }}</td>
-                    <td class="px-4 py-3 text-gray-600">{{ produit.auteur|default:"-" }}</td>
-                    <td class="px-4 py-3 font-bold text-cediRed">{{ produit.prix|floatformat:0 }} F</td>
-                    <td class="px-4 py-3 {% if produit.quantite_stock < 3 %}text-red-600 font-bold{% else %}text-gray-600{% endif %}">
-                        {{ produit.quantite_stock }}
-                    </td>
-                    
-                    <!-- Colonne Statut -->
-                    <td class="px-4 py-3">
-                        {% if produit.statut == True or produit.statut == 'actif' or produit.statut == 'ACTIF' %}
-                            <span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-semibold">Actif</span>
-                        {% else %}
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2.5 py-1 rounded-full font-semibold">Inactif</span>
-                        {% endif %}
-                    </td>
-
-                    <td class="px-4 py-3">{% if produit.est_edition_cedi %}<span class="bg-cediGold text-white text-xs px-2 py-1 rounded">✅</span>{% else %}<span class="text-gray-400">—</span>{% endif %}</td>
-                    
-                    <td class="px-4 py-3">
-                        <div class="flex items-center gap-3">
-                            <!-- Bouton Basculer Statut -->
-                            <a href="{% url 'basculer_statut_produit' produit.id %}" 
-                               title="{% if produit.statut == True or produit.statut == 'actif' or produit.statut == 'ACTIF' %}Désactiver{% else %}Activer{% endif %}"
-                               class="{% if produit.statut == True or produit.statut == 'actif' or produit.statut == 'ACTIF' %}text-green-600 hover:text-green-800{% else %}text-gray-400 hover:text-gray-600{% endif %} transition text-base">
-                                {% if produit.statut == True or produit.statut == 'actif' or produit.statut == 'ACTIF' %}
-                                    <i class="fa-solid fa-toggle-on text-xl"></i>
-                                {% else %}
-                                    <i class="fa-solid fa-toggle-off text-xl"></i>
-                                {% endif %}
-                            </a>
-
-                            <a href="{% url 'modifier_produit' produit.id %}" class="text-cediRed hover:text-cediRedDark transition" title="Modifier"><i class="fa-solid fa-pen"></i></a>
-                            <a href="{% url 'supprimer_produit' produit.id %}" class="text-red-500 hover:text-red-700 transition" title="Supprimer"><i class="fa-solid fa-trash"></i></a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="8" class="px-4 py-8 text-center text-gray-500">Aucun produit pour le moment. <a href="{% url 'ajouter_produit' %}" class="text-cediRed hover:underline">Ajoutez-en un !</a></td>
-                </tr>
-                {% endfor %}
+            <!-- Le tbody fait partie du formulaire d'actions groupées -->
+            <tbody id="produits-tbody" class="divide-y divide-gray-100">
+                {% include 'appcedi/admin/partials/_produits_rows.html' %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- 1. Logique de la Barre de Recherche AJAX ---
+    const searchInput = document.getElementById('search-produits');
+    const tbody = document.getElementById('produits-tbody');
+    let timeout = null;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            const query = searchInput.value;
+            fetch(`?q=${encodeURIComponent(query)}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                tbody.innerHTML = data.html;
+                // On décoche la case "Tout sélectionner" lors d'une nouvelle recherche
+                document.getElementById('select-all').checked = false;
+            })
+            .catch(error => console.error('Erreur:', error));
+        }, 300);
+    });
+
+    // --- 2. Logique de "Tout Sélectionner" ---
+    const selectAllCheckbox = document.getElementById('select-all');
+    
+    selectAllCheckbox.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.product-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = selectAllCheckbox.checked;
+        });
+    });
+
+    // Si on décoche un produit individuel, on décoche "Tout sélectionner"
+    tbody.addEventListener('change', function(e) {
+        if (e.target.classList.contains('product-checkbox')) {
+            const allCheckboxes = document.querySelectorAll('.product-checkbox');
+            const checkedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
+            selectAllCheckbox.checked = (allCheckboxes.length > 0 && allCheckboxes.length === checkedCheckboxes.length);
+        }
+    });
+});
+</script>
 {% endblock %}

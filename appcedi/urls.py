@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # --- ACCUEIL & COMPTE ---
@@ -21,6 +22,7 @@ urlpatterns = [
     path('admin_produits/modifier/<int:pk>/', views.modifier_produit, name='modifier_produit'),
     path('admin_produits/supprimer/<int:pk>/', views.supprimer_produit, name='supprimer_produit'),
     path('produits/<int:pk>/basculer-statut/', views.basculer_statut_produit, name='basculer_statut_produit'),
+    path('admin_produits/actions-bulk/', views.actions_produits_bulk, name='actions_produits_bulk'),
     path('gestion_images/principale/<int:image_id>/', views.definir_principale, name='definir_principale'),
     path('gestion_images/supprimer/<int:image_id>/', views.supprimer_image, name='supprimer_image'),
 
@@ -30,6 +32,8 @@ urlpatterns = [
     path('panier/modifier/<int:article_id>/', views.modifier_quantite_panier, name='modifier_quantite_panier'),
     path('panier/supprimer/<int:article_id>/', views.supprimer_du_panier, name='supprimer_du_panier'),
     path('panier/valider/', views.valider_commande, name='valider_commande'),
+    path('admin_commandes/detail/<int:pk>/', views.detail_commande, name='detail_commande'),
+path('admin_commandes/statut/', views.changer_statut_commande, name='changer_statut_commande'),
     path('produit/<int:pk>/ajouter-avis/', views.ajouter_avis_produit, name='ajouter_avis_produit'),
 
     # path('liste-souhaits/', views.voir_liste_souhaits, name='voir_liste_souhaits'),
@@ -43,7 +47,7 @@ urlpatterns = [
     path('admin_categories/ajouter/', views.ajouter_categorie, name='ajouter_categorie'),
     path('admin_categories/modifier/<int:pk>/', views.modifier_categorie, name='modifier_categorie'),
     path('admin_categories/supprimer/<int:pk>/', views.supprimer_categorie, name='supprimer_categorie'),
-
+    path('admin_categories/actions-bulk/', views.actions_categories_bulk, name='actions_categories_bulk'),
     # --- POINTS DE VENTE ---
     path('admin_points_vente/', views.liste_points_vente, name='liste_points_vente'),
     path('admin_points_vente/ajouter/', views.ajouter_point_vente, name='ajouter_point_vente'),
@@ -53,6 +57,7 @@ urlpatterns = [
     # --- PROMOTIONS ---
     path('admin_promotions/', views.liste_promotions, name='liste_promotions'),
     path('admin_promotions/ajouter/', views.ajouter_promotion, name='ajouter_promotion'),
+    path('admin_promotions/detail/<int:pk>/', views.detail_promotion, name='detail_promotion'),
     path('promotions/toggle/<int:promo_id>/', views.basculer_statut_promotion, name='basculer_statut_promotion'),
     path('admin_promotions/modifier/<int:pk>/', views.modifier_promotion, name='modifier_promotion'),
     path('admin_promotions/supprimer/<int:pk>/', views.supprimer_promotion, name='supprimer_promotion'),
@@ -94,4 +99,24 @@ urlpatterns = [
     # --- TÉMOIGNAGES (PUBLIC) ---
     path('temoignages/', views.liste_temoignages_publics, name='liste_temoignages_publics'),
     path('temoignages/soumettre/', views.soumettre_temoignage, name='soumettre_temoignage'),
+    
+        # --- RÉINITIALISATION DU MOT DE PASSE ---
+    path('mot-de-passe-oublie/', auth_views.PasswordResetView.as_view(
+        template_name='appcedi/auth/password_reset_form.html',
+        email_template_name='appcedi/auth/password_reset_email.html',
+        success_url='/mot-de-passe-oublie/envoye/'
+    ), name='password_reset'),
+    
+    path('mot-de-passe-oublie/envoye/', auth_views.PasswordResetDoneView.as_view(
+        template_name='appcedi/auth/password_reset_done.html'
+    ), name='password_reset_done'),
+    
+    path('reinitialiser/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='appcedi/auth/password_reset_confirm.html',
+        success_url='/reinitialiser/termine/'
+    ), name='password_reset_confirm'),
+    
+    path('reinitialiser/termine/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='appcedi/auth/password_reset_complete.html'
+    ), name='password_reset_complete'),
 ]
