@@ -1,0 +1,89 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+
+{% block admin_title %}<i class="fa-solid fa-tags text-cediRed mr-2"></i> Détails de la promotion{% endblock %}
+
+{% block admin_actions %}
+<a href="{% url 'liste_promotions' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold flex items-center gap-2">
+    <i class="fa-solid fa-arrow-left"></i> Retour
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    
+    <!-- Infos de la promotion -->
+    <div class="md:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
+        <h3 class="font-bold text-lg text-gray-800 border-b pb-2 mb-4">{{ promo.titre }}</h3>
+        
+        <p class="text-sm text-gray-600 mb-2">
+            <strong>Statut :</strong> 
+            {% if promo.actif %}
+                <span class="text-emerald-600 font-bold">Actif</span>
+            {% else %}
+                <span class="text-rose-600 font-bold">Inactif</span>
+            {% endif %}
+        </p>
+        
+        <p class="text-sm text-gray-600 mb-2">
+            <strong>Type :</strong> 
+            {% if promo.est_vente_flash %}
+                <span class="text-amber-600 font-bold"><i class="fa-solid fa-bolt"></i> Vente Flash</span>
+            {% else %}
+                <span>Standard</span>
+            {% endif %}
+        </p>
+
+        <p class="text-sm text-gray-600 mb-2">
+            <strong>Réduction :</strong> 
+            <span class="text-cediRed font-bold text-base">
+                {% if promo.type_reduction == 'pourcentage' %}
+                    -{{ promo.valeur_reduction|floatformat:0 }}%
+                {% else %}
+                    -{{ promo.valeur_reduction|floatformat:0 }} FCFA
+                {% endif %}
+            </span>
+        </p>
+
+        <p class="text-sm text-gray-600 mb-2"><strong>Début :</strong> {{ promo.date_debut|date:"d/m/Y à H:i" }}</p>
+        <p class="text-sm text-gray-600 mb-4"><strong>Fin :</strong> {{ promo.date_fin|date:"d/m/Y à H:i" }}</p>
+
+        {% if promo.description %}
+            <div class="bg-gray-50 p-3 rounded-lg text-sm text-gray-600 italic border border-gray-100">
+                {{ promo.description }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Liste des produits concernés -->
+    <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="font-bold text-gray-800 border-b pb-2 mb-4">Produits inclus dans cette promotion ({{ produits.count }})</h3>
+        
+        {% if produits %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {% for produit in produits %}
+            <div class="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50">
+                {% with produit.image_principale as img %}
+                    {% if img %}
+                        <img src="{{ img.url_image.url }}" alt="{{ produit.titre }}" class="w-12 h-12 object-contain bg-white rounded border">
+                    {% else %}
+                        <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400"><i class="fa-solid fa-book"></i></div>
+                    {% endif %}
+                {% endwith %}
+                <div>
+                    <p class="text-sm font-bold text-gray-800 line-clamp-1">{{ produit.titre }}</p>
+                    <p class="text-xs text-gray-500">Prix normal : {{ produit.prix }} FCFA</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-gray-500">
+            <i class="fa-solid fa-box-open text-4xl mb-3 text-gray-300"></i>
+            <p>Aucun produit n'a encore été ajouté à cette promotion.</p>
+            <a href="{% url 'modifier_promotion' promo.id %}" class="inline-block mt-3 text-cediRed hover:underline font-bold text-sm">Ajouter des produits</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

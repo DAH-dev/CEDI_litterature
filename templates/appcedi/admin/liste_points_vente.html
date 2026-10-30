@@ -1,23 +1,30 @@
 {% extends 'appcedi/admin/base_admin.html' %}
 
-{% block admin_title %}📍 Gestion des Points de Vente{% endblock %}
+{% block admin_title %}<i class="fa-solid fa-location-dot text-cediRed mr-2"></i> Gestion des Points de Vente{% endblock %}
 
 {% block admin_actions %}
-<a href="{% url 'ajouter_point_vente' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold">
-    <i class="fa-solid fa-plus"></i> Ajouter un point de vente
-</a>
+<div class="flex flex-wrap items-center gap-2">
+    <a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Tableau de bord
+    </a>
+    <a href="{% url 'ajouter_point_vente' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Ajouter un point de vente
+    </a>
+</div>
 {% endblock %}
 
 {% block admin_content %}
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
                     <th class="px-4 py-3 text-left font-semibold text-gray-600">Photo</th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-600">Nom</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Adresse</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Téléphone</th>
+                    <!-- Caché sur mobile -->
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600 hidden sm:table-cell">Adresse</th>
+                    <!-- Caché sur mobile et tablette -->
+                    <th class="px-4 py-3 text-left font-semibold text-gray-600 hidden md:table-cell">Téléphone</th>
                     <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
                 </tr>
             </thead>
@@ -26,24 +33,39 @@
                 <tr class="hover:bg-gray-50">
                     <td class="px-4 py-3">
                         {% if point.url_image %}
-                            <img src="{{ point.url_image.url }}" class="w-12 h-12 object-cover rounded" alt="{{ point.nom }}">
+                            <img src="{{ point.url_image.url }}" class="w-12 h-12 object-cover rounded-lg shadow-sm" alt="{{ point.nom }}">
                         {% else %}
-                            <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">📷</div>
+                            <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-xs"><i class="fa-solid fa-camera"></i></div>
                         {% endif %}
                     </td>
-                    <td class="px-4 py-3 font-medium text-gray-800">{{ point.nom }}</td>
-                    <td class="px-4 py-3 text-gray-600">{{ point.adresse_complete|truncatechars:40 }}</td>
-                    <td class="px-4 py-3 text-gray-600">{{ point.telephone|default:"-" }}</td>
+                    <td class="px-4 py-3 font-medium text-gray-800">
+                        {{ point.nom }}
+                        <!-- Sur mobile, on affiche l'adresse en petit sous le nom pour ne pas perdre l'info -->
+                        <div class="text-[11px] text-gray-500 mt-0.5 sm:hidden truncate max-w-[150px]">
+                            {{ point.adresse_complete|truncatechars:30 }}
+                        </div>
+                    </td>
+                    
+                    <td class="px-4 py-3 text-gray-600 hidden sm:table-cell">{{ point.adresse_complete|truncatechars:40 }}</td>
+                    <td class="px-4 py-3 text-gray-600 hidden md:table-cell">{{ point.telephone|default:"-" }}</td>
+                    
                     <td class="px-4 py-3">
-                        <div class="flex gap-2">
-                            <a href="{% url 'modifier_point_vente' point.id %}" class="text-cediRed hover:text-cediRedDark transition"><i class="fa-solid fa-pen"></i></a>
-                            <a href="{% url 'supprimer_point_vente' point.id %}" class="text-red-500 hover:text-red-700 transition"><i class="fa-solid fa-trash"></i></a>
+                        <div class="flex gap-3 items-center">
+                            <a href="{% url 'modifier_point_vente' point.id %}" class="text-cediRed hover:text-cediRedDark transition text-base" title="Modifier">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <a href="{% url 'supprimer_point_vente' point.id %}" class="text-red-500 hover:text-red-700 transition text-base" title="Supprimer">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
                         </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">Aucun point de vente. <a href="{% url 'ajouter_point_vente' %}" class="text-cediRed hover:underline">Ajoutez-en un !</a></td>
+                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                        Aucun point de vente. 
+                        <a href="{% url 'ajouter_point_vente' %}" class="text-cediRed hover:underline font-bold">Ajoutez-en un !</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -25,64 +25,69 @@
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
     
-    <!-- Barre d'outils -->
-    <div class="p-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-2 text-sm text-gray-600 font-medium">
-            <input type="checkbox" id="select-all" class="accent-cediRed w-4 h-4 cursor-pointer">
-            <label for="select-all" class="cursor-pointer">Tout sélectionner</label>
-        </div>
+    <!-- 👇 ON OUVRE LE FORMULAIRE ICI POUR ENGLOBER LA BARRE ET LE TABLEAU 👇 -->
+    <form method="POST" action="{% url 'actions_categories_bulk' %}" id="bulk-form">
+        {% csrf_token %}
+        <!-- Champ caché pour dire au serveur qu'on veut supprimer -->
+        <input type="hidden" name="action" value="delete">
 
-        <form method="POST" action="{% url 'actions_categories_bulk' %}" id="bulk-form" class="w-full sm:w-auto">
-            {% csrf_token %}
+        <!-- Barre d'outils -->
+        <div class="p-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-sm text-gray-600 font-medium">
+                <input type="checkbox" id="select-all" class="accent-cediRed w-4 h-4 cursor-pointer">
+                <label for="select-all" class="cursor-pointer">Tout sélectionner</label>
+            </div>
+
             <button type="button" onclick="supprimerSelection()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm flex items-center justify-center gap-2">
                 <i class="fa-solid fa-trash"></i> Supprimer la sélection
             </button>
-        </form>
-    </div>
+        </div>
 
-    <!-- Tableau -->
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-white border-b border-gray-200">
-                <tr>
-                    <th class="px-4 py-3 text-left w-10"></th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Nom</th>
-                    <!-- Caché sur mobile -->
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600 hidden md:table-cell">Description</th>
-                    <!-- Caché sur tablette et mobile -->
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600 hidden lg:table-cell">Catégorie parente</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="categories-tbody" class="divide-y divide-gray-100">
-                {% for cat in categories %}
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">
-                        <input type="checkbox" name="categorie_ids" value="{{ cat.id }}" class="category-checkbox accent-cediRed w-4 h-4 cursor-pointer">
-                    </td>
-                    <td class="px-4 py-3 font-medium text-gray-800">{{ cat.nom }}</td>
-                    
-                    <td class="px-4 py-3 text-gray-600 hidden md:table-cell">{{ cat.description|truncatechars:40|default:"-" }}</td>
-                    <td class="px-4 py-3 text-gray-600 hidden lg:table-cell">{{ cat.categorie_parente.nom|default:"-" }}</td>
-                    
-                    <td class="px-4 py-3">
-                        <div class="flex gap-3">
-                            <a href="{% url 'modifier_categorie' cat.id %}" class="text-cediRed hover:text-cediRedDark transition" title="Modifier"><i class="fa-solid fa-pen"></i></a>
-                            <a href="{% url 'supprimer_categorie' cat.id %}" class="text-red-500 hover:text-red-700 transition" title="Supprimer"><i class="fa-solid fa-trash"></i></a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-                        Aucune catégorie pour le moment. 
-                        <a href="{% url 'ajouter_categorie' %}" class="text-cediRed hover:underline font-bold">Ajoutez-en une !</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <!-- Tableau -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-white border-b border-gray-200">
+                    <tr>
+                        <th class="px-4 py-3 text-left w-10"></th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Nom</th>
+                        <!-- Caché sur mobile -->
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600 hidden md:table-cell">Description</th>
+                        <!-- Caché sur tablette et mobile -->
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600 hidden lg:table-cell">Catégorie parente</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="categories-tbody" class="divide-y divide-gray-100">
+                    {% for cat in categories %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">
+                            <!-- Les checkboxes ont le bon name pour être envoyés avec le form -->
+                            <input type="checkbox" name="categorie_ids" value="{{ cat.id }}" class="category-checkbox accent-cediRed w-4 h-4 cursor-pointer">
+                        </td>
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ cat.nom }}</td>
+                        
+                        <td class="px-4 py-3 text-gray-600 hidden md:table-cell">{{ cat.description|truncatechars:40|default:"-" }}</td>
+                        <td class="px-4 py-3 text-gray-600 hidden lg:table-cell">{{ cat.categorie_parente.nom|default:"-" }}</td>
+                        
+                        <td class="px-4 py-3">
+                            <div class="flex gap-3">
+                                <a href="{% url 'modifier_categorie' cat.id %}" class="text-cediRed hover:text-cediRedDark transition" title="Modifier"><i class="fa-solid fa-pen"></i></a>
+                                <a href="{% url 'supprimer_categorie' cat.id %}" class="text-red-500 hover:text-red-700 transition" title="Supprimer"><i class="fa-solid fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                            Aucune catégorie pour le moment. 
+                            <a href="{% url 'ajouter_categorie' %}" class="text-cediRed hover:underline font-bold">Ajoutez-en une !</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form> <!-- 👆 FERMETURE DU FORMULAIRE ICI 👆 -->
 </div>
 
 <script>
@@ -106,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Fonction de suppression groupée
+// Fonction de suppression groupée (Maintenant ultra simple !)
 function supprimerSelection() {
     const checkboxes = document.querySelectorAll('.category-checkbox:checked');
     if(checkboxes.length === 0) {
@@ -115,24 +120,9 @@ function supprimerSelection() {
     }
     
     if(confirm("Êtes-vous sûr de vouloir supprimer les " + checkboxes.length + " catégorie(s) sélectionnée(s) ? Cette action est irréversible.")) {
-        const form = document.getElementById('bulk-form');
-        // On ajoute l'action au formulaire
-        const inputAction = document.createElement('input');
-        inputAction.type = 'hidden';
-        inputAction.name = 'action';
-        inputAction.value = 'delete';
-        form.appendChild(inputAction);
-        
-        // On ajoute les IDs cochés au formulaire
-        checkboxes.forEach(cb => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'categorie_ids';
-            input.value = cb.value;
-            form.appendChild(input);
-        });
-        
-        form.submit();
+        // Le navigateur va envoyer automatiquement toutes les cases cochées
+        // puisqu'elles sont à l'intérieur du formulaire !
+        document.getElementById('bulk-form').submit();
     }
 }
 </script>

@@ -4,12 +4,9 @@
 
 {% block admin_actions %}
 <div class="flex flex-wrap items-center gap-2">
-    <!-- 👇 BOUTON RETOUR AU TABLEAU DE BORD 👇 -->
     <a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold flex items-center gap-2">
         <i class="fa-solid fa-arrow-left"></i> Tableau de bord
     </a>
-    
-    <!-- Ton bouton d'ajout existant -->
     <a href="{% url 'ajouter_produit' %}" class="bg-cediRed text-white px-4 py-2 rounded-lg hover:bg-cediRedDark transition text-sm font-bold flex items-center gap-2">
         <i class="fa-solid fa-plus"></i> Ajouter un produit
     </a>
@@ -19,56 +16,62 @@
 {% block admin_content %}
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     
-    <!-- Barre d'outils : Recherche et Actions groupées -->
-    <div class="p-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        
-        <!-- Recherche AJAX -->
+    <!-- Barre de recherche (En dehors du formulaire POST) -->
+    <div class="p-4 border-b border-gray-200 bg-gray-50">
         <div class="relative w-full md:max-w-md">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
             <input type="text" id="search-produits" placeholder="Rechercher par titre, auteur..." 
                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-cediRed focus:ring-1 focus:ring-cediRed transition">
         </div>
-
-        <!-- Formulaire d'actions groupées -->
-        <form method="POST" action="{% url 'actions_produits_bulk' %}" id="bulk-form" class="flex items-center gap-2 w-full md:w-auto">
-            {% csrf_token %}
-            <select name="action" required class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cediRed bg-white w-full md:w-auto">
-                <option value="">-- Action groupée --</option>
-                <option value="activate">Activer</option>
-                <option value="deactivate">Désactiver</option>
-                <option value="set_cedi">Marquer Édition CEDI</option>
-                <option value="delete">Supprimer</option>
-            </select>
-            <button type="submit" onclick="return confirm('Appliquer cette action aux produits sélectionnés ?');" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-900 transition whitespace-nowrap">
-                Appliquer
-            </button>
-        </form>
     </div>
 
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-white border-b border-gray-200">
-                <tr>
-                    <!-- Case "Tout sélectionner" -->
-                    <th class="px-4 py-3 text-center w-10">
-                        <input type="checkbox" id="select-all" class="accent-cediRed w-4 h-4 cursor-pointer" title="Tout sélectionner">
-                    </th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Image</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Titre</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Auteur</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Prix</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Stock</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Statut</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">CEDI</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
-                </tr>
-            </thead>
-            <!-- Le tbody fait partie du formulaire d'actions groupées -->
-            <tbody id="produits-tbody" class="divide-y divide-gray-100">
-                {% include 'appcedi/admin/partials/_produits_rows.html' %}
-            </tbody>
-        </table>
-    </div>
+    <!-- 👇 ON OUVRE LE FORMULAIRE ICI POUR ENGLOBER LES ACTIONS ET LE TABLEAU 👇 -->
+    <form method="POST" action="{% url 'actions_produits_bulk' %}" id="bulk-form">
+        {% csrf_token %}
+        
+        <!-- Barre d'actions groupées -->
+        <div class="p-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="select-all" class="accent-cediRed w-4 h-4 cursor-pointer">
+                <label for="select-all" class="text-sm font-medium text-gray-700 cursor-pointer">Tout sélectionner</label>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <select name="action" required class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cediRed bg-white w-full sm:w-auto">
+                    <option value="">-- Action groupée --</option>
+                    <option value="activate">Activer</option>
+                    <option value="deactivate">Désactiver</option>
+                    <option value="set_cedi">Marquer Édition CEDI</option>
+                    <option value="delete">Supprimer</option>
+                </select>
+                <button type="submit" onclick="return confirm('Appliquer cette action aux produits sélectionnés ?');" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-900 transition whitespace-nowrap">
+                    Appliquer
+                </button>
+            </div>
+        </div>
+
+        <!-- Tableau des produits -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-white border-b border-gray-200">
+                    <tr>
+                        <th class="px-4 py-3 text-center w-10"></th> <!-- Colonne pour le checkbox -->
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Image</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Titre</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Auteur</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Prix</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Stock</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Statut</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">CEDI</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="produits-tbody" class="divide-y divide-gray-100">
+                    {% include 'appcedi/admin/partials/_produits_rows.html' %}
+                </tbody>
+            </table>
+        </div>
+    </form> <!-- 👆 FERMETURE DU FORMULAIRE ICI 👆 -->
 </div>
 
 <script>
@@ -88,7 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 tbody.innerHTML = data.html;
-                // On décoche la case "Tout sélectionner" lors d'une nouvelle recherche
                 document.getElementById('select-all').checked = false;
             })
             .catch(error => console.error('Erreur:', error));

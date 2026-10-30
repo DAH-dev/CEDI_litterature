@@ -651,7 +651,52 @@ def supprimer_promotion(request, pk):
 def liste_articles(request):
     articles = ArticleBlog.objects.all().order_by('-date_publication')
     return render(request, 'appcedi/admin/liste_articles.html', {'articles': articles})
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def liste_articles(request):
+    query = request.GET.get('q', '').strip()
+    articles = ArticleBlog.objects.all().order_by('-date_publication')
 
+    if query:
+        articles = articles.filter(
+            Q(titre__icontains=query) |
+            Q(auteur__username__icontains=query) |
+            Q(categorie_article__icontains=query)
+        )
+
+    # Si c'est une requête AJAX (recherche en direct)
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        html = render_to_string('appcedi/admin/partials/_articles_rows.html', {'articles': articles})
+        return JsonResponse({'html': html})
+
+    return render(request, 'appcedi/admin/liste_articles.html', {'articles': articles})
+
+
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def actions_articles_bulk(request):
+    if request.method == 'POST':
+        article_ids = request.POST.getlist('article_ids')
+        action = request.POST.get('action')
+
+        if not article_ids:
+            messages.warning(request, "Veuillez sélectionner au moins un article.")
+            return redirect('liste_articles')
+
+        articles = ArticleBlog.objects.filter(id__in=article_ids)
+        count = articles.count()
+
+        if action == 'delete':
+            articles.delete()
+            messages.success(request, f"{count} article(s) supprimé(s) avec succès.")
+        elif action == 'publier':
+            articles.update(statut='publie')
+            messages.success(request, f"{count} article(s) publié(s).")
+        elif action == 'brouillon':
+            articles.update(statut='brouillon')
+            messages.success(request, f"{count} article(s) mis en brouillon.")
+            
+    return redirect('liste_articles')
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Produit, Panier, ArticlePanier, ListeSouhaits, AvisProduit, Commande, LigneCommande
 
@@ -979,12 +1024,59 @@ def ajouter_temoignage_site(request):
     return redirect(request.META.get('HTTP_REFERER', 'accueil'))
 
 # ========== TÉMOIGNAGES (ADMIN) ==========
+
+
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def liste_temoignages(request):
+    query = request.GET.get('q', '').strip()
     temoignages = Temoignage.objects.all().order_by('-date_creation')
+
+    if query:
+        temoignages = temoignages.filter(
+            Q(utilisateur__username__icontains=query) |
+            Q(contenu__icontains=query)
+        )
+
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        html = render_to_string('appcedi/admin/partials/_temoignages_rows.html', {'temoignages': temoignages})
+        return JsonResponse({'html': html})
+
     return render(request, 'appcedi/admin/liste_temoignages.html', {'temoignages': temoignages})
 
+
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def actions_temoignages_bulk(request):
+    if request.method == 'POST':
+        temoignage_ids = request.POST.getlist('temoignage_ids')
+        action = request.POST.get('action')
+
+        if not temoignage_ids:
+            return JsonResponse({'success': False, 'error': 'Aucun témoignage sélectionné.'})
+
+        qs = Temoignage.objects.filter(id__in=temoignage_ids)
+        
+        if action == 'approuve':
+            qs.update(statut='approuve')
+        elif action == 'rejete':
+            qs.update(statut='rejete')
+        elif action == 'en_attente':
+            qs.update(statut='en_attente')
+        elif action == 'delete':
+            qs.delete()
+
+        # Si c'est une requête AJAX, on renvoie le tableau mis à jour
+        if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+            query = request.POST.get('q', '').strip()
+            new_qs = Temoignage.objects.all().order_by('-date_creation')
+            if query:
+                new_qs = new_qs.filter(Q(utilisateur__username__icontains=query) | Q(contenu__icontains=query))
+            html = render_to_string('appcedi/admin/partials/_temoignages_rows.html', {'temoignages': new_qs})
+            return JsonResponse({'success': True, 'html': html})
+
+        messages.success(request, "Action effectuée avec succès.")
+        return redirect('liste_temoignages')
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -1123,8 +1215,51 @@ def supprimer_article(request, pk):
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
 def liste_avis(request):
-    avis = AvisClient.objects.all().order_by('-date_creation')
-    return render(request, 'appcedi/admin/liste_avis.html', {'avis': avis})
+    query = request.GET.get('q', '').strip()
+    avis_list = AvisClient.objects.all().order_by('-date_creation')
+
+    if query:
+        avis_list = avis_list.filter(
+            Q(produit__titre__icontains=query) |
+            Q(utilisateur__username__icontains=query)
+        )
+
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        html = render_to_string('appcedi/admin/partials/_avis_rows.html', {'avis': avis_list})
+        return JsonResponse({'html': html})
+
+    return render(request, 'appcedi/admin/liste_avis.html', {'avis': avis_list})
+
+
+@login_required
+@user_passes_test(est_admin_ou_gestionnaire)
+def actions_avis_bulk(request):
+    if request.method == 'POST':
+        avis_ids = request.POST.getlist('avis_ids')
+        action = request.POST.get('action')
+
+        if not avis_ids:
+            return JsonResponse({'success': False, 'error': 'Aucun avis sélectionné.'})
+
+        avis_queryset = AvisClient.objects.filter(id__in=avis_ids)
+        
+        if action == 'approuve':
+            avis_queryset.update(statut='approuve')
+        elif action == 'rejete':
+            avis_queryset.update(statut='rejete')
+        elif action == 'en_attente':
+            avis_queryset.update(statut='en_attente')
+        elif action == 'delete':
+            avis_queryset.delete()
+
+        # On renvoie le nouveau tableau pour l'AJAX
+        if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+            new_avis_list = AvisClient.objects.all().order_by('-date_creation')
+            html = render_to_string('appcedi/admin/partials/_avis_rows.html', {'avis': new_avis_list})
+            return JsonResponse({'success': True, 'html': html})
+
+        messages.success(request, "Action effectuée avec succès.")
+        return redirect('liste_avis')
 
 @login_required
 @user_passes_test(est_admin_ou_gestionnaire)
@@ -1261,3 +1396,4 @@ def ajouter_temoignage_site(request):
             )
             messages.success(request, "Merci ! Votre témoignage a été transmis à l'équipe.")
     return redirect(request.META.get('HTTP_REFERER', 'accueil'))
+

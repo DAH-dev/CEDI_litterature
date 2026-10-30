@@ -1,0 +1,44 @@
+{% for article in articles %}
+<tr class="hover:bg-gray-50 transition">
+    <!-- Checkbox -->
+    <td class="px-4 py-3 text-center">
+        <input type="checkbox" name="article_ids" value="{{ article.id }}" class="article-checkbox accent-cediRed w-4 h-4 cursor-pointer">
+    </td>
+    
+    <!-- Titre -->
+    <td class="px-4 py-3 font-medium text-gray-800 truncate max-w-[200px]">{{ article.titre }}</td>
+    
+    <!-- Auteur (Caché sur très petit écran) -->
+    <td class="px-4 py-3 text-gray-600 hidden sm:table-cell">{{ article.auteur.username }}</td>
+    
+    <!-- Catégorie (Cachée sur mobile) -->
+    <td class="px-4 py-3 text-gray-600 hidden md:table-cell">{{ article.get_categorie_article_display }}</td>
+    
+    <!-- Date (Cachée sur tablette et mobile) -->
+    <td class="px-4 py-3 text-gray-600 hidden lg:table-cell">{{ article.date_publication|date:"d/m/Y" }}</td>
+    
+    <!-- Statut -->
+    <td class="px-4 py-3 whitespace-nowrap">
+        {% if article.statut == 'publie' %}
+            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] sm:text-xs font-bold"><i class="fa-solid fa-check"></i> Publié</span>
+        {% else %}
+            <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-[10px] sm:text-xs font-bold"><i class="fa-solid fa-pen"></i> Brouillon</span>
+        {% endif %}
+    </td>
+    
+    <!-- Actions -->
+    <td class="px-4 py-3">
+        <div class="flex gap-2 justify-center sm:justify-start">
+            <a href="{% url 'article_detail' article.id %}" target="_blank" class="text-blue-500 hover:text-blue-700 transition" title="Voir l'article"><i class="fa-solid fa-eye"></i></a>
+            <a href="{% url 'modifier_article' article.id %}" class="text-cediRed hover:text-cediRedDark transition" title="Modifier"><i class="fa-solid fa-pen"></i></a>
+            <a href="{% url 'supprimer_article' article.id %}" class="text-red-500 hover:text-red-700 transition" title="Supprimer"><i class="fa-solid fa-trash"></i></a>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+        Aucun article trouvé.
+    </td>
+</tr>
+{% endfor %}

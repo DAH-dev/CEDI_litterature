@@ -33,7 +33,7 @@ urlpatterns = [
     path('panier/supprimer/<int:article_id>/', views.supprimer_du_panier, name='supprimer_du_panier'),
     path('panier/valider/', views.valider_commande, name='valider_commande'),
     path('admin_commandes/detail/<int:pk>/', views.detail_commande, name='detail_commande'),
-path('admin_commandes/statut/', views.changer_statut_commande, name='changer_statut_commande'),
+    path('admin_commandes/statut/', views.changer_statut_commande, name='changer_statut_commande'),
     path('produit/<int:pk>/ajouter-avis/', views.ajouter_avis_produit, name='ajouter_avis_produit'),
 
     # path('liste-souhaits/', views.voir_liste_souhaits, name='voir_liste_souhaits'),
@@ -64,6 +64,7 @@ path('admin_commandes/statut/', views.changer_statut_commande, name='changer_sta
 
     # --- BLOG / ARTICLES ---
     path('admin_articles/', views.liste_articles, name='liste_articles'),
+    path('admin_articles/actions-bulk/', views.actions_articles_bulk, name='actions_articles_bulk'),
     path('admin_articles/ajouter/', views.ajouter_article, name='ajouter_article'),
     path('articles/<int:pk>/', views.article_detail, name='article_detail'),
     path('admin_articles/modifier/<int:pk>/', views.modifier_article, name='modifier_article'),
@@ -71,6 +72,7 @@ path('admin_commandes/statut/', views.changer_statut_commande, name='changer_sta
 
     # --- MODERATION AVIS ---
     path('admin_avis/', views.liste_avis, name='liste_avis'),
+    path('admin_avis/actions-bulk/', views.actions_avis_bulk, name='actions_avis_bulk'),
     path('admin_avis/approuver/<int:pk>/', views.approuver_avis, name='approuver_avis'),
     path('admin_avis/rejeter/<int:pk>/', views.rejeter_avis, name='rejeter_avis'),
     path('admin_avis/detail/<int:pk>/', views.detail_avis, name='detail_avis'),
@@ -90,6 +92,7 @@ path('admin_commandes/statut/', views.changer_statut_commande, name='changer_sta
     
         # --- TÉMOIGNAGES (ADMIN) ---
     path('admin_temoignages/', views.liste_temoignages, name='liste_temoignages'),
+    path('admin_temoignages/actions-bulk/', views.actions_temoignages_bulk, name='actions_temoignages_bulk'),
     path('admin_temoignages/detail/<int:pk>/', views.detail_temoignage, name='detail_temoignage'),
     path('admin_temoignages/approuver/<int:pk>/', views.approuver_temoignage, name='approuver_temoignage'),
     path('admin_temoignages/rejeter/<int:pk>/', views.rejeter_temoignage, name='rejeter_temoignage'),

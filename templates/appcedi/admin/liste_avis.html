@@ -1,87 +1,180 @@
 {% extends 'appcedi/admin/base_admin.html' %}
 
-{% block admin_title %}<i class="fa-solid fa-star text-cediGold"></i> Gestion des avis clients{% endblock %}
+{% block admin_title %}<i class="fa-solid fa-star text-cediGold mr-2"></i> Gestion des avis clients{% endblock %}
 
 {% block admin_actions %}
-<a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold">
-    <i class="fa-solid fa-arrow-left"></i> Retour
+<a href="{% url 'tableau_de_bord' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-bold flex items-center gap-2">
+    <i class="fa-solid fa-arrow-left"></i> Tableau de bord
 </a>
 {% endblock %}
 
 {% block admin_content %}
-
-{% if messages %}
-    {% for message in messages %}
-        <div class="mb-4 p-3 rounded-lg bg-green-100 text-green-700 border border-green-200">
-            {{ message }}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
+    
+    <!-- Barre de recherche -->
+    <div class="p-4 border-b border-gray-200 bg-gray-50">
+        <div class="relative w-full md:max-w-md">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="search-avis" placeholder="Rechercher par nom du client ou titre du produit..." 
+                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-cediRed transition">
         </div>
-    {% endfor %}
-{% endif %}
-
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Produit</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Client</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Note</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Commentaire</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Statut</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                {% for avis in avis %}
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium text-gray-800">
-                        <a href="{% url 'detail_produit' avis.produit.pk %}" target="_blank" class="text-cediRed hover:underline">
-                            {{ avis.produit.titre|truncatechars:30 }}
-                        </a>
-                    </td>
-                    <td class="px-4 py-3 text-gray-600">{{ avis.utilisateur.username }}</td>
-                    <td class="px-4 py-3 text-cediGold font-bold">{{ avis.note }}/5</td>
-                    <td class="px-4 py-3 text-gray-600">{{ avis.commentaire|truncatechars:50|default:"-" }}</td>
-                    <td class="px-4 py-3">
-                        {% if avis.statut == 'approuve' %}
-                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs"><i class="fa-solid fa-check"></i> Approuvé</span>
-                        {% elif avis.statut == 'rejete' %}
-                            <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs"><i class="fa-solid fa-xmark"></i> Rejeté</span>
-                        {% else %}
-                            <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs"><i class="fa-solid fa-hourglass-half"></i> En attente</span>
-                        {% endif %}
-                    </td>
-                    <td class="px-4 py-3">
-                        <div class="flex gap-1 flex-wrap items-center">
-                            <!-- Voir détail -->
-                            <a href="{% url 'detail_avis' avis.id %}" class="bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300 text-xs" title="Voir le détail">
-                                <i class="fa-solid fa-eye"></i>
-                            </a>
-
-                            <!-- Changer le statut (toujours disponible) -->
-                            <a href="{% url 'changer_statut_avis' avis.id %}" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs" title="Changer le statut">
-                                <i class="fa-solid fa-rotate"></i>
-                            </a>
-
-                            <!-- Actions rapides selon le statut -->
-                            {% if avis.statut == 'en_attente' %}
-                                <a href="{% url 'approuver_avis' avis.id %}" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 text-xs" title="Approuver">
-                                    <i class="fa-solid fa-check"></i>
-                                </a>
-                                <a href="{% url 'rejeter_avis' avis.id %}" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-xs" title="Rejeter">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </a>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="px-4 py-8 text-center text-gray-500">Aucun avis pour le moment.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
+
+    <!-- Filtres par note -->
+    <div class="p-3 border-b border-gray-200 bg-white flex items-center gap-2 overflow-x-auto whitespace-nowrap no-scrollbar text-xs font-semibold">
+        <span class="text-gray-400 mr-1 shrink-0"><i class="fa-solid fa-filter"></i> Filtrer par note :</span>
+        <button onclick="filtrerAvis('toutes')" class="btn-filtre active bg-gray-900 text-white px-3 py-1.5 rounded-lg transition shrink-0" data-filtre="toutes">Toutes</button>
+        <button onclick="filtrerAvis('5')" class="btn-filtre bg-gray-100 text-gray-600 hover:bg-amber-100 hover:text-amber-800 px-3 py-1.5 rounded-lg transition shrink-0" data-filtre="5">5 ★</button>
+        <button onclick="filtrerAvis('4')" class="btn-filtre bg-gray-100 text-gray-600 hover:bg-amber-100 hover:text-amber-800 px-3 py-1.5 rounded-lg transition shrink-0" data-filtre="4">4 ★</button>
+        <button onclick="filtrerAvis('3')" class="btn-filtre bg-gray-100 text-gray-600 hover:bg-amber-100 hover:text-amber-800 px-3 py-1.5 rounded-lg transition shrink-0" data-filtre="3">3 ★</button>
+        <button onclick="filtrerAvis('2')" class="btn-filtre bg-gray-100 text-gray-600 hover:bg-amber-100 hover:text-amber-800 px-3 py-1.5 rounded-lg transition shrink-0" data-filtre="2">2 ★</button>
+        <button onclick="filtrerAvis('1')" class="btn-filtre bg-gray-100 text-gray-600 hover:bg-amber-100 hover:text-amber-800 px-3 py-1.5 rounded-lg transition shrink-0" data-filtre="1">1 ★</button>
+    </div>
+
+    <!-- Formulaire d'actions groupées (englobe le tableau) -->
+    <form method="POST" action="{% url 'actions_avis_bulk' %}" id="bulk-form">
+        {% csrf_token %}
+        
+        <div class="p-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="select-all" class="accent-cediRed w-4 h-4 cursor-pointer">
+                <label for="select-all" class="text-sm font-medium text-gray-700 cursor-pointer">Tout sélectionner</label>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <select name="action" required class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cediRed bg-white w-full sm:w-auto">
+                    <option value="">-- Action groupée --</option>
+                    <option value="approuve">Approuver</option>
+                    <option value="rejete">Rejeter</option>
+                    <option value="en_attente">Remettre en attente</option>
+                    <option value="delete">Supprimer</option>
+                </select>
+                <button type="button" onclick="appliquerActionGroupee()" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-900 transition whitespace-nowrap">
+                    Appliquer
+                </button>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-white border-b border-gray-200">
+                    <tr>
+                        <th class="px-4 py-3 text-center w-10"></th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Produit</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Client</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Note</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600 hidden md:table-cell">Commentaire</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Statut</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="avis-tbody" class="divide-y divide-gray-100">
+                    {% include 'appcedi/admin/partials/_avis_rows.html' %}
+                </tbody>
+            </table>
+        </div>
+    </form>
 </div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+const searchInput = document.getElementById('search-avis');
+const tbody = document.getElementById('avis-tbody');
+
+// 1. Recherche en direct
+let timeout = null;
+searchInput.addEventListener('input', function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', searchInput.value);
+        
+        fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.json())
+            .then(data => {
+                tbody.innerHTML = data.html;
+                document.getElementById('select-all').checked = false;
+                filtrerAvis(document.querySelector('.btn-filtre.active').dataset.filtre); // Réappliquer le filtre actuel
+            });
+    }, 300);
+});
+
+// 2. "Tout sélectionner"
+document.getElementById('select-all').addEventListener('change', function(e) {
+    document.querySelectorAll('.avis-checkbox').forEach(cb => cb.checked = e.target.checked);
+});
+
+// 3. Filtrage par note (Côté client)
+function filtrerAvis(note) {
+    const rows = document.querySelectorAll('.avis-row');
+    const boutons = document.querySelectorAll('.btn-filtre');
+
+    boutons.forEach(btn => {
+        if (btn.getAttribute('data-filtre') === note) {
+            btn.classList.add('bg-gray-900', 'text-white');
+            btn.classList.remove('bg-gray-100', 'text-gray-600');
+        } else {
+            btn.classList.remove('bg-gray-900', 'text-white');
+            btn.classList.add('bg-gray-100', 'text-gray-600');
+        }
+    });
+
+    rows.forEach(row => {
+        const rowNote = row.getAttribute('data-note');
+        if (note === 'toutes' || rowNote === note) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// 4. Changement de statut individuel (AJAX)
+function changerStatutAvis(event, form) {
+    event.preventDefault();
+    const formData = new FormData(form);
+    
+    fetch("{% url 'actions_avis_bulk' %}", {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            tbody.innerHTML = data.html;
+            document.getElementById('select-all').checked = false;
+            filtrerAvis(document.querySelector('.btn-filtre.active').dataset.filtre);
+        }
+    });
+}
+
+// 5. Action groupée
+function appliquerActionGroupee() {
+    const ids = Array.from(document.querySelectorAll('.avis-checkbox:checked')).map(cb => cb.value);
+    const action = document.querySelector('#bulk-form select[name="action"]').value;
+    
+    if(ids.length === 0) return alert("Veuillez sélectionner au moins un avis.");
+    if(!action) return alert("Veuillez choisir une action.");
+
+    const formData = new FormData();
+    ids.forEach(id => formData.append('avis_ids', id));
+    formData.append('action', action);
+    
+    fetch("{% url 'actions_avis_bulk' %}", {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            tbody.innerHTML = data.html;
+            document.getElementById('select-all').checked = false;
+            document.querySelector('#bulk-form select').value = "";
+            filtrerAvis(document.querySelector('.btn-filtre.active').dataset.filtre);
+        }
+    });
+}
+</script>
 {% endblock %}
