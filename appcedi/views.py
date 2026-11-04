@@ -52,7 +52,7 @@ def accueil(request):
 
     context = {
         'points_de_vente': PointVente.objects.all(),
-        'produits_recents': Produit.objects.filter(statut=True).order_by('-id')[:8],
+        'produits_recents': Produit.objects.filter(statut=True).order_by('-id')[:40],
         'promos_data': promos_data,
         'articles_blog': ArticleBlog.objects.filter(statut='publie').order_by('-date_publication')[:3],
     }
