@@ -1,0 +1,12 @@
+{% extends 'appcedi/admin/base_admin.html' %}
+{% block admin_title %}Supprimer l'utilisateur{% endblock %}
+{% block admin_content %}
+<div class="bg-white rounded-xl shadow-sm border p-6 max-w-md mx-auto text-center">
+    <h3 class="text-xl font-bold mb-4">Es-tu sûr de vouloir supprimer {{ user_obj.username }} ?</h3>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-red-700">Oui, supprimer</button>
+        <a href="{% url 'liste_utilisateurs' %}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-bold ml-2">Annuler</a>
+    </form>
+</div>
+{% endblock %}

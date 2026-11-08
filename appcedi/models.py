@@ -221,8 +221,15 @@ class QuestionConseil(models.Model):
     
     
 class Profil(models.Model):
+    ROLE_CHOICES = (
+        ('client', 'Client'), # 👈 AJOUTÉ ICI
+        ('admin', 'Administrateur'),
+        ('gestionnaire_stock', 'Gestionnaire de stock'),
+        ('conseiller', 'Conseiller'),
+    )
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profil')
     telephone = models.CharField(max_length=20, blank=True, null=True)
+    role = models.CharField(max_length=30, choices=ROLE_CHOICES, default='client') # 👈 Par défaut : client
 
     def __str__(self):
         return f"Profil de {self.user.username}"

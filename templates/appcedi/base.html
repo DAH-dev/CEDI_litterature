@@ -120,26 +120,20 @@
                 <i class="fa-solid fa-magnifying-glass text-xl"></i>
             </button>
 
-            <!-- Icône utilisateur (cadrage aligné sur la maquette : flex + gap + texte "Compte") -->
-           <!-- APRES -->
-{% if user.is_authenticated %}
-    {% if user.is_superuser or user.role == 'admin' or user.role == 'gestionnaire_stock' %}
-        <a href="{% url 'espace_client' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Tableau de bord">
-    {% else %}
-        <a href="{% url 'espace_client' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Mon Profil">
-    {% endif %}
-        <i class="fa-regular fa-user text-xl text-cediRed"></i>
-        <span class="absolute -top-1 -right-2 bg-cediGold text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
-            {{ user.username|slice:":1"|upper }}
-        </span>
-    </a>
-{% else %}
-    <a href="{% url 'connexion' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Se connecter">
-        <i class="fa-regular fa-user text-xl text-cediRed"></i>
-    </a>
-{% endif %}
+            <!-- Icône utilisateur : Pointe toujours vers l'espace client (car même le staff commande) -->
+            {% if user.is_authenticated %}
+                <a href="{% url 'espace_client' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Mon Profil">
+                    <i class="fa-regular fa-user text-xl text-cediRed"></i>
+                    <span class="absolute -top-1 -right-2 bg-cediGold text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
+                        {{ user.username|slice:":1"|upper }}
+                    </span>
+                </a>
+            {% else %}
+                <a href="{% url 'connexion' %}" class="hover:text-cediRed flex items-center transition relative p-1" title="Se connecter">
+                    <i class="fa-regular fa-user text-xl text-cediRed"></i>
+                </a>
+            {% endif %}
 
-           
 <!-- Panier -->
 <a href="{% url 'voir_panier' %}" class="hover:text-cediRed relative transition" title="Mon panier">
     <i class="fa-solid fa-cart-shopping text-xl text-cediRed"></i>
@@ -212,42 +206,39 @@
                     <div class="my-1 border-t border-gray-100"></div>
 
                     <!-- ====== ZONE AUTHENTIFICATION ====== -->
-                    <!-- APRES -->
-                 <!-- ====== ZONE AUTHENTIFICATION ====== -->
-{% if user.is_authenticated %}
-    <div class="px-4 py-2 text-sm text-gray-500 flex items-center gap-2">
-        <i class="fa-solid fa-circle-user text-cediRed text-base"></i>
-        <span>{{ user.username }}</span>
-    </div>
-    
-    <a href="{% url 'espace_client' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
-        <i class="fa-regular fa-user mr-1"></i> Mon Profil
-    </a>
+                    {% if user.is_authenticated %}
+                        <div class="px-4 py-2 text-sm text-gray-500 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-user text-cediRed text-base"></i>
+                            <span>{{ user.username }}</span>
+                        </div>
+                        
+                        <!-- Lien Mon Profil pour tout le monde -->
+                        <a href="{% url 'espace_client' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+                            <i class="fa-regular fa-user mr-1"></i> Mon Profil
+                        </a>
 
-    {% if user.is_superuser or user.role == 'admin' or user.role == 'gestionnaire_stock' %}
-        <a href="{% url 'tableau_de_bord' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
-            <i class="fa-solid fa-gauge-high mr-1"></i> Tableau de bord
-        </a>
-    {% endif %}
+                        <!-- Lien Tableau de bord : uniquement pour le staff (remis en rouge) -->
+                        {% if user.is_superuser or user.profil.role == 'admin' or user.profil.role == 'gestionnaire_stock' or user.profil.role == 'conseiller' %}
+                            <a href="{% url 'tableau_de_bord' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+                                <i class="fa-solid fa-gauge-high mr-1"></i> Tableau de bord
+                            </a>
+                        {% endif %}
 
-    <a href="{% url 'deconnexion' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
-        <i class="fa-solid fa-right-from-bracket mr-1"></i> Déconnexion
-    </a>
-{% else %}
-    <a href="{% url 'connexion' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
-        <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i> Se connecter
-    </a>
-{% endif %}
-<!-- ============================================= -->
+                        <a href="{% url 'deconnexion' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Déconnexion
+                        </a>
+                    {% else %}
+                        <a href="{% url 'connexion' %}" class="block mx-4 my-1 bg-cediRed text-white text-center font-bold py-2 rounded-lg hover:bg-cediRedDark transition">
+                            <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i> Se connecter
+                        </a>
+                    {% endif %}
                     <!-- ============================================= -->
-
-               
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Barre de navigation secondaire (facultative) -->
+    <!-- Barre de navigation secondaire -->
     <nav class="bg-gray-100 border-t border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 flex space-x-6 overflow-x-auto text-sm font-medium py-2.5 text-gray-700">
             <a href="/" class="text-cediRed font-bold hover:text-cediRed transition">Accueil</a>
@@ -255,7 +246,6 @@
             <a href="{% url 'liste_ressources' %}" class="hover:text-cediRed whitespace-nowrap transition">Ressources Spirituelles</a>
              <a href="{% url 'liste_temoignages_publics' %}" class="hover:text-cediRed whitespace-nowrap transition">Témoignages</a>
              <a href="{% url 'a_propos' %}" class="hover:text-cediRed whitespace-nowrap transition">À propos</a>
-            
         </div>
     </nav>
 </header>
@@ -268,7 +258,7 @@
         <i class="fa-brands fa-whatsapp text-2xl"></i>
     </a>
 
-    <!-- FOOTER (harmonisé avec la maquette : fond crème, comme le hero) -->
+    <!-- FOOTER -->
     <footer class="bg-cediCream text-gray-600 mt-auto pt-12 pb-6 border-t-2 border-cediGold">
         <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 text-sm">
             <div>
@@ -309,7 +299,7 @@
         </div>
     </footer>
 
-    <!-- SCRIPTS (EXACTEMENT comme dans ton fichier original) -->
+    <!-- SCRIPTS -->
     <script>
         var filterToggle = document.getElementById('filterToggle');
         var filterDropdown = document.getElementById('filterDropdown');

@@ -5,21 +5,36 @@
 {% endblock %}
 
 {% block admin_actions %}
-<!-- J'ai retiré la div "flex overflow-x-auto" qui englobait tout -->
-<a href="{% url 'liste_produits' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-box mr-1"></i> Produits</a>
-<a href="{% url 'liste_commandes' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-truck mr-1"></i> Commandes</a>
-<a href="{% url 'liste_categories' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-tags mr-1"></i> Catégories</a>
-<a href="{% url 'liste_promotions' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-percent mr-1"></i> Promos</a>
-<a href="{% url 'liste_articles' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-newspaper mr-1"></i> Articles</a>
-<a href="{% url 'liste_avis' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-star mr-1"></i> Avis</a>
-<a href="{% url 'liste_temoignages' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-comment-dots mr-1"></i> Témoignages</a>
-<a href="{% url 'liste_questions' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-question mr-1"></i> Questions</a>
-<a href="{% url 'liste_points_vente' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto col-span-2 md:col-span-1"><i class="fa-solid fa-location-dot mr-1"></i> Points de vente</a>
+<!-- ================= BOUTONS D'ACTION ================= -->
+
+<!-- Liens accessibles aux Admins ET Gestionnaires de stock -->
+{% if user.is_superuser or user.profil.role == 'admin' or user.profil.role == 'gestionnaire_stock' %}
+    <a href="{% url 'liste_produits' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-box mr-1"></i> Produits</a>
+    <a href="{% url 'liste_commandes' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-truck mr-1"></i> Commandes</a>
+    <a href="{% url 'liste_categories' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-tags mr-1"></i> Catégories</a>
+    <a href="{% url 'liste_promotions' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-percent mr-1"></i> Promos</a>
+    <a href="{% url 'liste_points_vente' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto col-span-2 md:col-span-1"><i class="fa-solid fa-location-dot mr-1"></i> Points de vente</a>
+{% endif %}
+
+<!-- Liens accessibles aux Admins ET Conseillers -->
+{% if user.is_superuser or user.profil.role == 'admin' or user.profil.role == 'conseiller' %}
+    <a href="{% url 'liste_articles' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-newspaper mr-1"></i> Articles</a>
+    <a href="{% url 'liste_avis' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-star mr-1"></i> Avis</a>
+    <a href="{% url 'liste_temoignages' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-comment-dots mr-1"></i> Témoignages</a>
+    <a href="{% url 'liste_questions' %}" class="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:border-cediRed hover:text-cediRed transition text-xs font-bold w-full md:w-auto"><i class="fa-solid fa-question mr-1"></i> Questions</a>
+{% endif %}
+
+<!-- 👇 NOUVEAU BOUTON UTILISATEURS (Admin/Superadmin uniquement) 👇 -->
+{% if user.is_superuser or user.profil.role == 'admin' %}
+    <a href="{% url 'liste_utilisateurs' %}" class="flex items-center justify-center bg-gray-900 text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition text-xs font-bold w-full md:w-auto col-span-2 md:col-span-1 shadow-md"><i class="fa-solid fa-users mr-1 text-cediGold"></i> Utilisateurs</a>
+{% endif %}
 {% endblock %}
 
 {% block admin_content %}
 <!-- GRILLE 1 : STATS (2 colonnes sur mobile, 4 sur PC) -->
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 w-full">
+    
+    {% if user.is_superuser or user.profil.role == 'admin' or user.profil.role == 'gestionnaire_stock' %}
     <!-- Produits -->
     <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 text-center flex flex-col justify-center items-center">
         <div class="text-2xl sm:text-3xl font-bold text-cediRed">{{ total_produits }}</div>
@@ -37,7 +52,9 @@
             <div class="text-[10px] sm:text-xs text-amber-600 mt-2 font-bold bg-amber-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-clock"></i> {{ commandes_attente }} en attente</div>
         {% endif %}
     </div>
+    {% endif %}
 
+    {% if user.is_superuser or user.profil.role == 'admin' or user.profil.role == 'conseiller' %}
     <!-- Avis -->
     <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 text-center flex flex-col justify-center items-center">
         <div class="text-2xl sm:text-3xl font-bold text-cediRed">{{ total_avis }}</div>
@@ -55,10 +72,12 @@
             <div class="text-[10px] sm:text-xs text-blue-500 mt-2 font-bold bg-blue-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-clock"></i> En attente</div>
         {% endif %}
     </div>
+    {% endif %}
 </div>
 
 <!-- GRILLE 2 : STATS SECONDAIRES -->
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8 w-full">
+    {% if user.is_superuser or user.profil.role == 'admin' or user.profil.role == 'gestionnaire_stock' %}
     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
         <div class="text-xl sm:text-2xl font-bold text-cediRed">{{ total_categories }}</div>
         <div class="text-[11px] sm:text-sm text-gray-600">Catégories</div>
@@ -71,10 +90,14 @@
         <div class="text-xl sm:text-2xl font-bold text-cediRed">{{ total_promotions }}</div>
         <div class="text-[11px] sm:text-sm text-gray-600">Promotions</div>
     </div>
+    {% endif %}
+
+    {% if user.is_superuser or user.profil.role == 'admin' or user.profil.role == 'conseiller' %}
     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
         <div class="text-xl sm:text-2xl font-bold text-cediRed">{{ total_articles }}</div>
         <div class="text-[11px] sm:text-sm text-gray-600">Articles</div>
     </div>
+    {% endif %}
 </div>
 
 <!-- ACTIONS ET LIENS -->
@@ -82,19 +105,32 @@
     <div class="bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 class="font-bold text-gray-800 mb-4 text-sm sm:text-base"><i class="fa-solid fa-bolt text-cediGold"></i> Actions rapides</h3>
         <div class="flex flex-wrap gap-2">
-            <a href="{% url 'ajouter_produit' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Produit</a>
-            <a href="{% url 'ajouter_categorie' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Catégorie</a>
-            <a href="{% url 'ajouter_point_vente' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Point de vente</a>
-            <a href="{% url 'ajouter_promotion' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Promotion</a>
-            <a href="{% url 'ajouter_article' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Article</a>
+            {% if user.is_superuser or user.profil.role == 'admin' or user.profil.role == 'gestionnaire_stock' %}
+                <a href="{% url 'ajouter_produit' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Produit</a>
+                <a href="{% url 'ajouter_categorie' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Catégorie</a>
+                <a href="{% url 'ajouter_point_vente' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Point de vente</a>
+                <a href="{% url 'ajouter_promotion' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Promotion</a>
+            {% endif %}
+            
+            {% if user.is_superuser or user.profil.role == 'admin' or user.profil.role == 'conseiller' %}
+                <a href="{% url 'ajouter_article' %}" class="bg-cediRed text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-cediRedDark">+ Article</a>
+            {% endif %}
         </div>
     </div>
+    
     <div class="bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 class="font-bold text-gray-800 mb-4 text-sm sm:text-base"><i class="fa-solid fa-link text-cediGold"></i> Liens utiles</h3>
         <div class="flex flex-col gap-2">
+            {% if user.is_superuser or user.profil.role == 'admin' or user.profil.role == 'gestionnaire_stock' %}
             <a href="/admin/appcedi/commande/" class="text-xs sm:text-sm text-gray-600 hover:text-cediRed flex items-center justify-between p-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-200 transition">Commandes (Django) <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
             <a href="/admin/appcedi/image/" class="text-xs sm:text-sm text-gray-600 hover:text-cediRed flex items-center justify-between p-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-200 transition">Images (Django) <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
             <a href="/admin/appcedi/promotion/" class="text-xs sm:text-sm text-gray-600 hover:text-cediRed flex items-center justify-between p-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-200 transition">Promotions (Django) <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+            {% endif %}
+            
+            {% if user.is_superuser or user.profil.role == 'admin' %}
+            <a href="/admin/appcedi/avisclient/" class="text-xs sm:text-sm text-gray-600 hover:text-cediRed flex items-center justify-between p-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-200 transition">Avis (Django) <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+            <a href="/admin/appcedi/articleblog/" class="text-xs sm:text-sm text-gray-600 hover:text-cediRed flex items-center justify-between p-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-200 transition">Articles (Django) <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+            {% endif %}
         </div>
     </div>
 </div>

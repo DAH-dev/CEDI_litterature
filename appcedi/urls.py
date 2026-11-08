@@ -12,6 +12,13 @@ urlpatterns = [
 
     # --- TABLEAU DE BORD ADMIN ---
     path('tableau-de-bord/', views.tableau_de_bord, name='tableau_de_bord'),
+    
+    
+        # --- GESTION DES UTILISATEURS (SUPERADMIN) ---
+    path('admin_utilisateurs/', views.liste_utilisateurs, name='liste_utilisateurs'),
+    path('admin_utilisateurs/ajouter/', views.ajouter_utilisateur, name='ajouter_utilisateur'),
+    path('admin_utilisateurs/modifier/<int:pk>/', views.modifier_utilisateur, name='modifier_utilisateur'),
+    path('admin_utilisateurs/supprimer/<int:pk>/', views.supprimer_utilisateur, name='supprimer_utilisateur'),
 
     # --- PRODUITS (BOUTIQUE & ADMIN) ---
     path('produit/<int:pk>/', views.detail_produit, name='detail_produit'),
@@ -102,6 +109,9 @@ urlpatterns = [
     # --- TÉMOIGNAGES (PUBLIC) ---
     path('temoignages/', views.liste_temoignages_publics, name='liste_temoignages_publics'),
     path('temoignages/soumettre/', views.soumettre_temoignage, name='soumettre_temoignage'),
+    
+    
+    
     
         # --- RÉINITIALISATION DU MOT DE PASSE ---
     path('mot-de-passe-oublie/', auth_views.PasswordResetView.as_view(
