@@ -110,6 +110,7 @@ urlpatterns = [
     path('temoignages/', views.liste_temoignages_publics, name='liste_temoignages_publics'),
     path('temoignages/soumettre/', views.soumettre_temoignage, name='soumettre_temoignage'),
     
+    path('contact/', views.page_contact, name='page_contact'),
     
     
     

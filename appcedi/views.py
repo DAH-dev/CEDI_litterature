@@ -1168,3 +1168,18 @@ def supprimer_utilisateur(request, pk):
         messages.success(request, "Utilisateur supprimé.")
         return redirect('liste_utilisateurs')
     return render(request, 'appcedi/admin/supprimer_utilisateur.html', {'user_obj': user_obj})
+
+@login_required
+def page_contact(request):
+    if request.method == 'POST':
+        nom = request.POST.get('nom')
+        email = request.POST.get('email')
+        sujet = request.POST.get('sujet')
+        message = request.POST.get('message')
+        
+        # Ici, tu pourras ajouter l'envoi d'email plus tard
+        # Pour l'instant, on affiche juste un message de succès
+        messages.success(request, "Merci ! Votre message a bien été envoyé. Nous vous répondrons sous 48h.")
+        return redirect('page_contact')
+        
+    return render(request, 'appcedi/contact.html')
