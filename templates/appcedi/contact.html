@@ -6,7 +6,6 @@
 <!-- En-tête simple -->
 <section class="py-10 px-4">
     <div class="max-w-7xl mx-auto text-center">
-        <!-- 👇 Titre et icône en rouge cediRed 👇 -->
         <h1 class="text-3xl md:text-4xl font-extrabold text-cediRed mb-2">
             <i class="fa-solid fa-envelope text-cediRed mr-2"></i> Contactez-nous
         </h1>
@@ -112,9 +111,19 @@
                     <textarea name="message" rows="5" required placeholder="Écrivez votre message ici..." class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cediRed focus:ring-1 focus:ring-cediRed transition"></textarea>
                 </div>
 
-                <button type="submit" class="w-full bg-cediRed hover:bg-cediRedDark text-white font-bold py-3 rounded-lg transition shadow-md flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> Envoyer le message
-                </button>
+                <!-- 👇 LOGIQUE D'AFFICHAGE DU BOUTON 👇 -->
+                {% if user.is_authenticated %}
+                    <button type="submit" class="w-full bg-cediRed hover:bg-cediRedDark text-white font-bold py-3 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> Envoyer le message
+                    </button>
+                {% else %}
+                    <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg mb-2 text-center">
+                        <p class="text-xs text-amber-800">Vous devez être connecté pour envoyer un message.</p>
+                    </div>
+                    <a href="{% url 'connexion' %}?next={% url 'page_contact' %}" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-lock"></i> Se connecter pour envoyer
+                    </a>
+                {% endif %}
             </form>
         </div>
     </div>

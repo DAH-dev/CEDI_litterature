@@ -1169,16 +1169,18 @@ def supprimer_utilisateur(request, pk):
         return redirect('liste_utilisateurs')
     return render(request, 'appcedi/admin/supprimer_utilisateur.html', {'user_obj': user_obj})
 
-@login_required
 def page_contact(request):
     if request.method == 'POST':
+        # 👇 On vérifie la connexion SEULEMENT ici, au moment de l'envoi
+        if not request.user.is_authenticated:
+            messages.warning(request, "Veuillez vous connecter pour envoyer un message.")
+            return redirect(f"{request.path}?next={request.path}") # Redirige vers la page de connexion en gardant le retour
+            
         nom = request.POST.get('nom')
         email = request.POST.get('email')
         sujet = request.POST.get('sujet')
         message = request.POST.get('message')
         
-        # Ici, tu pourras ajouter l'envoi d'email plus tard
-        # Pour l'instant, on affiche juste un message de succès
         messages.success(request, "Merci ! Votre message a bien été envoyé. Nous vous répondrons sous 48h.")
         return redirect('page_contact')
         
