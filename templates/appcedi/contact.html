@@ -116,11 +116,12 @@
                     <button type="submit" class="w-full bg-cediRed hover:bg-cediRedDark text-white font-bold py-3 rounded-lg transition shadow-md flex justify-center items-center gap-2">
                         <i class="fa-solid fa-paper-plane"></i> Envoyer le message
                     </button>
-                {% else %}
+                                {% else %}
                     <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg mb-2 text-center">
                         <p class="text-xs text-amber-800">Vous devez être connecté pour envoyer un message.</p>
                     </div>
-                    <a href="{% url 'connexion' %}?next={% url 'page_contact' %}" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                    <!-- 👇 Bouton en rouge cediRed 👇 -->
+                    <a href="{% url 'connexion' %}?next={% url 'page_contact' %}" class="w-full bg-cediRed hover:bg-cediRedDark text-white font-bold py-3 rounded-lg transition shadow-md flex justify-center items-center gap-2">
                         <i class="fa-solid fa-lock"></i> Se connecter pour envoyer
                     </a>
                 {% endif %}
