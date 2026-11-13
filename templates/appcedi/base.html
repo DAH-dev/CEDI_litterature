@@ -253,51 +253,61 @@
     <!-- CONTENU PRINCIPAL -->
     {% block content %}{% endblock %}
 
-    <!-- WhatsApp flottant -->
-    <a href="https://wa.me/2250777891070" target="_blank" class="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-lg hover:bg-emerald-600 transition z-50 flex items-center justify-center hover:scale-110">
-        <i class="fa-brands fa-whatsapp text-2xl"></i>
-    </a>
+   <!-- Bouton Retour en haut -->
+<button id="backToTopBtn" 
+        onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+        class="fixed bottom-6 right-6 bg-cediRed text-white p-3.5 rounded-full shadow-lg hover:bg-cediRedDark transition-all duration-300 z-50 flex items-center justify-center opacity-0 invisible"
+        aria-label="Retour en haut de la page">
+    <i class="fa-solid fa-arrow-up text-xl"></i>
+</button>
 
     <!-- FOOTER -->
-    <footer class="bg-cediCream text-gray-600 mt-auto pt-12 pb-6 border-t-2 border-cediGold">
-        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 text-sm">
-            <div>
-                <h5 class="text-cediRed font-bold text-base mb-3">CEDI Littérature</h5>
-                <p class="text-xs text-gray-500 mb-4">Maison d'édition chrétienne intégrée, librairie et conseil spirituel. "Distribuer la vie" à travers la Parole de Dieu.</p>
-                <div class="flex space-x-3 text-lg">
-                    <a href="#" class="w-9 h-9 rounded-full border border-cediGold text-cediRed flex items-center justify-center hover:bg-cediGold hover:text-white transition"><i class="fa-brands fa-facebook text-sm"></i></a>
-                    <a href="#" class="w-9 h-9 rounded-full border border-cediGold text-cediRed flex items-center justify-center hover:bg-cediGold hover:text-white transition"><i class="fa-brands fa-whatsapp text-sm"></i></a>
-                    <a href="#" class="w-9 h-9 rounded-full border border-cediGold text-cediRed flex items-center justify-center hover:bg-cediGold hover:text-white transition"><i class="fa-brands fa-instagram text-sm"></i></a>
-                </div>
-            </div>
-            <div>
-                <h5 class="text-cediRed font-bold text-base mb-3">Navigation</h5>
-                <ul class="space-y-2 text-xs">
-                    <li><a href="{% url 'liste_catalogue' %}" class="hover:text-cediRed transition">Boutique en ligne</a></li>
-                    <li><a href="{% url 'liste_ressources' %}" class="hover:text-cediRed transition">Vérités Fondamentales</a></li>
-                    <li><a href="{% url 'liste_temoignages_publics' %}" class="hover:text-cediRed whitespace-nowrap transition">Témoignages</a></li>
-                    <li><a href="{% url 'a_propos' %}" class="hover:text-cediRed whitespace-nowrap transition">À propos</a></li>
-                </ul>
-            </div>
-            <div>
-                <h5 class="text-cediRed font-bold text-base mb-3">Modes de Paiement</h5>
-                <p class="text-xs text-gray-500 mb-2">Paiement hors-ligne sécurisé :</p>
-                <ul class="space-y-1 text-xs text-gray-600">
-                    <li>• Paiement au retrait / livraison</li>
-                    <li>• Orange Money / MTN MoMo</li>
-                </ul>
-            </div>
-            <div>
-                <h5 class="text-cediRed font-bold text-base mb-3">Contact & Support</h5>
-                <p class="text-xs text-gray-500 mb-1">📍 Côte d'Ivoire (Abidjan & Attiékoi)</p>
-                <p class="text-xs text-gray-500 mb-1">📞 Contact / WhatsApp : +225 0777891070/0504101014</p>
-                <p class="text-xs text-gray-500">✉️ Email : contact@cedi-litterature.com</p>
+<!-- FOOTER -->
+<!-- FOOTER -->
+<footer class="bg-gray-700 text-gray-200 mt-auto pt-12 pb-6 border-t-4 border-cediGold">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 text-sm">
+        <div>
+            <!-- Titre en blanc (plus de jaune) -->
+            <h5 class="text-white font-bold text-base mb-3">CEDI Littérature</h5>
+            <p class="text-xs text-gray-400 mb-4">Maison d'édition chrétienne intégrée, librairie et conseil spirituel. "Distribuer la vie" à travers la Parole de Dieu.</p>
+            <div class="flex space-x-3 text-lg">
+                <!-- Icônes avec bordure grise, pas de jaune -->
+                <a href="#" class="w-9 h-9 rounded-full border border-gray-500 text-gray-300 flex items-center justify-center hover:bg-white hover:text-gray-900 hover:border-white transition"><i class="fa-brands fa-facebook text-sm"></i></a>
+                <a href="#" class="w-9 h-9 rounded-full border border-gray-500 text-gray-300 flex items-center justify-center hover:bg-white hover:text-gray-900 hover:border-white transition"><i class="fa-brands fa-whatsapp text-sm"></i></a>
+                <a href="#" class="w-9 h-9 rounded-full border border-gray-500 text-gray-300 flex items-center justify-center hover:bg-white hover:text-gray-900 hover:border-white transition"><i class="fa-brands fa-instagram text-sm"></i></a>
             </div>
         </div>
-        <div class="max-w-7xl mx-auto px-4 border-t border-cediGold/30 pt-4 text-center text-xs text-gray-500">
-            <p>&copy; 2026 CEDI Littérature. Tous droits réservés.</p>
+        <div>
+            <!-- Titre en blanc -->
+            <h5 class="text-white font-bold text-base mb-3">Navigation</h5>
+            <ul class="space-y-2 text-xs">
+                <li><a href="{% url 'liste_catalogue' %}" class="text-gray-300 hover:text-white transition">Boutique en ligne</a></li>
+                <li><a href="{% url 'liste_ressources' %}" class="text-gray-300 hover:text-white transition">Vérités Fondamentales</a></li>
+                <li><a href="{% url 'liste_temoignages_publics' %}" class="text-gray-300 hover:text-white whitespace-nowrap transition">Témoignages</a></li>
+                <li><a href="{% url 'a_propos' %}" class="text-gray-300 hover:text-white whitespace-nowrap transition">À propos</a></li>
+            </ul>
         </div>
-    </footer>
+        <div>
+            <h5 class="text-white font-bold text-base mb-3">Modes de Paiement</h5>
+            <p class="text-xs text-gray-400 mb-2">Paiement hors-ligne sécurisé :</p>
+            <ul class="space-y-1 text-xs text-gray-300">
+                <li>• Paiement au retrait / livraison</li>
+                <li>• Orange Money / MTN MoMo</li>
+            </ul>
+        </div>
+        <div>
+            <h5 class="text-white font-bold text-base mb-3">Contact & Support</h5>
+            <p class="text-xs text-gray-300 mb-1">📍 Côte d'Ivoire (Abidjan & Attiékoi)</p>
+            <p class="text-xs text-gray-300 mb-1">📞 Contact / WhatsApp : +225 0777891070/0504101014</p>
+            <p class="text-xs text-gray-300">✉️ Email : contact@cedi-litterature.com</p>
+        </div>
+    </div>
+    
+    <!-- Ligne du bas -->
+    <div class="max-w-7xl mx-auto px-4 border-t border-gray-600 pt-4 text-center text-xs text-gray-400">
+        <p>&copy; 2026 CEDI Littérature. Tous droits réservés.</p>
+    </div>
+</footer>
 
     <!-- SCRIPTS -->
     <script>
@@ -369,6 +379,23 @@
         } else {
             targets.forEach(function (el) { el.classList.add('in-view'); });
         }
+
+        // Gestion du bouton "Retour en haut"
+const backToTopBtn = document.getElementById('backToTopBtn');
+
+if (backToTopBtn) {
+    window.addEventListener('scroll', function() {
+        // Si on a défilé de plus de 300 pixels, on montre le bouton
+        if (window.scrollY > 300) {
+            backToTopBtn.classList.remove('opacity-0', 'invisible');
+            backToTopBtn.classList.add('opacity-100', 'visible');
+        } else {
+            // Sinon, on le cache
+            backToTopBtn.classList.remove('opacity-100', 'visible');
+            backToTopBtn.classList.add('opacity-0', 'invisible');
+        }
+    });
+}
     </script>
 </body>
 </html>
