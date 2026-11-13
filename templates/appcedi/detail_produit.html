@@ -1,6 +1,8 @@
 {% extends 'appcedi/base.html' %}
 
 {% block content %}
+
+
 <style>
   /* ===== Style CSS classique de la fiche produit ===== */
   :root{
@@ -284,6 +286,13 @@
       padding-right: 0 !important;
     }
   }
+    /* ===== Ajustement produits similaires (style accueil) ===== */
+  .img-zoom { overflow: hidden; }
+  .img-zoom img { transition: transform .5s ease; }
+  .img-zoom:hover img { transform: scale(1.07); }
+
+  .card-lift { transition: transform .25s ease, box-shadow .25s ease; }
+  .card-lift:hover { transform: translateY(-5px); box-shadow: 0 18px 30px -16px rgba(107,21,24,0.28); }
 </style>
 
 <div class="pf-container">
@@ -515,46 +524,74 @@
         </div>
     </div>
 
-    <!-- ===== PRODUITS SIMILAIRES ===== -->
+ 
+    <!-- ===== PRODUITS SIMILAIRES (style accueil) ===== -->
     {% if produits_similaires %}
-    <section class="pf-related">
-        <h3>Vous aimerez aussi</h3>
-        <div class="pf-related-grid">
-            {% for similaire in produits_similaires %}
-            <div class="pf-rel-card">
-                <a href="{% url 'detail_produit' similaire.pk %}" style="text-decoration: none; color: inherit; display: block;">
-                    <div class="pf-rel-imgwrap">
-                        {% if similaire.est_edition_cedi %}
-                            <span class="pf-rel-badge"><i class="fa-solid fa-certificate"></i> Édition CEDI</span>
-                        {% endif %}
-                        {% with similaire.images.all|first as img %}
-                            {% if img %}
-                                <img src="{{ img.url_image.url }}" alt="{{ similaire.titre }}">
-                            {% else %}
-                                <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&auto=format&fit=crop&q=70" alt="{{ similaire.titre }}">
-                            {% endif %}
-                        {% endwith %}
-                    </div>
-                    <h4>{{ similaire.titre|truncatechars:28 }}</h4>
-                    <p class="pf-rel-author">Auteur : {{ similaire.auteur|default:"Inconnu" }}</p>
-                    <div class="pf-rel-stars">
-                        {% with note=similaire.moyenne_avis %}
-                            {% for i in "12345"|make_list %}
-                                {% if forloop.counter <= note|floatformat:0|add:"0" %}★{% else %}☆{% endif %}
-                            {% endfor %}
-                            <span>({{ similaire.nombre_avis }})</span>
-                        {% endwith %}
-                    </div>
-                </a>
+    <section class="mt-8 bg-gray-100 rounded-xl px-2 sm:px-4 py-6">
+        <div class="max-w-7xl mx-auto">
+            <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-5">Vous aimerez aussi</h3>
 
-                <div class="pf-rel-bottom">
-                    <span class="pf-rel-price">{{ similaire.prix|floatformat:0 }} FCFA</span>
-                    {% if similaire.quantite_stock > 0 %}
-                        <a href="{% url 'ajouter_au_panier' similaire.pk %}" class="pf-rel-add"><i class="fa-solid fa-cart-shopping"></i> Ajouter</a>
-                    {% endif %}
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-5">
+                {% for similaire in produits_similaires %}
+                <div class="card-lift bg-white p-1.5 sm:p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between w-full">
+                    <div>
+                        <a href="{% url 'detail_produit' similaire.pk %}" class="block">
+                            <div class="relative img-zoom rounded-lg">
+                                {% if similaire.est_edition_cedi %}
+                                    <span class="absolute top-1 left-1 z-10 bg-cediGold text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shadow-sm">
+                                        <i class="fa-solid fa-certificate"></i> Édition CEDI
+                                    </span>
+                                {% endif %}
+                                <div class="p-0.5 sm:p-1 flex items-center justify-center">
+                                    {% with similaire.images.all|first as img %}
+                                        {% if img %}
+                                            <img src="{{ img.url_image.url }}" alt="{{ similaire.titre }}"
+                                                 class="h-40 sm:h-56 object-contain w-full rounded" loading="lazy">
+                                        {% else %}
+                                            <img src="https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=400&auto=format&fit=crop&q=70"
+                                                 alt="Couverture Livre CEDI"
+                                                 class="h-40 sm:h-56 object-contain w-full rounded" loading="lazy">
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+
+                            <h4 class="font-bold text-xs sm:text-sm text-gray-800 mt-1.5 mb-0.5 text-left leading-tight">
+                                {{ similaire.titre|truncatechars:30 }}
+                            </h4>
+                        </a>
+                        <p class="text-[10px] sm:text-xs text-gray-500 mb-1 text-left truncate">
+                            Auteur : {{ similaire.auteur|default:"Inconnu" }}
+                        </p>
+                        <div class="flex items-center justify-start gap-0.5 text-cediGold text-[10px] sm:text-xs mt-0.5 mb-1.5">
+                            {% with note=similaire.moyenne_avis %}
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= note|floatformat:0|add:"0" %}
+                                        <i class="fa-solid fa-star"></i>
+                                    {% else %}
+                                        <i class="fa-regular fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="text-[9px] sm:text-xs text-gray-500 ml-0.5">({{ similaire.nombre_avis }})</span>
+                            {% endwith %}
+                        </div>
+                    </div>
+                    <div class="mt-auto border-t border-gray-100 pt-1.5 sm:pt-2">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-xs sm:text-base font-bold text-cediRed whitespace-nowrap">
+                                {{ similaire.prix|floatformat:0 }} FCFA
+                            </span>
+                            {% if similaire.quantite_stock > 0 %}
+                                <a href="{% url 'ajouter_au_panier' similaire.pk %}"
+                                   class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </section>
     {% endif %}

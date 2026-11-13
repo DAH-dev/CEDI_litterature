@@ -4,7 +4,7 @@
 
 {% block content %}
 {% if q %}
-<section class="bg-white py-4 px-4 border-b border-gray-200">
+<section class="bg-white py-4 px-2 border-b border-gray-200">
     <div class="max-w-7xl mx-auto">
         <p class="text-sm text-gray-600">
             <i class="fa-solid fa-magnifying-glass text-cediRed"></i>
@@ -17,13 +17,13 @@
 </section>
 {% endif %}
 
-<section class="py-10 px-4">
+<section class="py-8 px-2">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
             <!-- ===== FILTRES (colonne gauche) ===== -->
             <aside class="lg:col-span-1">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sticky top-24">
                     <h2 class="text-lg font-bold text-cediRed mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-filter"></i> Filtres
                     </h2>
@@ -80,62 +80,71 @@
             <!-- ===== GRILLE DE PRODUITS (colonne droite) ===== -->
             <div class="lg:col-span-3">
                 {% if page_obj %}
-                <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-5">
                     {% for produit in page_obj %}
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between card-lift">
-                        <a href="{% url 'detail_produit' produit.pk %}" class="block">
-                            <div class="relative img-zoom rounded-t-xl overflow-hidden">
-                                {% if produit.est_edition_cedi %}
-                                <span class="absolute top-2 left-2 z-10 bg-cediGold text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                                    <i class="fa-solid fa-certificate"></i> Édition CEDI
-                                </span>
-                                {% endif %}
-                                <div class="p-2 flex items-center justify-center bg-white">
-                                    {% with produit.image_principale as img %}
-                                        {% if img %}
-                                            <img src="{{ img.url_image.url }}" alt="{{ produit.titre }}" class="h-36 sm:h-48 object-contain w-full" loading="lazy">
-                                        {% else %}
-                                            <img src="https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=400&auto=format&fit=crop&q=70" alt="{{ produit.titre }}" class="h-36 sm:h-48 object-contain w-full" loading="lazy">
-                                        {% endif %}
-                                    {% endwith %}
-                                </div>
-                                <!-- 👇 BOUTON WISHLIST (COEUR) -->
-    <button type="button" 
-            class="btn-wishlist-card absolute top-2 right-2 z-20 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition"
-            data-url="{% url 'basculer_liste_souhaits' produit.id %}">
-        <i class="{% if produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-500{% endif %} text-sm"></i>
-    </button>
-                            </div>
-                            <div class="px-3 pt-2">
-                                <h4 class="font-bold text-xs sm:text-sm text-gray-800 mb-1 leading-snug">{{ produit.titre|truncatechars:35 }}</h4>
-                                <p class="text-[11px] sm:text-xs text-gray-500 mb-1 truncate">Auteur : {{ produit.auteur|default:"Inconnu" }}</p>
-                                <div class="flex items-center gap-0.5 text-cediGold text-[11px] sm:text-sm mb-2">
-                                    {% with note=produit.moyenne_avis %}
-                                        {% for i in "12345"|make_list %}
-                                            {% if forloop.counter <= note|floatformat:0|add:"0" %}
-                                                <i class="fa-solid fa-star"></i>
+                    <div class="card-lift bg-white p-1.5 sm:p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between w-full">
+                        <div>
+                            <a href="{% url 'detail_produit' produit.pk %}" class="block">
+                                <div class="relative img-zoom rounded-lg">
+                                    {% if produit.est_edition_cedi %}
+                                        <span class="absolute top-1 left-1 z-10 bg-cediGold text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shadow-sm">
+                                            <i class="fa-solid fa-certificate"></i> Édition CEDI
+                                        </span>
+                                    {% endif %}
+                                    <div class="p-0.5 sm:p-1 flex items-center justify-center">
+                                        {% with produit.image_principale as img %}
+                                            {% if img %}
+                                                <img src="{{ img.url_image.url }}" alt="{{ produit.titre }}"
+                                                     class="h-40 sm:h-56 object-contain w-full rounded" loading="lazy">
                                             {% else %}
-                                                <i class="fa-regular fa-star"></i>
+                                                <img src="https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=400&auto=format&fit=crop&q=70"
+                                                     alt="{{ produit.titre }}"
+                                                     class="h-40 sm:h-56 object-contain w-full rounded" loading="lazy">
                                             {% endif %}
-                                        {% endfor %}
-                                        <span class="text-[10px] sm:text-xs text-gray-500 ml-1">({{ produit.nombre_avis }})</span>
-                                    {% endwith %}
+                                        {% endwith %}
+                                    </div>
+                                    <button type="button"
+                                            class="btn-wishlist-card absolute top-1 right-1 sm:top-2 sm:right-2 z-20 bg-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center shadow-md hover:scale-110 transition"
+                                            data-url="{% url 'basculer_liste_souhaits' produit.id %}">
+                                        <i class="{% if produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-500{% endif %} text-xs sm:text-sm"></i>
+                                    </button>
                                 </div>
+
+                                <h4 class="font-bold text-xs sm:text-sm text-gray-800 mt-1.5 mb-0.5 text-left leading-tight">
+                                    {{ produit.titre|truncatechars:30 }}
+                                </h4>
+                            </a>
+                            <p class="text-[10px] sm:text-xs text-gray-500 mb-1 text-left truncate">
+                                Auteur : {{ produit.auteur|default:"Inconnu" }}
+                            </p>
+                            <div class="flex items-center justify-start gap-0.5 text-cediGold text-[10px] sm:text-xs mt-0.5 mb-1.5">
+                                {% with note=produit.moyenne_avis %}
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= note|floatformat:0|add:"0" %}
+                                            <i class="fa-solid fa-star"></i>
+                                        {% else %}
+                                            <i class="fa-regular fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="text-[9px] sm:text-xs text-gray-500 ml-0.5">({{ produit.nombre_avis }})</span>
+                                {% endwith %}
                             </div>
-                        </a>
-                        <div class="px-3 pb-3 border-t border-gray-100 pt-2 mt-auto">
+                        </div>
+                        <div class="mt-auto border-t border-gray-100 pt-1.5 sm:pt-2">
                             <div class="flex items-center justify-between gap-1">
-                                <span class="text-xs sm:text-base font-bold text-cediRed whitespace-nowrap">{{ produit.prix|floatformat:0 }} FCFA</span>
+                                <span class="text-xs sm:text-base font-bold text-cediRed whitespace-nowrap">
+                                    {{ produit.prix|floatformat:0 }} FCFA
+                                </span>
                                 {% if produit.quantite_stock > 0 %}
                                     <form action="{% url 'ajouter_au_panier' produit.pk %}" method="post" style="display:inline;">
                                         {% csrf_token %}
                                         <input type="hidden" name="quantite" value="1">
-                                        <button type="submit" class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
-                                            <i class="fa-solid fa-cart-shopping"></i> <span class="hidden sm:inline">Ajouter</span>
+                                        <button type="submit" class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
+                                            <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
                                         </button>
                                     </form>
                                 {% else %}
-                                    <span class="text-[10px] text-gray-400 italic">Rupture</span>
+                                    <span class="text-[10px] sm:text-xs text-gray-400 italic">Rupture</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -190,9 +199,9 @@
     // Gestion AJAX des boutons Wishlist
     document.querySelectorAll('.btn-wishlist-card').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
-            e.preventDefault(); // Empêche de cliquer sur le lien du produit
+            e.preventDefault();
             e.stopPropagation();
-            
+
             const url = btn.dataset.url;
             const icon = btn.querySelector('i');
 
@@ -204,7 +213,7 @@
                 }
             })
             .then(res => {
-                if(res.redirected) { window.location.href = res.url; return; } // Si non connecté
+                if(res.redirected) { window.location.href = res.url; return; }
                 return res.json();
             })
             .then(data => {
