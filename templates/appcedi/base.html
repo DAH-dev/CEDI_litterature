@@ -253,12 +253,13 @@
     <!-- CONTENU PRINCIPAL -->
     {% block content %}{% endblock %}
 
-   <!-- Bouton Retour en haut -->
+
+<!-- Bouton Retour en haut -->
 <button id="backToTopBtn" 
         onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
-        class="fixed bottom-6 right-6 bg-cediRed text-white p-3.5 rounded-full shadow-lg hover:bg-cediRedDark transition-all duration-300 z-50 flex items-center justify-center opacity-0 invisible"
+        class="fixed bottom-6 right-6 w-12 h-12 bg-cediRed text-white rounded-full shadow-xl hover:bg-cediRedDark hover:scale-110 transition-all duration-300 z-50 flex items-center justify-center opacity-0 invisible"
         aria-label="Retour en haut de la page">
-    <i class="fa-solid fa-arrow-up text-xl"></i>
+    <i class="fa-solid fa-arrow-up text-lg"></i>
 </button>
 
     <!-- FOOTER -->
