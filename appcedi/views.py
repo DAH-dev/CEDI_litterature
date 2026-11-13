@@ -323,7 +323,7 @@ def liste_catalogue(request):
     if type_produit: produits = produits.filter(type_produit=type_produit)
     if request.GET.get('cedi') == '1': produits = produits.filter(est_edition_cedi=True)
 
-    paginator = Paginator(produits.distinct(), 12)
+    paginator = Paginator(produits.distinct(), 40)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     context = {
