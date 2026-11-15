@@ -162,17 +162,22 @@
                             </div>
                         </div>
 
-                        <div class="mt-auto pt-1.5 border-t border-gray-100">
-                            <div class="flex items-center justify-between gap-1">
-                                <div>
-                                    <span class="text-xs sm:text-base font-bold text-cediRed block sm:inline leading-none">{{ item.prix_reduit|floatformat:0 }} FCFA</span>
-                                    <span class="text-[9px] sm:text-xs text-gray-400 line-through block sm:inline sm:ml-1 leading-none">{{ item.prix_original|floatformat:0 }} FCFA</span>
-                                </div>
-                                <button class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
-                                    <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
-                                </button>
-                            </div>
-                        </div>
+<div class="mt-auto pt-1.5 border-t border-gray-100">
+    <div class="flex items-center justify-between gap-1">
+        <div>
+            <span class="text-xs sm:text-base font-bold text-cediRed block sm:inline leading-none">{{ item.prix_reduit|floatformat:0 }} FCFA</span>
+            <span class="text-[9px] sm:text-xs text-gray-400 line-through block sm:inline sm:ml-1 leading-none">{{ item.prix_original|floatformat:0 }} FCFA</span>
+        </div>
+        <!-- 👇 FORMULAIRE AJOUTÉ ICI 👇 -->
+        <form action="{% url 'ajouter_au_panier' item.produit.pk %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="quantite" value="1">
+            <button type="submit" class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
+                <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
+            </button>
+        </form>
+    </div>
+</div>
                     </div>
                     {% endfor %}
                 {% endfor %}
@@ -244,14 +249,23 @@
                         {% endwith %}
                     </div>
                 </div>
-                <div class="mt-auto border-t border-gray-100 pt-1.5 sm:pt-2">
-                    <div class="flex items-center justify-between gap-1">
-                        <span class="text-xs sm:text-base font-bold text-cediRed whitespace-nowrap">{{ produit.prix|floatformat:0 }} FCFA</span>
-                        <button class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
-                            <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
-                        </button>
-                    </div>
-                </div>
+<div class="mt-auto border-t border-gray-100 pt-1.5 sm:pt-2">
+    <div class="flex items-center justify-between gap-1">
+        <span class="text-xs sm:text-base font-bold text-cediRed whitespace-nowrap">{{ produit.prix|floatformat:0 }} FCFA</span>
+        <!-- 👇 FORMULAIRE AJOUTÉ ICI 👇 -->
+        {% if produit.quantite_stock > 0 %}
+            <form action="{% url 'ajouter_au_panier' produit.pk %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="quantite" value="1">
+                <button type="submit" class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
+                    <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
+                </button>
+            </form>
+        {% else %}
+            <span class="text-[10px] sm:text-xs text-gray-400 italic">Rupture</span>
+        {% endif %}
+    </div>
+</div>
                 
             </div>
             {% empty %}
