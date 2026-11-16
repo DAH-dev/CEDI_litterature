@@ -14,13 +14,23 @@
                 {% for article in articles %}
                 <div class="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                      data-article-id="{{ article.id }}"
-                     data-prix-unitaire="{{ article.produit.prix }}">
+                     data-prix-unitaire="{% if article.prix_unitaire > 0 %}{{ article.prix_unitaire }}{% else %}{{ article.produit.prix }}{% endif %}">
                     <div class="flex-1 min-w-0">
                         <h2 class="text-base sm:text-lg font-semibold text-gray-800 break-words">
                             {{ article.produit.titre }}
                         </h2>
+                        
+                        <!-- 👇 AFFICHAGE DU PRIX (avec gestion de la promotion) 👇 -->
                         <p class="text-gray-600 text-sm mt-1">
-                            Prix unitaire: <span class="prix-unitaire">{{ article.produit.prix }}</span> FCFA
+                            Prix unitaire: 
+                            <span class="prix-unitaire font-semibold">
+                                {% if article.prix_unitaire > 0 %}{{ article.prix_unitaire }}{% else %}{{ article.produit.prix }}{% endif %} FCFA
+                            </span>
+                            
+                            {% if article.prix_unitaire > 0 and article.prix_unitaire < article.produit.prix %}
+                                <span class="text-xs text-gray-400 line-through ml-2">{{ article.produit.prix }} FCFA</span>
+                                <span class="text-[10px] bg-cediRed text-white px-1.5 py-0.5 rounded ml-1">PROMO</span>
+                            {% endif %}
                         </p>
                     </div>
 

@@ -199,9 +199,15 @@ class ArticlePanier(models.Model):
     panier = models.ForeignKey(Panier, on_delete=models.CASCADE, related_name='articles')
     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
     quantite = models.PositiveIntegerField(default=1)
+    prix_unitaire = models.IntegerField(default=0)
+
+    class Meta:
+        # 👇 Un même produit ne peut apparaître qu'une fois PAR PRIX dans un panier
+        unique_together = ('panier', 'produit', 'prix_unitaire')
 
     def total_ligne(self):
-        return self.produit.prix * self.quantite
+        prix = self.prix_unitaire if self.prix_unitaire > 0 else self.produit.prix
+        return prix * self.quantite
 
 # ================= LISTE DE SOUHAITS =================
 class ListeSouhaits(models.Model):

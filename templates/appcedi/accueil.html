@@ -4,24 +4,14 @@
 {% block content %}
 <!-- SECTION HERO PLEINE LARGEUR -->
 <section class="relative w-full overflow-hidden bg-cediCream">
-    
-    <!-- Cercles décoratifs (pour le fond crème à droite) -->
     <div class="pointer-events-none absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full z-0" style="background: radial-gradient(circle, rgba(243,156,18,0.35) 0%, rgba(212,175,55,0.18) 45%, transparent 72%);"></div>
 
-    <!-- Conteneur Flex -->
     <div class="flex flex-col md:flex-row w-full relative z-10 min-h-[500px]">
-        
-        <!-- ===== PARTIE GAUCHE : IMAGE (Adaptée mobile & PC) ===== -->
-        <!-- 
-             Mobile : w-full, rounded-b-2xl (coins en bas), shadow-lg, pas de marge
-             PC : md:w-1/2, md:m-8, md:rounded-2xl (tous les coins), md:shadow-2xl 
-        -->
         <div id="hero-left-card" 
              class="relative w-full md:w-1/2 h-[350px] md:h-auto rounded-b-2xl md:rounded-2xl shadow-lg md:shadow-2xl md:m-8 overflow-hidden"
              style="background-image: url('{% static 'images/accueil1.jpg' %}'); background-size: cover; background-position: center; transition: background-image 1s ease-in-out;">
         </div>
 
-        <!-- ===== PARTIE DROITE : TEXTE ===== -->
         <div class="w-full md:w-1/2 flex items-center justify-center p-8 md:p-16">
             <div class="max-w-lg text-center md:text-left">
                 <span class="bg-white border-2 border-cediGold text-cediRed text-xs font-bold uppercase px-3 py-1 rounded-full inline-block mb-4 shadow-sm">
@@ -38,7 +28,6 @@
         </div>
     </div>
 
-    <!-- Script pour faire défiler les images de gauche -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const images = [
@@ -89,8 +78,6 @@
 <section id="section-promotions" class="reveal px-1 sm:px-4 py-8">
     <div class="max-w-7xl mx-auto">
         <div class="bg-amber-50 border border-cediGold rounded-2xl p-2 sm:p-5 shadow-sm">
-            
-            <!-- En-tête -->
             <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-3">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-bolt text-2xl text-cediGold"></i>
@@ -115,40 +102,42 @@
                 </div>
             </div>
 
-            <!-- Grille des Produits en Promotion (Marges réduites : gap-2 et p-1.5 sur mobile) -->
             <div id="grille-promotions" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-5">
                 {% for promo_data in promos_data %}
                     {% for item in promo_data.produits %}
                     <div class="carte-promo stagger-item card-lift bg-white p-1.5 sm:p-3 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between w-full"
                          data-fin="{{ promo_data.promotion.date_fin|date:'c' }}">
                         <div>
-                            <div class="relative img-zoom rounded-lg">
-                                <span class="absolute top-1 left-1 z-10 bg-cediRed text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shadow-sm">
-                                    {% if promo_data.promotion.est_vente_flash %}
-                                        <i class="fa-solid fa-bolt text-white"></i> 
-                                    {% endif %}
-                                    {% if promo_data.promotion.type_reduction == 'pourcentage' %}
-                                        -{{ promo_data.promotion.valeur_reduction|floatformat:0 }}%
-                                    {% else %}
-                                        -{{ promo_data.promotion.valeur_reduction|floatformat:0 }} FCFA
-                                    {% endif %}
-                                </span>
-                                <div class="p-0.5 sm:p-1 flex items-center justify-center">
-                                    {% with item.produit.image_principale as img %}
-                                        {% if img %}
-                                            <img src="{{ img.url_image.url }}" alt="{{ item.produit.titre }}" class="h-40 sm:h-52 object-contain w-full rounded" loading="lazy">
-                                        {% else %}
-                                            <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&auto=format&fit=crop&q=70" alt="Couverture" class="h-40 sm:h-52 object-contain w-full rounded" loading="lazy">
+                            <!-- 👇 LIEN VERS LA FICHE DU PRODUIT 👇 -->
+                            <a href="{% url 'detail_produit' item.produit.pk %}" class="block">
+                                <div class="relative img-zoom rounded-lg">
+                                    <span class="absolute top-1 left-1 z-10 bg-cediRed text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shadow-sm">
+                                        {% if promo_data.promotion.est_vente_flash %}
+                                            <i class="fa-solid fa-bolt text-white"></i> 
                                         {% endif %}
-                                    {% endwith %}
+                                        {% if promo_data.promotion.type_reduction == 'pourcentage' %}
+                                            -{{ promo_data.promotion.valeur_reduction|floatformat:0 }}%
+                                        {% else %}
+                                            -{{ promo_data.promotion.valeur_reduction|floatformat:0 }} FCFA
+                                        {% endif %}
+                                    </span>
+                                    <div class="p-0.5 sm:p-1 flex items-center justify-center">
+                                        {% with item.produit.image_principale as img %}
+                                            {% if img %}
+                                                <img src="{{ img.url_image.url }}" alt="{{ item.produit.titre }}" class="h-40 sm:h-52 object-contain w-full rounded" loading="lazy">
+                                            {% else %}
+                                                <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&auto=format&fit=crop&q=70" alt="Couverture" class="h-40 sm:h-52 object-contain w-full rounded" loading="lazy">
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
                                 </div>
-                                <!-- 👇 BOUTON WISHLIST POUR LES PROMOS -->
-    <button type="button" 
-            class="btn-wishlist-card absolute top-2 right-2 z-20 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition"
-            data-url="{% url 'basculer_liste_souhaits' item.produit.id %}">
-        <i class="{% if item.produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-500{% endif %} text-sm"></i>
-    </button>
-                            </div>
+                            </a>
+                            
+                            <button type="button" 
+                                    class="btn-wishlist-card absolute top-2 right-2 z-20 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition"
+                                    data-url="{% url 'basculer_liste_souhaits' item.produit.id %}">
+                                <i class="{% if item.produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-500{% endif %} text-sm"></i>
+                            </button>
 
                             <h4 class="font-bold text-xs sm:text-sm text-gray-800 mt-1.5 mb-0.5 text-left leading-tight">{{ item.produit.titre|truncatechars:32 }}</h4>
                             <p class="text-[10px] sm:text-xs text-gray-500 mb-1 text-left truncate">Auteur : {{ item.produit.auteur|default:"Inconnu" }}</p>
@@ -156,28 +145,32 @@
                             <div class="flex items-center gap-1 mt-0.5 text-[10px] sm:text-xs text-gray-500">
                                 <i class="fa-regular fa-clock text-cediGold"></i>
                                 <span>Fin :</span>
-                                <span class="compteur-individuel font-bold text-cediRed font-mono">
-                                    Calcul...
-                                </span>
+                                <span class="compteur-individuel font-bold text-cediRed font-mono">Calcul...</span>
                             </div>
                         </div>
 
-<div class="mt-auto pt-1.5 border-t border-gray-100">
-    <div class="flex items-center justify-between gap-1">
-        <div>
-            <span class="text-xs sm:text-base font-bold text-cediRed block sm:inline leading-none">{{ item.prix_reduit|floatformat:0 }} FCFA</span>
-            <span class="text-[9px] sm:text-xs text-gray-400 line-through block sm:inline sm:ml-1 leading-none">{{ item.prix_original|floatformat:0 }} FCFA</span>
-        </div>
-        <!-- 👇 FORMULAIRE AJOUTÉ ICI 👇 -->
-        <form action="{% url 'ajouter_au_panier' item.produit.pk %}" method="post" style="display:inline;">
-            {% csrf_token %}
-            <input type="hidden" name="quantite" value="1">
-            <button type="submit" class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
-                <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
-            </button>
-        </form>
-    </div>
-</div>
+                        <div class="mt-auto pt-1.5 border-t border-gray-100">
+                            <div class="flex items-center justify-between gap-1">
+                                <div>
+                                    <span class="text-xs sm:text-base font-bold text-cediRed block sm:inline leading-none">{{ item.prix_reduit|floatformat:0 }} FCFA</span>
+                                    <span class="text-[9px] sm:text-xs text-gray-400 line-through block sm:inline sm:ml-1 leading-none">{{ item.prix_original|floatformat:0 }} FCFA</span>
+                                </div>
+                                
+                                <!-- 👇 FORMULAIRE AVEC PRIX PROMO ET STOCK 👇 -->
+                                {% if item.produit.quantite_stock > 0 %}
+                                    <form action="{% url 'ajouter_au_panier' item.produit.pk %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quantite" value="1">
+                                        <input type="hidden" name="prix_promo" value="{{ item.prix_reduit|floatformat:0 }}">
+                                        <button type="submit" class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
+                                            <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-[10px] sm:text-xs text-gray-400 italic">Rupture</span>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                     {% endfor %}
                 {% endfor %}
@@ -203,7 +196,7 @@
             </div>
         </div>
 
-        <!-- Grid Responsive avec espacement resserré (gap-2 et p-1.5 sur mobile) -->
+        <!-- Grid Responsive -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-5">
             {% for produit in produits_recents %}
             <div class="stagger-item card-lift bg-white p-1.5 sm:p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between w-full">
@@ -225,12 +218,12 @@
                                 {% endwith %}
                             </div>
                             
-<!-- 👇 BOUTON WISHLIST POUR LES PRODUITS RÉCENTS -->
-    <button type="button" 
-            class="btn-wishlist-card absolute top-2 right-2 z-20 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition"
-            data-url="{% url 'basculer_liste_souhaits' produit.id %}">
-        <i class="{% if produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-500{% endif %} text-sm"></i>
-    </button>
+                            <!-- 👇 LE BOUTON WISHLIST (CŒUR) EST REMIS ICI 👇 -->
+                            <button type="button" 
+                                    class="btn-wishlist-card absolute top-2 right-2 z-20 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition"
+                                    data-url="{% url 'basculer_liste_souhaits' produit.id %}">
+                                <i class="{% if produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-500{% endif %} text-sm"></i>
+                            </button>
                         </div>
                       
                         <h4 class="font-bold text-xs sm:text-sm text-gray-800 mt-1.5 mb-0.5 text-left leading-tight">{{ produit.titre|truncatechars:30 }}</h4>
@@ -249,34 +242,34 @@
                         {% endwith %}
                     </div>
                 </div>
-<div class="mt-auto border-t border-gray-100 pt-1.5 sm:pt-2">
-    <div class="flex items-center justify-between gap-1">
-        <span class="text-xs sm:text-base font-bold text-cediRed whitespace-nowrap">{{ produit.prix|floatformat:0 }} FCFA</span>
-        <!-- 👇 FORMULAIRE AJOUTÉ ICI 👇 -->
-        {% if produit.quantite_stock > 0 %}
-            <form action="{% url 'ajouter_au_panier' produit.pk %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <input type="hidden" name="quantite" value="1">
-                <button type="submit" class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
-                    <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
-                </button>
-            </form>
-        {% else %}
-            <span class="text-[10px] sm:text-xs text-gray-400 italic">Rupture</span>
-        {% endif %}
-    </div>
-</div>
-                
+                <div class="mt-auto border-t border-gray-100 pt-1.5 sm:pt-2">
+                    <div class="flex items-center justify-between gap-1">
+                        <span class="text-xs sm:text-base font-bold text-cediRed whitespace-nowrap">{{ produit.prix|floatformat:0 }} FCFA</span>
+                        
+                        {% if produit.quantite_stock > 0 %}
+                           <form action="{% url 'ajouter_au_panier' produit.pk %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantite" value="1">
+                                <input type="hidden" name="prix_promo" value="{{ produit.prix }}">
+                                <button type="submit" class="bg-cediRed text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded hover:bg-cediRedDark transition flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-cart-shopping text-[9px] sm:text-xs"></i> <span>Ajouter</span>
+                                </button>
+                            </form>
+                        {% else %}
+                            <span class="text-[10px] sm:text-xs text-gray-400 italic">Rupture</span>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
             {% empty %}
             <p class="text-gray-500 col-span-full text-center">Aucun produit disponible pour le moment.</p>
             {% endfor %}
         </div>
         <div class="text-center mt-8">
-    <a href="{% url 'liste_catalogue' %}" class="inline-block bg-cediRed hover:bg-cediRedDark text-white font-bold py-3 px-8 rounded-lg transition">
-        <i class="fa-solid fa-book-open"></i> Voir tout le catalogue
-    </a>
-  </div>
+            <a href="{% url 'liste_catalogue' %}" class="inline-block bg-cediRed hover:bg-cediRedDark text-white font-bold py-3 px-8 rounded-lg transition">
+                <i class="fa-solid fa-book-open"></i> Voir tout le catalogue
+            </a>
+        </div>
     </div>
 </section>
 
@@ -301,44 +294,12 @@
             {% endfor %}
         </div>
         <div class="text-center mt-8">
-    <a href="{% url 'liste_ressources' %}" class="inline-flex items-center gap-2 bg-cediRed hover:bg-cediRedDark text-white font-bold py-3 px-8 rounded-lg transition shadow-md hover:-translate-y-0.5">
-        <i class="fa-solid fa-book-open"></i> Voir toutes les ressources
-    </a>
-</div>
+            <a href="{% url 'liste_ressources' %}" class="inline-flex items-center gap-2 bg-cediRed hover:bg-cediRedDark text-white font-bold py-3 px-8 rounded-lg transition shadow-md hover:-translate-y-0.5">
+                <i class="fa-solid fa-book-open"></i> Voir toutes les ressources
+            </a>
+        </div>
     </div>
 </section>
-
-{% comment %} <!-- POINTS DE VENTE -->
-<section id="points-de-vente" class="reveal px-4 py-10">
-    <div class="max-w-7xl mx-auto">
-        <div class="text-center max-w-xl mx-auto mb-8">
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Nos Points de Vente Physiques</h3>
-            <p class="text-sm text-gray-600">Venez nous visiter ou retirez vos commandes gratuites en boutique</p>
-        </div>
-
-        <div class="flex flex-wrap justify-center gap-5">
-            {% for point in points_de_vente %}
-            <div class="stagger-item card-lift bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:border-cediGold w-full sm:w-[calc(50%-1.25rem)] lg:w-[calc(25%-1.25rem)]">
-                <div class="relative img-zoom h-60 lg:h-68">
-                    {% if point.url_image %}
-                        <img src="{{ point.url_image.url }}" alt="Librairie CEDI {{ point.nom }}" class="w-full h-full object-cover" loading="lazy">
-                    {% else %}
-                        <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=900&auto=format&fit=crop&q=70" alt="Librairie CEDI {{ point.nom }}" class="w-full h-full object-cover" loading="lazy">
-                    {% endif %}
-                    <div class="absolute top-3 left-3 w-8 h-8 bg-cediGold text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">{{ forloop.counter }}</div>
-                    <div class="absolute bottom-3 left-4 right-4">
-                        <h4 class="text-white font-bold text-lg drop-shadow-lg mb-1">{{ point.nom }}</h4>
-                        <p class="text-white/90 text-xs drop-shadow-lg mb-2">{{ point.adresse_complete|truncatechars:50 }}</p>
-                        <span class="inline-block bg-white/15 backdrop-blur-sm border border-white/30 text-white text-[10px] px-2.5 py-1 rounded-full">Retrait de commande gratuit</span>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <p class="text-gray-500 w-full text-center">Aucun point de vente configuré.</p>
-            {% endfor %}
-        </div>
-    </div>
-</section> {% endcomment %}
 
 <!-- Script de Décompte et Disparition Dynamique -->
 <script>
@@ -417,10 +378,11 @@
         majCompteursEtMasquage();
         setInterval(majCompteursEtMasquage, 1000);
     });
-     // Gestion AJAX des boutons Wishlist sur la page d'accueil
+
+    // Gestion AJAX des boutons Wishlist sur la page d'accueil
     document.querySelectorAll('.btn-wishlist-card').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
-            e.preventDefault(); // Empêche de cliquer sur le lien du produit
+            e.preventDefault();
             e.stopPropagation();
             
             const url = btn.dataset.url;
@@ -434,17 +396,15 @@
                 }
             })
             .then(res => {
-                if(res.redirected) { window.location.href = res.url; return; } // Si non connecté
+                if(res.redirected) { window.location.href = res.url; return; }
                 return res.json();
             })
             .then(data => {
                 if(!data) return;
                 if(data.is_wishlisted) {
-                    // Ajouté : cœur plein et rouge
                     icon.classList.remove('fa-regular', 'text-gray-500');
                     icon.classList.add('fa-solid', 'text-cediRed');
                 } else {
-                    // Retiré : cœur vide et gris
                     icon.classList.remove('fa-solid', 'text-cediRed');
                     icon.classList.add('fa-regular', 'text-gray-500');
                 }

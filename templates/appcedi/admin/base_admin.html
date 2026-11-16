@@ -19,13 +19,30 @@
 
     </div>
     
+    <!-- 👇 BLOC MESSAGES AVEC FONDU DE DISPARITION AUTOMATIQUE 👇 -->
     {% if messages %}
-        {% for message in messages %}
-            <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
-                {{ message }}
-            </div>
-        {% endfor %}
+        <div id="django-messages">
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        <script>
+            // Efface les messages après 3 secondes
+            setTimeout(function() {
+                var msgDiv = document.getElementById('django-messages');
+                if (msgDiv) {
+                    msgDiv.style.transition = 'opacity 0.5s ease';
+                    msgDiv.style.opacity = '0';
+                    setTimeout(function() { 
+                        msgDiv.remove(); 
+                    }, 500);
+                }
+            }, 3000);
+        </script>
     {% endif %}
+    <!-- 👆 FIN DU BLOC MESSAGES 👆 -->
     
     {% block admin_content %}{% endblock %}
 </div>

@@ -1,8 +1,7 @@
 {% extends 'appcedi/base.html' %}
+{% load static %}
 
 {% block content %}
-
-
 <style>
   /* ===== Style CSS classique de la fiche produit ===== */
   :root{
@@ -121,80 +120,19 @@
   .pf-pickup-list li i{ color:#10b981; margin-right:4px; }
 
   /* ===== Description Voir Plus ===== */
-  .pf-desc-container {
-    position: relative;
-    max-width: 720px;
-  }
-  .pf-desc-text {
-    font-size: 14px;
-    color: #4b5563;
-    line-height: 1.7;
-    white-space: pre-line;
-    max-height: 150px; /* Hauteur par défaut avant "Voir plus" */
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-  }
-  .pf-desc-text.expanded {
-    max-height: 2000px; /* Assez grand pour tout afficher */
-  }
-  .pf-read-more-btn {
-    background: none;
-    border: none;
-    color: var(--cedi-red);
-    font-weight: bold;
-    font-size: 13px;
-    cursor: pointer;
-    padding: 4px 0;
-    margin-top: 4px;
-    display: none; /* Masqué par défaut, affiché par JS si nécessaire */
-  }
-  .pf-read-more-btn:hover {
-    text-decoration: underline;
-  }
+  .pf-desc-container { position: relative; max-width: 720px; }
+  .pf-desc-text { font-size: 14px; color: #4b5563; line-height: 1.7; white-space: pre-line; max-height: 150px; overflow: hidden; transition: max-height 0.3s ease; }
+  .pf-desc-text.expanded { max-height: 2000px; }
+  .pf-read-more-btn { background: none; border: none; color: var(--cedi-red); font-weight: bold; font-size: 13px; cursor: pointer; padding: 4px 0; margin-top: 4px; display: none; }
+  .pf-read-more-btn:hover { text-decoration: underline; }
 
   /* ===== Modal Image Plein Écran ===== */
-  .pf-modal {
-    display: none;
-    position: fixed;
-    z-index: 9999;
-    padding-top: 5vh;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(4px);
-  }
-  .pf-modal-content {
-    margin: auto;
-    display: block;
-    max-width: 95%;
-    max-height: 90vh;
-    object-fit: contain;
-    animation: zoomIn 0.3s;
-    border-radius: 8px;
-  }
-  @keyframes zoomIn {
-    from { transform: scale(0.85); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  .pf-modal-close {
-    position: absolute;
-    top: 20px;
-    right: 30px;
-    color: #f1f1f1;
-    font-size: 40px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.2s;
-  }
-  .pf-modal-close:hover {
-    color: var(--cedi-gold);
-  }
-  .pf-gallery-main img {
-    cursor: zoom-in;
-  }
+  .pf-modal { display: none; position: fixed; z-index: 9999; padding-top: 5vh; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.9); backdrop-filter: blur(4px); }
+  .pf-modal-content { margin: auto; display: block; max-width: 95%; max-height: 90vh; object-fit: contain; animation: zoomIn 0.3s; border-radius: 8px; }
+  @keyframes zoomIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .pf-modal-close { position: absolute; top: 20px; right: 30px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; transition: color 0.2s; }
+  .pf-modal-close:hover { color: var(--cedi-gold); }
+  .pf-gallery-main img { cursor: zoom-in; }
 
   /* Onglets avis */
   .pf-tabs{ margin-top:28px; }
@@ -222,25 +160,9 @@
   .pf-empty-box .small{ font-size:11px; color:#9ca3af; margin-top:4px; }
 
   /* Formulaire d'avis */
-  .pf-add-review-form {
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 24px;
-    max-width: 720px;
-  }
+  .pf-add-review-form { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 24px; max-width: 720px; }
   .pf-add-review-form h4 { margin: 0 0 12px 0; font-size: 15px; color: #111827; }
-  .pf-add-review-form select, 
-  .pf-add-review-form textarea {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    margin-bottom: 12px;
-    font-family: inherit;
-    font-size: 13px;
-  }
+  .pf-add-review-form select, .pf-add-review-form textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-family: inherit; font-size: 13px; }
 
   /* Produits similaires */
   .pf-related{ margin-top:32px; background:#f3f4f6; border-radius:12px; padding:20px 14px; }
@@ -249,17 +171,10 @@
   @media (min-width:640px){ .pf-related-grid{ grid-template-columns:repeat(3,1fr); gap:16px; } }
   @media (min-width:1024px){ .pf-related-grid{ grid-template-columns:repeat(4,1fr); } }
 
-  .pf-rel-card{
-    background:#fff; border:1px solid var(--border); border-radius:10px; padding:10px;
-    transition:box-shadow .2s ease, transform .2s ease; display:flex; flex-direction:column; text-decoration:none; color:inherit;
-  }
+  .pf-rel-card{ background:#fff; border:1px solid var(--border); border-radius:10px; padding:10px; transition:box-shadow .2s ease, transform .2s ease; display:flex; flex-direction:column; text-decoration:none; color:inherit; }
   .pf-rel-card:hover{ box-shadow:0 8px 16px rgba(0,0,0,0.06); transform:translateY(-2px); }
   .pf-rel-imgwrap{ position:relative; margin-bottom:6px; height:130px; display:flex; align-items:center; justify-content:center; background:#f9fafb; border-radius:6px; overflow:hidden; }
-  .pf-rel-badge{
-    position:absolute; top:4px; left:4px; background:var(--cedi-gold); color:#fff;
-    font-size:8px; font-weight:bold; padding:2px 6px; border-radius:999px;
-    display:flex; align-items:center; gap:3px; z-index:1;
-  }
+  .pf-rel-badge{ position:absolute; top:4px; left:4px; background:var(--cedi-gold); color:#fff; font-size:8px; font-weight:bold; padding:2px 6px; border-radius:999px; display:flex; align-items:center; gap:3px; z-index:1; }
   .pf-rel-card img{ max-width:100%; max-height:100%; object-fit:contain; border-radius:6px; }
   .pf-rel-card h4{ font-size:12px; margin:0 0 4px; color:#1f2937; font-weight:700; line-height:1.2; }
   .pf-rel-author{ font-size:10px; color:var(--ink-soft); margin:0 0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -267,10 +182,7 @@
   .pf-rel-stars span{ font-size:9px; color:var(--ink-soft); margin-left:3px; }
   .pf-rel-bottom{ margin-top:auto; border-top:1px solid #f3f4f6; padding-top:6px; display:flex; align-items:center; justify-content:space-between; gap:4px; }
   .pf-rel-price{ font-size:12px; font-weight:bold; color:var(--cedi-red); white-space:nowrap; }
-  .pf-rel-add{
-    background:var(--cedi-red); color:#fff; border:none; border-radius:6px; font-size:10px; font-weight:bold;
-    padding:5px 8px; display:flex; align-items:center; gap:3px; cursor:pointer; flex-shrink:0; text-decoration:none;
-  }
+  .pf-rel-add{ background:var(--cedi-red); color:#fff; border:none; border-radius:6px; font-size:10px; font-weight:bold; padding:5px 8px; display:flex; align-items:center; gap:3px; cursor:pointer; flex-shrink:0; text-decoration:none; }
 
   .pf-back{ margin:24px 0; text-align:center; }
   .pf-back a{ color:var(--cedi-red); font-weight:bold; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
@@ -280,17 +192,11 @@
     .pf-gallery-main { height: 260px; }
     .pf-perks div { font-size: 9px; padding: 6px 1px; }
     .pf-perks i { font-size: 12px; }
-    .pf-btn-add {
-      font-size: 13px;
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-    }
+    .pf-btn-add { font-size: 13px; padding-left: 0 !important; padding-right: 0 !important; }
   }
-    /* ===== Ajustement produits similaires (style accueil) ===== */
   .img-zoom { overflow: hidden; }
   .img-zoom img { transition: transform .5s ease; }
   .img-zoom:hover img { transform: scale(1.07); }
-
   .card-lift { transition: transform .25s ease, box-shadow .25s ease; }
   .card-lift:hover { transform: translateY(-5px); box-shadow: 0 18px 30px -16px rgba(107,21,24,0.28); }
 </style>
@@ -344,13 +250,15 @@
                 {% if produit.auteur %}<span><b>Auteur :</b> <span class="pf-author-name">{{ produit.auteur }}</span></span>{% endif %}
                 {% if produit.editeur %}<span><b>Éditeur :</b> {{ produit.editeur }}</span>{% endif %}
                 {% if produit.isbn %}<span><b>ISBN :</b> {{ produit.isbn }}</span>{% endif %}
-                
-                <!-- 👇 AJOUT DU NOMBRE DE PAGES ICI 👇 -->
-                {% if produit.nombre_pages %}
-                    <span> <span class="pf-author-name">{{ produit.nombre_pages }}</span> <b>Pages </b></span>
+                                <!-- 👇 AJOUT DU POIDS ICI 👇 -->
+                {% if produit.poids %}
+                    <span><b>Poids :</b> {{ produit.poids }} kg</span>
                 {% endif %}
                 <!-- 👆 FIN DE L'AJOUT 👆 -->
                 
+                {% if produit.nombre_pages %}
+                    <span> <span class="pf-author-name">{{ produit.nombre_pages }}</span> <b>Pages </b></span>
+                {% endif %}
             </div>
 
             <div class="pf-rating-row">
@@ -362,7 +270,22 @@
                 <span class="pf-rating-count">{{ note_moyenne|floatformat:1 }} · <a href="#" onclick="pfShowTab('avis');return false;" style="color:inherit;">{{ total_avis }} avis</a></span>
             </div>
 
-            <div class="pf-price">{{ produit.prix|floatformat:0 }} FCFA</div>
+            <!-- 👇 AFFICHAGE DU PRIX AVEC PROMO 👇 -->
+            <div class="pf-price" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span style="color: var(--cedi-red); font-size: 26px; font-weight: bold;">
+                    {{ prix_actuel|floatformat:0 }} FCFA
+                </span>
+                
+                {% if prix_original %}
+                    <span style="color: #9ca3af; text-decoration: line-through; font-size: 16px; font-weight: normal;">
+                        {{ prix_original|floatformat:0 }} FCFA
+                    </span>
+                    <span style="background: var(--cedi-red); color: white; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 6px;">
+                        PROMO
+                    </span>
+                {% endif %}
+            </div>
+            <!-- 👆 FIN AFFICHAGE DU PRIX 👆 -->
 
             {% if produit.quantite_stock > 0 %}
                 <div class="pf-stock ok"><i class="fa-solid fa-circle-check"></i> En stock ({{ produit.quantite_stock }} exemplaires)</div>
@@ -382,27 +305,30 @@
             <!-- Quantité + Bouton Ajouter au Panier -->
             <form action="{% url 'ajouter_au_panier' produit.pk %}" method="post" style="margin: 0;">
                 {% csrf_token %}
+                <!-- 👇 CHAMP CACHÉ POUR ENVOYER LE PRIX AU PANIER 👇 -->
+                <input type="hidden" name="prix_promo" value="{{ prix_actuel }}">
+                
                 <div class="pf-action-row">
-    <div class="pf-qty">
-        <button type="button" onclick="document.getElementById('pfQty').stepDown()">−</button>
-        <input id="pfQty" type="number" name="quantite" value="1" min="1" max="{{ produit.quantite_stock }}">
-        <button type="button" onclick="document.getElementById('pfQty').stepUp()">+</button>
-    </div>
-    
-    {% if produit.quantite_stock > 0 %}
-        <button type="submit" class="pf-btn-add"><i class="fa-solid fa-cart-shopping"></i> Ajouter au panier</button>
-    {% else %}
-        <button type="button" class="pf-btn-add" disabled style="opacity: 0.6; cursor: not-allowed;"><i class="fa-solid fa-cart-shopping"></i> Indisponible</button>
-    {% endif %}
+                    <div class="pf-qty">
+                        <button type="button" onclick="document.getElementById('pfQty').stepDown()">−</button>
+                        <input id="pfQty" type="number" name="quantite" value="1" min="1" max="{{ produit.quantite_stock }}">
+                        <button type="button" onclick="document.getElementById('pfQty').stepUp()">+</button>
+                    </div>
+                    
+                    {% if produit.quantite_stock > 0 %}
+                        <button type="submit" class="pf-btn-add"><i class="fa-solid fa-cart-shopping"></i> Ajouter au panier</button>
+                    {% else %}
+                        <button type="button" class="pf-btn-add" disabled style="opacity: 0.6; cursor: not-allowed;"><i class="fa-solid fa-cart-shopping"></i> Indisponible</button>
+                    {% endif %}
 
-    <!-- 👇 BOUTON LISTE DE SOUHAITS -->
-    <button type="button" 
-            class="btn-wishlist-detail" 
-            data-url="{% url 'basculer_liste_souhaits' produit.id %}"
-            style="width: 44px; height: 40px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-        <i class="{% if produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-400{% endif %} text-lg"></i>
-    </button>
-</div>
+                    <!-- BOUTON LISTE DE SOUHAITS -->
+                    <button type="button" 
+                            class="btn-wishlist-detail" 
+                            data-url="{% url 'basculer_liste_souhaits' produit.id %}"
+                            style="width: 44px; height: 40px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <i class="{% if produit.id in souhaits_ids %}fa-solid fa-heart text-cediRed{% else %}fa-regular fa-heart text-gray-400{% endif %} text-lg"></i>
+                    </button>
+                </div>
             </form>
 
             <!-- Avantages -->
@@ -434,12 +360,12 @@
             <button onclick="pfShowTab('avis', this)">Avis clients ({{ total_avis }})</button>
         </div>
 
-            <div id="pf-tab-description" class="pf-tab-panel active">
-             <div class="pf-desc-container">
+        <div id="pf-tab-description" class="pf-tab-panel active">
+            <div class="pf-desc-container">
                 <p id="pf-desc-text" class="pf-desc-text">{{ produit.description }}</p>
                 <button type="button" id="pf-read-more-btn" class="pf-read-more-btn">Voir plus</button>
-             </div>
-             </div>
+            </div>
+        </div>
 
         <div id="pf-tab-avis" class="pf-tab-panel">
             <div class="pf-review-summary">
@@ -461,7 +387,7 @@
                 </div>
             </div>
 
-            <!-- Formulaire d'Avis Dynamique (Ajout ou Modification) -->
+            <!-- Formulaire d'Avis Dynamique -->
             {% if user.is_authenticated %}
             <div class="pf-add-review-form">
                 {% if mon_avis %}
@@ -524,8 +450,7 @@
         </div>
     </div>
 
- 
-    <!-- ===== PRODUITS SIMILAIRES (style accueil) ===== -->
+    <!-- ===== PRODUITS SIMILAIRES ===== -->
     {% if produits_similaires %}
     <section class="mt-8 bg-gray-100 rounded-xl px-2 sm:px-4 py-6">
         <div class="max-w-7xl mx-auto">
@@ -599,11 +524,12 @@
     <div class="pf-back">
         <a href="{% url 'liste_catalogue' %}"><i class="fa-solid fa-arrow-left"></i> Retour à la boutique</a>
     </div>
+    
     <!-- Modal pour l'image en plein écran -->
-<div id="pf-modal" class="pf-modal">
-    <span class="pf-modal-close">&times;</span>
-    <img class="pf-modal-content" id="pf-modal-img">
-</div>
+    <div id="pf-modal" class="pf-modal">
+        <span class="pf-modal-close">&times;</span>
+        <img class="pf-modal-content" id="pf-modal-img">
+    </div>
 </div>
 
 <script>
@@ -627,45 +553,43 @@
         }
     }
 
-    // Gestion du bouton Wishlist sur la fiche produit
-document.querySelector('.btn-wishlist-detail')?.addEventListener('click', function() {
-    const btn = this;
-    const url = btn.dataset.url;
-    const icon = btn.querySelector('i');
+    // Gestion du bouton Wishlist
+    document.querySelector('.btn-wishlist-detail')?.addEventListener('click', function() {
+        const btn = this;
+        const url = btn.dataset.url;
+        const icon = btn.querySelector('i');
 
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(res => {
-        if(res.redirected) { window.location.href = res.url; return; } // Si non connecté, redirige vers login
-        return res.json();
-    })
-    .then(data => {
-        if(!data) return;
-        if(data.is_wishlisted) {
-            icon.classList.remove('fa-regular', 'text-gray-400');
-            icon.classList.add('fa-solid', 'text-cediRed');
-        } else {
-            icon.classList.remove('fa-solid', 'text-cediRed');
-            icon.classList.add('fa-regular', 'text-gray-400');
-        }
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => {
+            if(res.redirected) { window.location.href = res.url; return; }
+            return res.json();
+        })
+        .then(data => {
+            if(!data) return;
+            if(data.is_wishlisted) {
+                icon.classList.remove('fa-regular', 'text-gray-400');
+                icon.classList.add('fa-solid', 'text-cediRed');
+            } else {
+                icon.classList.remove('fa-solid', 'text-cediRed');
+                icon.classList.add('fa-regular', 'text-gray-400');
+            }
+        });
     });
-});
 
-    // --- Description Voir Plus / Voir Moins ---
+    // Description Voir Plus / Voir Moins
     const descText = document.getElementById('pf-desc-text');
     const readMoreBtn = document.getElementById('pf-read-more-btn');
 
     if (descText && readMoreBtn) {
-        // Si le texte est plus grand que la hauteur max, on affiche le bouton
         if (descText.scrollHeight > descText.clientHeight) {
             readMoreBtn.style.display = 'inline-block';
         }
-
         readMoreBtn.addEventListener('click', function() {
             if (descText.classList.contains('expanded')) {
                 descText.classList.remove('expanded');
@@ -677,7 +601,7 @@ document.querySelector('.btn-wishlist-detail')?.addEventListener('click', functi
         });
     }
 
-    // --- Zoom Image (Modal) ---
+    // Zoom Image (Modal)
     const modal = document.getElementById('pf-modal');
     const modalImg = document.getElementById('pf-modal-img');
     const mainImage = document.getElementById('pfMainImage');

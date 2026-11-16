@@ -198,11 +198,13 @@ def ajouter_produit(request):
     return render(request, 'appcedi/admin/ajouter_produit.html', {'form': form})
 
 def detail_produit(request, pk):
+    # 1. On récupère le produit
     produit = get_object_or_404(Produit, pk=pk, statut=True)
+    
     mon_avis = None
     if request.user.is_authenticated:
         mon_avis = AvisClient.objects.filter(produit=produit, utilisateur=request.user).first()
-    
+        
     images = produit.images.all()
     image_principale = images.filter(est_principale=True).first()
     if not image_principale and images.exists():
@@ -219,6 +221,32 @@ def detail_produit(request, pk):
         categories__in=categories, statut=True
     ).exclude(pk=produit.pk).distinct()[:4]
 
+    # 👇 2. LE CALCUL DE LA PROMOTION SE FAIT ICI (Après avoir défini le produit) 👇
+    prix_actuel = produit.prix
+    prix_original = None
+    promotion_active = None
+    
+    from django.utils import timezone
+    now = timezone.now()
+    
+    promotions = ProduitPromotion.objects.filter(
+        produit=produit,
+        promotion__date_debut__lte=now,
+        promotion__date_fin__gte=now,
+        promotion__actif=True
+    )
+    
+    if promotions.exists():
+        promotion_active = promotions.first().promotion
+        if promotion_active.type_reduction == 'pourcentage':
+            prix_actuel = produit.prix * (1 - promotion_active.valeur_reduction / 100)
+        else:
+            prix_actuel = produit.prix - promotion_active.valeur_reduction
+        prix_actuel = int(round(prix_actuel))
+        prix_original = produit.prix
+    # 👆 FIN DU CALCUL DE LA PROMOTION 👆
+
+    # 3. On envoie tout au template
     context = {
         'produit': produit,
         'image_principale': image_principale,
@@ -230,9 +258,11 @@ def detail_produit(request, pk):
         'produits_similaires': produits_similaires,
         'points_vente': PointVente.objects.all(),
         'mon_avis': mon_avis,
+        'prix_actuel': prix_actuel,        # 👈 Ajouté
+        'prix_original': prix_original,    # 👈 Ajouté
+        'promotion_active': promotion_active, # 👈 Ajouté
     }
     return render(request, 'appcedi/detail_produit.html', context)
-
 @login_required
 @user_passes_test(est_gestionnaire_stock)
 def modifier_produit(request, pk):
@@ -916,9 +946,14 @@ def voir_panier(request):
         panier, created = Panier.objects.get_or_create(session_id=session_key)
 
     articles = panier.articles.all()
-    total = sum(article.produit.prix * article.quantite for article in articles)
+    # 👇 On utilise total_ligne() qui prend en compte le prix_unitaire (promo) 👇
+    total = sum(article.total_ligne() for article in articles)
     
-    context = {'panier': panier, 'articles': articles, 'total': total}
+    context = {
+        'panier': panier,
+        'articles': articles,
+        'total': total,
+    }
     return render(request, 'appcedi/panier/panier_detail.html', context)
 
 
@@ -936,16 +971,24 @@ def ajouter_au_panier(request, produit_id):
 
     quantite = int(request.POST.get('quantite', 1))
     
-    article, created = ArticlePanier.objects.get_or_create(panier=panier, produit=produit)
+    prix_envoye = request.POST.get('prix_promo')
+    prix_final = int(prix_envoye) if prix_envoye else produit.prix
+
+    # 👇 On cherche l'article par panier + produit + prix
+    article, created = ArticlePanier.objects.get_or_create(
+        panier=panier, 
+        produit=produit,
+        prix_unitaire=prix_final,  # ← La clé : on précise le prix
+        defaults={'quantite': quantite}
+    )
+    
     if not created:
+        # Si la ligne existait déjà à ce même prix, on ajoute juste la quantité
         article.quantite += quantite
-    else:
-        article.quantite = quantite
-    article.save()
+        article.save()
 
     messages.success(request, f"{produit.titre} a été ajouté à votre panier.")
     return redirect('voir_panier')
-
 
 def modifier_quantite_panier(request, article_id):
     article = get_object_or_404(ArticlePanier, id=article_id)
@@ -1071,7 +1114,8 @@ def valider_commande(request):
         adresse_livraison = request.POST.get('adresse_livraison', '')
         telephone = request.POST.get('telephone', '')
         
-        total = sum(item.produit.prix * item.quantite for item in articles)
+        # On utilise total_ligne() qui prend en compte le prix promotionnel
+        total = sum(item.total_ligne() for item in articles)
         reference = f"CMD-{timezone.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
 
         commande = Commande.objects.create(
@@ -1082,17 +1126,33 @@ def valider_commande(request):
         )
 
         for item in articles:
+            # On enregistre le prix réel (promo ou normal) dans la ligne de commande
+            prix_final = item.prix_unitaire if item.prix_unitaire > 0 else item.produit.prix
+            
             LigneCommande.objects.create(
                 commande=commande, produit=item.produit,
-                quantite=item.quantite, prix_unitaire_au_moment=item.produit.prix,
+                quantite=item.quantite, 
+                prix_unitaire_au_moment=prix_final,
             )
 
         articles.delete()
         messages.success(request, f"Votre commande {reference} a été enregistrée avec succès !")
         return redirect('espace_client')
 
-    total = sum(item.produit.prix * item.quantite for item in articles)
-    return render(request, 'appcedi/panier/checkout.html', {'articles': articles, 'total': total, 'points_vente': PointVente.objects.all()})
+    # 👇 CALCUL DU TOTAL ET DU POIDS TOTAL 👇
+    total = sum(item.total_ligne() for item in articles)
+    
+    poids_total = 0
+    for item in articles:
+        if item.produit.poids:
+            poids_total += item.produit.poids * item.quantite
+
+    return render(request, 'appcedi/panier/checkout.html', {
+        'articles': articles, 
+        'total': total, 
+        'poids_total': poids_total, # 👈 Envoyé au template
+        'points_vente': PointVente.objects.all()
+    })
 
 
 # ========== GESTION DES UTILISATEURS (Admin uniquement) ==========
