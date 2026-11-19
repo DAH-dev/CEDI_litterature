@@ -270,8 +270,13 @@
 <footer class="bg-gray-700 text-gray-200 mt-auto pt-12 pb-6 border-t-4 border-cediGold">
     <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 text-sm">
         <div>
-            <!-- Titre en blanc (plus de jaune) -->
-            <h5 class="text-white font-bold text-base mb-3">CEDI Littérature</h5>
+            <!-- 👇 LOGO + TITRE SUR LA MÊME LIGNE 👇 -->
+            <div class="flex items-center gap-2 mb-3">
+                <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-cediGold bg-white flex items-center justify-center shrink-0">
+                    <img src="{% static 'images/logo_cedi.png' %}" alt="Logo CEDI" class="w-full h-full object-cover">
+                </div>
+                <h5 class="text-white font-bold text-base m-0">CEDI Littérature</h5>
+            </div>
             <p class="text-xs text-gray-400 mb-4">Maison d'édition chrétienne intégrée, librairie et conseil spirituel. "Distribuer la vie" à travers la Parole de Dieu.</p>
             <div class="flex space-x-3 text-lg">
                 <!-- Icônes avec bordure grise, pas de jaune -->
