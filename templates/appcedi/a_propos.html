@@ -1,4 +1,5 @@
 {% extends 'appcedi/base.html' %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -77,7 +78,7 @@
   /* Mission */
   .ap-mission{ display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; }
   @media (max-width:800px){ .ap-mission{ grid-template-columns:1fr; gap:24px; } }
-  .ap-mission img{ border-radius:12px; height:280px; width:100%; object-fit:cover; }
+  .ap-mission img{ border-radius:12px; height:360px; width:100%; object-fit:cover; }
   .ap-mission p{ font-size:15px; line-height:1.8; color:#4b5563; margin:0 0 16px; }
   .ap-quote{
     background:#fff; border-left:4px solid var(--cedi-gold); border-radius:0 10px 10px 0;
@@ -113,7 +114,7 @@
   @media (max-width:860px){ .ap-team{ grid-template-columns:repeat(2,1fr); } }
   .ap-member{ text-align:center; }
   .ap-member .photo-wrap{ border-radius:12px; overflow:hidden; margin-bottom:14px; }
-  .ap-member img{ width:100%; height:220px; object-fit:cover; display:block; }
+  .ap-member img{ width:100%; height:280px; object-fit:cover; display:block; }
   .ap-member h4{ font-size:15px; color:#111827; margin:0 0 3px; }
   .ap-member .role{ font-size:12.5px; color:var(--cedi-red); font-weight:bold; margin:0 0 8px; }
   .ap-member .bio{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin:0; }
@@ -139,8 +140,11 @@
         <div class="ap-history-layout">
             <!-- Colonne gauche : Image -->
             <div class="ap-history-img-wrap">
-                <!-- Remplace cette URL par une de tes propres photos si tu en as une -->
-                <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80" 
+                <!-- 👇 TON IMAGE LOCALE ICI 👇 -->
+                {% comment %} <img src="{% static 'images/histoire.jpg' %}" 
+                     alt="La communauté CEDI Littérature" 
+                     class="ap-history-img"> {% endcomment %}
+                     <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80" 
                      alt="La communauté CEDI Littérature" 
                      class="ap-history-img">
             </div>
@@ -189,7 +193,8 @@
     <!-- NOTRE MISSION -->
     <section class="ap-section">
         <div class="ap-mission">
-            <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=700&auto=format&fit=crop&q=75" alt="Intérieur d'une librairie CEDI">
+            <!-- 👇 TON IMAGE LOCALE ICI 👇 -->
+            <img src="{% static 'images/mission.jpg' %}" alt="Intérieur d'une librairie CEDI">
             <div>
                 <h2>Notre mission</h2>
                 <p>Depuis sa création, CEDI Littérature s'est donné pour vocation de rendre la Parole de Dieu et une littérature chrétienne solide accessibles au plus grand nombre, à travers l'édition de nos propres ouvrages et la distribution de publications choisies.</p>
@@ -254,15 +259,16 @@
         <div class="ap-team">
             <div class="ap-member">
                 <div class="photo-wrap">
-                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=75" alt="Directeur de CEDI Littérature">
+                    <!-- 👇 TES IMAGES LOCALES ICI 👇 -->
+                    <img src="{% static 'images/equipe1.jpg' %}" alt="Directeur de CEDI Littérature">
                 </div>
-                <h4>Jean-Baptiste K.</h4>
+                <h4>ANOH Josias</h4>
                 <p class="role">Directeur général</p>
                 <p class="bio">Fondateur de CEDI Littérature, à l'origine de la vision d'une maison d'édition au service de l'Église.</p>
             </div>
             <div class="ap-member">
                 <div class="photo-wrap">
-                    <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&auto=format&fit=crop&q=75" alt="Responsable éditoriale">
+                    <img src="{% static 'images/equipe2.jpg' %}" alt="Responsable éditoriale">
                 </div>
                 <h4>Grace A.</h4>
                 <p class="role">Responsable éditoriale</p>
@@ -270,15 +276,15 @@
             </div>
             <div class="ap-member">
                 <div class="photo-wrap">
-                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=75" alt="Responsable conseil spirituel">
+                    <img src="{% static 'images/equipe3.jpg' %}" alt="Responsable conseil spirituel">
                 </div>
-                <h4>Pasteur Samuel D.</h4>
+                <h4>Pasteur D.</h4>
                 <p class="role">Responsable conseil spirituel</p>
                 <p class="bio">Accompagne les lecteurs à travers le service de conseils spirituels en ligne et en librairie.</p>
             </div>
             <div class="ap-member">
                 <div class="photo-wrap">
-                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&auto=format&fit=crop&q=75" alt="Responsable des librairies">
+                    <img src="{% static 'images/equipe4.jpg' %}" alt="Responsable des librairies">
                 </div>
                 <h4>Marie-Claire T.</h4>
                 <p class="role">Responsable des librairies</p>
