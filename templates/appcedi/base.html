@@ -263,6 +263,10 @@
              <a href="{% url 'liste_temoignages_publics' %}" class="hover:text-cediRed whitespace-nowrap transition">Témoignages</a>
              <a href="{% url 'a_propos' %}" class="hover:text-cediRed whitespace-nowrap transition">À propos</a>
              <a href="{% url 'page_contact' %}" class="hover:text-cediRed whitespace-nowrap transition">Contact</a>
+              <!-- 👇 BOUTON INSTALLER L'APP DANS LA BARRE SECONDAIRE 👇 -->
+             <button type="button" id="installAppBtnSecondary" class="hover:text-cediRed whitespace-nowrap transition flex items-center gap-1">
+                 <i class="fa-solid fa-mobile-screen-button"></i> Installer l'app
+             </button>
         </div>
     </nav>
 </header>
@@ -444,6 +448,31 @@
         window.addEventListener('appinstalled', () => {
             console.log('Application installée avec succès !');
             if (installBtn) installBtn.style.display = 'none';
+        });
+
+                // Gestion du bouton d'installation dans la barre secondaire
+        const installBtnSecondary = document.getElementById('installAppBtnSecondary');
+        if (installBtnSecondary) {
+            installBtnSecondary.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('Installation acceptée');
+                    } else {
+                        console.log('Installation refusée');
+                    }
+                    deferredPrompt = null;
+                } else {
+                    alert("Pour installer l'application :\n\nSur Android (Chrome) :\nMenu (3 points) > Ajouter à l'écran d'accueil\n\nSur iPhone (Safari) :\nPartager > Sur l'écran d'accueil");
+                }
+            });
+        }
+
+        window.addEventListener('appinstalled', () => {
+            console.log('Application installée avec succès !');
+            if (installBtn) installBtn.style.display = 'none';
+            if (installBtnSecondary) installBtnSecondary.style.display = 'none'; // 👈 On cache aussi le bouton secondaire
         });
     </script>
 </body>
